@@ -1,0 +1,8 @@
+{
+  "appId": "com.erick.gastosedificio",
+  "appName": "Gastos Edificio",
+  "webDir": "www",
+  "android": {
+    "allowMixedContent": true
+  }
+}

@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+
+# Local Netlify folder
+.netlify/
+
+# Android & Build files
+*.apk
+.gradle/
+local.properties
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Environment / local secrets if any
+.env
+.env.local
+

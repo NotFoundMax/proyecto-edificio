@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Los Castaños</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header id="app-header">
+        <h1 id="header-title">Los Castaños</h1>
+        <div class="header-right">
+            <select id="edificio-select" class="edificio-select" style="display:none;" aria-label="Edificio activo"></select>
+            <span id="user-chip" class="user-chip" style="display:none;"></span>
+            <button id="btn-logout" class="icon-btn" title="Cerrar sesión">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+                    <path d="M12 3v9"/>
+                    <path d="M6.2 6.2a8 8 0 1 0 11.6 0"/>
+                </svg>
+            </button>
+            <button id="btn-config" class="icon-btn" title="Configuración">⚙</button>
+        </div>
+    </header>
+
+    <main id="app-main">
+        <!-- Login -->
+        <section id="screen-login" class="screen active">
+            <div class="screen-content login-content">
+                <div class="login-card">
+                    <div class="login-logo">🏢</div>
+                    <h1 id="login-title">Ingresar</h1>
+                    <p id="login-subtitle" class="login-subtitle">Ingresa para ver los estados de cuenta del edificio.</p>
+                    <form id="form-login">
+                        <div class="form-group">
+                            <label for="login-email">Email</label>
+                            <input type="email" id="login-email" required autocomplete="email" placeholder="tu@email.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="login-password">Contraseña</label>
+                            <input type="password" id="login-password" autocomplete="current-password" placeholder="••••••••">
+                        </div>
+                        <div class="form-group" id="login-password2-group" style="display:none;">
+                            <label for="login-password2">Repetí la contraseña</label>
+                            <input type="password" id="login-password2" autocomplete="new-password" placeholder="••••••••">
+                        </div>
+                        <button type="submit" id="btn-login-submit" class="btn btn-primary btn-block">Ingresar</button>
+                    </form>
+                    <div id="login-error" class="login-error" style="display:none;"></div>
+                    <div id="login-info" class="login-info" style="display:none;"></div>
+                    <button id="btn-toggle-signup" class="login-link">¿No tienes cuenta? Crea una</button>
+                    <button id="btn-forgot-password" class="login-link">¿Olvidaste tu contraseña?</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Cuenta pendiente de aprobación -->
+        <section id="screen-pendiente" class="screen">
+            <div class="screen-content login-content">
+                <div class="login-card">
+                    <div class="login-logo">⏳</div>
+                    <h1>Cuenta en revisión</h1>
+                    <p class="login-subtitle" id="pendiente-detalle">Tu solicitud fue enviada. El administrador del edificio tiene que aprobarla antes de que puedas ver los estados de cuenta.</p>
+                    <button id="btn-logout-pendiente" class="btn btn-outline btn-block">Cerrar sesión</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sin acceso todavía: invitaciones y solicitud de acceso -->
+        <section id="screen-acceso" class="screen">
+            <div class="screen-content login-content">
+                <div class="login-card">
+                    <div class="login-logo">🏢</div>
+                    <h1>Elegí tu edificio</h1>
+                    <p class="login-subtitle">Tu cuenta está creada. Para ver los estados de cuenta necesitás que te aprueben el acceso en un edificio.</p>
+
+                    <div id="invitaciones-pendientes" style="display:none;text-align:left;">
+                        <h3>Te invitaron a administrar</h3>
+                        <p class="empty-state" style="margin:0 0 8px;">Aceptá la invitación para entrar como administrador.</p>
+                        <div id="lista-invitaciones" class="list-container"></div>
+                    </div>
+
+                    <div id="solicitar-acceso" style="display:none;text-align:left;">
+                        <h3>Solicitar acceso</h3>
+                        <p class="empty-state" style="margin:0 0 8px;">Pedí ser propietario. El administrador del edificio aprueba tu solicitud.</p>
+                        <div id="lista-edificios" class="list-container"></div>
+                    </div>
+
+                    <div id="crear-edificio-zona" style="display:none;text-align:left;">
+                        <hr>
+                        <h3>Administrar otro edificio</h3>
+                        <form id="form-crear-edificio">
+                            <div class="form-group">
+                                <label for="nuevo-edificio-nombre">Nombre del edificio</label>
+                                <input type="text" id="nuevo-edificio-nombre" required placeholder="Ej: Edificio Los Robles">
+                            </div>
+                            <div class="form-group">
+                                <label for="nuevo-edificio-direccion">Dirección</label>
+                                <input type="text" id="nuevo-edificio-direccion" placeholder="Ej: Av. México 777">
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block">Crear edificio</button>
+                        </form>
+                    </div>
+
+                    <button id="btn-logout-acceso" class="btn btn-outline btn-block">Cerrar sesión</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Puerta de entrada: elegir edificio antes de ver sus datos -->
+        <section id="screen-edificios" class="screen">
+            <div class="screen-content login-content">
+                <div class="login-card">
+                    <div class="login-logo">🏢</div>
+                    <h1>Tus edificios</h1>
+                    <p class="login-subtitle">Elegí el edificio que querés administrar. Cada uno tiene sus propios gastos, pagos y miembros.</p>
+
+                    <div id="lista-edificios-menu" class="list-container" style="text-align:left;"></div>
+
+                    <div id="crear-desde-menu" style="display:none;text-align:left;">
+                        <hr>
+                        <h3>Administrar otro edificio</h3>
+                        <form id="form-crear-edificio-menu">
+                            <div class="form-group">
+                                <label for="menu-edificio-nombre">Nombre del edificio</label>
+                                <input type="text" id="menu-edificio-nombre" required placeholder="Ej: Edificio Los Robles">
+                            </div>
+                            <div class="form-group">
+                                <label for="menu-edificio-direccion">Dirección</label>
+                                <input type="text" id="menu-edificio-direccion" placeholder="Ej: Av. México 777">
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block">Crear edificio</button>
+                        </form>
+                    </div>
+
+                    <button id="btn-logout-menu" class="btn btn-outline btn-block">Cerrar sesión</button>
+                </div>
+            </div>
+        </section>
+        <!-- Dashboard -->
+        <section id="screen-dashboard" class="screen active">
+            <div class="screen-content">
+                <div class="month-selector">
+                    <button id="btn-prev-month" class="icon-btn">◀</button>
+                    <span id="current-month-label">Julio 2026</span>
+                    <button id="btn-next-month" class="icon-btn">▶</button>
+                </div>
+
+                <div class="caja-chica-bar" id="caja-chica-bar">
+                    <span>💰 Caja Chica:</span>
+                    <span id="caja-chica-monto" class="caja-chica-amount">S/. 0</span>
+                    <button id="btn-edit-caja" class="btn btn-sm btn-outline">✏️</button>
+                </div>
+
+                <div class="summary-cards">
+                    <div class="card card-total">
+                        <span class="card-label">Gastos Pagados</span>
+                        <span id="total-gastos" class="card-value">S/. 0</span>
+                    </div>
+                    <div class="card card-pagado">
+                        <span class="card-label">Pagos Recibidos</span>
+                        <span id="total-pagado" class="card-value">S/. 0</span>
+                    </div>
+                    <div class="card card-balance">
+                        <span class="card-label">Balance Caja</span>
+                        <span id="total-balance" class="card-value">S/. 0</span>
+                    </div>
+                </div>
+
+                <div class="extra-info" id="extra-info"></div>
+
+                <h2>Cuota por Departamento</h2>
+                <div id="dashboard-propietarios" class="list-container">
+                    <p class="empty-state">Cargando...</p>
+                </div>
+
+                <div class="dashboard-actions">
+                    <button id="btn-cerrar-mes" class="btn btn-secondary btn-block" onclick="App.cerrarMes()">📅 Cerrar Mes</button>
+                </div>
+
+                <button id="btn-add-gasto-dashboard" class="fab">+ Gasto</button>
+            </div>
+        </section>
+
+        <!-- Departamentos -->
+        <section id="screen-propietarios" class="screen">
+            <div class="screen-content">
+                <div class="screen-header">
+                    <h2>Departamentos</h2>
+                    <button id="btn-add-propietario" class="btn btn-primary">+ Nuevo</button>
+                </div>
+                <div class="coeficientes-info" id="coeficientes-info"></div>
+                <div id="lista-propietarios" class="list-container"></div>
+            </div>
+        </section>
+
+        <!-- Gastos -->
+        <section id="screen-gastos" class="screen">
+            <div class="screen-content">
+                <div class="screen-header">
+                    <h2>Gastos</h2>
+                    <button id="btn-add-gasto" class="btn btn-primary">+ Nuevo</button>
+                </div>
+                <div class="filters">
+                    <select id="filter-categoria">
+                        <option value="">Todas las categorías</option>
+                    </select>
+                    <select id="filter-frecuencia">
+                        <option value="">Todas las frecuencias</option>
+                        <option value="mensual">Mensual</option>
+                        <option value="trimestral">Trimestral</option>
+                        <option value="semestral">Semestral</option>
+                        <option value="anual">Anual</option>
+                        <option value="unico">Único</option>
+                        <option value="extraordinario">Extraordinario</option>
+                    </select>
+                </div>
+                <div id="luz-card" class="luz-card">
+                    <div class="luz-card-info">
+                        <span class="luz-icon">💡</span>
+                        <div>
+                            <div class="luz-title">Recibo de Luz — <span id="luz-mes-label"></span></div>
+                            <div id="luz-status" class="luz-status"></div>
+                        </div>
+                    </div>
+                    <div class="luz-controls">
+                        <input type="number" id="luz-monto" step="0.01" min="0" placeholder="Monto del recibo">
+                        <select id="luz-estado">
+                            <option value="pendiente">Por pagar</option>
+                            <option value="pagado">Pagado</option>
+                        </select>
+                        <button id="btn-luz-guardar" class="btn btn-sm btn-primary">Guardar</button>
+                    </div>
+                </div>
+                <div id="gastos-totales" class="gastos-totales" style="display:none;">
+                    <div class="gasto-total-item">
+                        <span>Total</span>
+                        <strong id="gastos-total-monto">S/. 0</strong>
+                    </div>
+                    <div class="gasto-total-item gasto-total-pagado">
+                        <span>✅ Pagado</span>
+                        <strong id="gastos-pagados-monto">S/. 0</strong>
+                    </div>
+                    <div class="gasto-total-item gasto-total-pendiente">
+                        <span>⏳ Por pagar</span>
+                        <strong id="gastos-pendientes-monto">S/. 0</strong>
+                    </div>
+                </div>
+                <div id="lista-gastos" class="list-container">
+                    <p class="empty-state">No hay gastos registrados</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Gas -->
+        <section id="screen-gas" class="screen">
+            <div class="screen-content">
+                <div class="screen-header">
+                    <h2>Gas</h2>
+                </div>
+                <div class="month-selector">
+                    <button id="btn-prev-month-gas" class="icon-btn">◀</button>
+                    <span id="gas-month-label">Julio 2026</span>
+                    <button id="btn-next-month-gas" class="icon-btn">▶</button>
+                </div>
+                <div class="servicio-params">
+                    <div class="form-group form-inline">
+                        <label>Precio balón S/</label>
+                        <input type="number" id="gas-precio-balon" value="245" step="0.01">
+                    </div>
+                    <div class="form-group form-inline">
+                        <label>Kg por balón</label>
+                        <input type="number" id="gas-kg-balon" value="45" step="0.01">
+                    </div>
+                    <div class="form-group form-inline">
+                        <label>kg/m³ (LPG)</label>
+                        <input type="number" id="gas-kg-m3" value="2.464" step="0.001">
+                    </div>
+                    <div class="form-group form-inline">
+                        <label>Nº balones/mes</label>
+                        <input type="number" id="gas-n-balones" value="3" step="1" min="1">
+                    </div>
+                </div>
+                <div class="form-hint" id="gas-balones-total">Total balones del mes: S/ 735.00</div>
+                <div id="gas-lista" class="list-container">
+                    <p class="empty-state">Carga los datos de gas este mes</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Agua -->
+        <section id="screen-agua" class="screen">
+            <div class="screen-content">
+                <div class="screen-header">
+                    <h2>Agua</h2>
+                    <button id="btn-agua-formula" class="btn btn-outline btn-sm" title="Ingresar factura del agua del mes">📄 Factura</button>
+                </div>
+                <div class="month-selector">
+                    <button id="btn-prev-month-agua" class="icon-btn">◀</button>
+                    <span id="agua-month-label">Julio 2026</span>
+                    <button id="btn-next-month-agua" class="icon-btn">▶</button>
+                </div>
+                <div id="agua-lista" class="list-container">
+                    <p class="empty-state">Carga los datos de agua este mes</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Gastos Fijos -->
+        <section id="screen-servicios" class="screen">
+            <div class="screen-content">
+                <div class="servicio-seccion">
+                    <div class="screen-header">
+                        <h2>Gastos Fijos</h2>
+                        <button id="btn-add-personal" class="btn btn-primary">+ Nuevo</button>
+                    </div>
+                    <p class="servicio-hint">Personal (porteros, descansero, mantenimiento y administración) y gastos fijos recurrentes (mant. ascensores, portón de cochera, cisterna, etc.). El sueldo o el monto genera el gasto automáticamente según su frecuencia.</p>
+                    <div id="lista-personal" class="list-container"></div>
+                </div>
+
+                <hr>
+
+                <div class="servicio-seccion">
+                    <div class="screen-header">
+                        <h2>Jardinería</h2>
+                        <button id="btn-add-jardineria" class="btn btn-primary">+ Nuevo</button>
+                    </div>
+                    <p class="servicio-hint">Visitas y trabajos a realizar y/o realizados.</p>
+                    <div id="lista-jardineria" class="list-container"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Cálculo Mensual -->
+        <section id="screen-calculo" class="screen">
+            <div class="screen-content">
+                <div class="month-selector">
+                    <button id="btn-prev-month-calc" class="icon-btn">◀</button>
+                    <span id="calc-month-label">Julio 2026</span>
+                    <button id="btn-next-month-calc" class="icon-btn">▶</button>
+                </div>
+
+                <div id="calculo-detalles" class="list-container">
+                    <p class="empty-state">No hay gastos este mes</p>
+                </div>
+
+                <button id="btn-simplificar-deudas" class="btn btn-secondary" style="display:none;">
+                    Simplificar Deudas
+                </button>
+
+                <div id="simplificacion" class="list-container" style="display:none;">
+                    <h3>Pagos a realizar</h3>
+                    <div id="lista-pagos-simplificados"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Informes -->
+        <section id="screen-informes" class="screen">
+            <div class="screen-content">
+                <h2>Informes</h2>
+                <div class="month-selector">
+                    <button id="btn-prev-month-inf" class="icon-btn">◀</button>
+                    <span id="inf-month-label">Julio 2026</span>
+                    <button id="btn-next-month-inf" class="icon-btn">▶</button>
+                </div>
+                <div class="informes-actions">
+                    <button id="btn-export-pdf" class="btn btn-outline">📄 Exportar PDF</button>
+                    <button id="btn-export-excel" class="btn btn-outline">📊 Exportar Excel</button>
+                </div>
+                <div id="preview-informe" class="list-container">
+                    <p class="empty-state">Selecciona un mes para generar el informe</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Configuración -->
+        <section id="screen-config" class="screen">
+            <div class="screen-content">
+                <h2>Configuración</h2>
+                <form id="form-config">
+                    <div class="form-group">
+                        <label for="config-nombre">Nombre del Edificio</label>
+                        <input type="text" id="config-nombre" placeholder="Ej: Edificio Los Robles">
+                    </div>
+                    <div class="form-group">
+                        <label for="config-direccion">Dirección</label>
+                        <input type="text" id="config-direccion" placeholder="Ej: Av. Principal 123">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="config-moneda">Moneda</label>
+                            <select id="config-moneda">
+                                <option value="S/.">Soles (S/.)</option>
+                                <option value="$">Pesos ($)</option>
+                                <option value="USD">Dólares (USD)</option>
+                                <option value="€">Euros (€)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="config-mes-inicio">Mes de inicio</label>
+                            <select id="config-mes-inicio">
+                                <option value="1">Enero</option>
+                                <option value="2">Febrero</option>
+                                <option value="3">Marzo</option>
+                                <option value="4">Abril</option>
+                                <option value="5">Mayo</option>
+                                <option value="6">Junio</option>
+                                <option value="7">Julio</option>
+                                <option value="8">Agosto</option>
+                                <option value="9">Septiembre</option>
+                                <option value="10">Octubre</option>
+                                <option value="11">Noviembre</option>
+                                <option value="12">Diciembre</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Guardar</button>
+                </form>
+
+                <hr>
+
+                <div id="usuarios-admin">
+                    <h3 id="miembros-titulo">Miembros del edificio</h3>
+                    <p class="empty-state" style="margin:0 0 8px;">Aprueba solicitudes, asigna departamentos y controla quién accede a este edificio.</p>
+
+                    <div id="solicitudes-wrap" style="display:none;">
+                        <h4>Solicitudes pendientes</h4>
+                        <div id="lista-solicitudes" class="list-container"></div>
+                    </div>
+
+                    <h4>Miembros</h4>
+                    <div id="lista-usuarios" class="list-container">
+                        <p class="empty-state">Cargando...</p>
+                    </div>
+
+                    <h4>Invitar administrador</h4>
+                    <p class="empty-state" style="margin:0 0 8px;">Quien se registre con ese correo va a ver la invitación al entrar y podrá aceptarla.</p>
+                    <form id="form-invitar">
+                        <div class="form-group">
+                            <label for="invitar-email">Correo del invitado</label>
+                            <input type="email" id="invitar-email" required placeholder="correo@ejemplo.com" autocomplete="off">
+                        </div>
+                        <button type="submit" class="btn btn-outline btn-block">Enviar invitación</button>
+                    </form>
+                    <div id="lista-invitaciones-admin" class="list-container"></div>
+
+                    <hr>
+                    <h4>Administrar otro edificio</h4>
+                    <form id="form-crear-edificio-config">
+                        <div class="form-group">
+                            <label for="config-edificio-nombre">Nombre del edificio</label>
+                            <input type="text" id="config-edificio-nombre" required placeholder="Ej: Edificio Los Robles">
+                        </div>
+                        <div class="form-group">
+                            <label for="config-edificio-direccion">Dirección</label>
+                            <input type="text" id="config-edificio-direccion" placeholder="Ej: Av. México 777">
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">Crear edificio</button>
+                    </form>
+                </div>
+
+                <hr>
+
+                <h3>Datos</h3>
+                <div class="config-actions">
+                    <button id="btn-export-backup" class="btn btn-outline btn-block">📦 Exportar Backup</button>
+                    <label class="btn btn-outline btn-block" style="text-align:center;">
+                        📂 Importar Backup
+                        <input type="file" id="btn-import-backup" accept=".json" style="display:none;">
+                    </label>
+                    <button id="btn-reset-data" class="btn btn-danger btn-block">🗑 Borrar Todos los Datos</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav id="bottom-nav">
+        <button class="nav-btn active" data-screen="dashboard">
+            <span class="nav-icon">🏠</span>
+            <span class="nav-label">Inicio</span>
+        </button>
+        <button class="nav-btn" data-screen="propietarios">
+            <span class="nav-icon">🏢</span>
+            <span class="nav-label">Dptos</span>
+        </button>
+        <button class="nav-btn" data-screen="gastos">
+            <span class="nav-icon">💰</span>
+            <span class="nav-label">Gastos</span>
+        </button>
+        <button class="nav-btn" data-screen="gas">
+            <span class="nav-icon">🔥</span>
+            <span class="nav-label">Gas</span>
+        </button>
+        <button class="nav-btn" data-screen="agua">
+            <span class="nav-icon">💧</span>
+            <span class="nav-label">Agua</span>
+        </button>
+        <button class="nav-btn" data-screen="servicios">
+            <span class="nav-icon">📌</span>
+            <span class="nav-label">G. Fijos</span>
+        </button>
+        <button class="nav-btn" data-screen="calculo">
+            <span class="nav-icon">🧮</span>
+            <span class="nav-label">Cálculo</span>
+        </button>
+        <button class="nav-btn" data-screen="informes">
+            <span class="nav-icon">📋</span>
+            <span class="nav-label">Informes</span>
+        </button>
+    </nav>
+
+    <!-- Modal: Agregar/Editar Propietario -->
+    <div id="modal-propietario" class="modal" style="display:none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-propietario-title">Nuevo Departamento</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <form id="form-propietario">
+                <input type="hidden" id="propietario-id">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="propietario-nombre">Nombre</label>
+                        <input type="text" id="propietario-nombre" required placeholder="Ej: Juan">
+                    </div>
+                    <div class="form-group">
+                        <label for="propietario-apellido">Apellido</label>
+                        <input type="text" id="propietario-apellido" placeholder="Ej: Pérez">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="propietario-departamento">Departamento</label>
+                        <input type="text" id="propietario-departamento" placeholder="Ej: 101, PB, 2B">
+                    </div>
+                    <div class="form-group">
+                        <label for="propietario-m2">m²</label>
+                        <input type="number" id="propietario-m2" step="0.01" min="0" placeholder="Ej: 141.29">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="propietario-coeficiente">Coeficiente (%)</label>
+                        <input type="number" id="propietario-coeficiente" step="0.01" min="0" max="100" required placeholder="Ej: 13.89">
+                    </div>
+                    <div class="form-group">
+                        <label for="propietario-cuota">Cuota Mensual</label>
+                        <input type="number" id="propietario-cuota" step="0.01" min="0" placeholder="Ej: 895">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="propietario-email">Email (opcional)</label>
+                    <input type="email" id="propietario-email" placeholder="para enviar informes">
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Guardar</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Estado de Cuenta -->
+    <div id="modal-estado-cuenta" class="modal" style="display:none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="estado-cuenta-title">Estado de Cuenta</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div id="estado-cuenta-cuerpo"></div>
+            <div class="modal-actions">
+                <button id="btn-estado-pdf" class="btn btn-primary">Descargar PDF</button>
+                <button id="btn-estado-cerrar" class="btn btn-secondary">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Registrar/Editar Pago -->
+    <div id="modal-pago" class="modal" style="display:none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-pago-title">Registrar Pago</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <form id="form-pago">
+                <input type="hidden" id="pago-id">
+                <input type="hidden" id="pago-propietario-id">
+                <input type="hidden" id="pago-mes">
+                <div class="form-group">
+                    <label>Propietario</label>
+                    <div id="pago-propietario-nombre" class="pago-propietario"></div>
+                </div>
+                <div class="form-group">
+                    <label for="pago-concepto">¿Qué está pagando?</label>
+                    <select id="pago-concepto" required></select>
+                    <div id="pago-concepto-fijo" class="pago-propietario" style="display:none;"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="pago-monto">Monto</label>
+                        <input type="number" id="pago-monto" step="0.01" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="pago-fecha">Fecha</label>
+                        <input type="date" id="pago-fecha" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="pago-metodo">Método de pago</label>
+                    <select id="pago-metodo">
+                        <option value="efectivo">Efectivo</option>
+                        <option value="transferencia">Transferencia</option>
+                        <option value="deposito">Depósito</option>
+                        <option value="yape">Yape / Plin</option>
+                        <option value="otro">Otro</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Guardar pago</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Agregar/Editar Gasto -->
+    <div id="modal-gasto" class="modal" style="display:none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-gasto-title">Nuevo Gasto</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <form id="form-gasto">
+                <input type="hidden" id="gasto-id">
+                <div class="form-group">
+                    <label for="gasto-concepto">Concepto</label>
+                    <input type="text" id="gasto-concepto" required placeholder="Ej: Portería turno mañana">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="gasto-monto">Monto</label>
+                        <input type="number" id="gasto-monto" step="0.01" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="gasto-fecha">Fecha</label>
+                        <input type="date" id="gasto-fecha" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="gasto-categoria">Categoría</label>
+                        <select id="gasto-categoria" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="gasto-frecuencia">Frecuencia</label>
+                        <select id="gasto-frecuencia" required>
+                            <option value="mensual">Mensual</option>
+                            <option value="trimestral">Trimestral</option>
+                            <option value="semestral">Semestral</option>
+                            <option value="anual">Anual</option>
+                            <option value="unico">Único</option>
+                            <option value="extraordinario">Extraordinario</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group" id="gasto-division-group" style="display:none;">
+                    <label for="gasto-division">División del gasto</label>
+                    <select id="gasto-division">
+                        <option value="proporcional">Proporcional (por coeficiente)</option>
+                        <option value="igualitario">Igualitario (todos pagan lo mismo)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="gasto-estado">Estado del pago</label>
+                    <select id="gasto-estado">
+                        <option value="pendiente">Por pagar</option>
+                        <option value="pagado">Ya se pagó</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="gasto-notas">Notas (opcional)</label>
+                    <textarea id="gasto-notas" rows="2" placeholder="Detalles adicionales"></textarea>
+                </div>
+                <div class="form-group" id="gasto-cuota-extra-group" style="display:none;">
+                    <label>Cuota Extraordinaria por Depto</label>
+                    <div id="gasto-cuota-preview" class="cuota-preview"></div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Guardar</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Agregar/Editar Personal -->
+    <div id="modal-personal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-personal-title">Nuevo Empleado</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <form id="form-personal">
+                <input type="hidden" id="personal-id">
+                <div class="form-group">
+                    <label>Tipo de gasto</label>
+                    <div style="display:flex;gap:12px;margin-top:4px;flex-wrap:wrap;">
+                        <label style="display:flex;align-items:center;gap:5px;font-size:0.85rem;"><input type="radio" name="gasto-tipo" value="personal" checked> 👤 Personal</label>
+                        <label style="display:flex;align-items:center;gap:5px;font-size:0.85rem;"><input type="radio" name="gasto-tipo" value="fijo"> 🛠 Gasto fijo</label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="personal-nombre" id="label-nombre">Nombre</label>
+                    <input type="text" id="personal-nombre" required placeholder="Ej: Juan">
+                </div>
+                <div id="grupo-personal">
+                    <div class="form-group">
+                        <label for="personal-rol">Rol</label>
+                        <select id="personal-rol">
+                            <option value="portero">Portero</option>
+                            <option value="descansero">Descansero</option>
+                            <option value="mantenimiento">Mantenimiento</option>
+                            <option value="jardinero">Jardinería</option>
+                            <option value="administracion">Administración</option>
+                            <option value="otros">Otros</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="personal-sueldo">Sueldo mensual (S/)</label>
+                        <input type="number" id="personal-sueldo" step="0.01" min="0" placeholder="Ej: 1200">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="personal-horario">Turno de trabajo</label>
+                            <select id="personal-horario">
+                                <option value="">Selecciona un turno</option>
+                                <option value="Turno mañana">Turno mañana</option>
+                                <option value="Turno tarde">Turno tarde</option>
+                                <option value="Turno noche">Turno noche</option>
+                                <option value="Dominguero">Dominguero</option>
+                                <option value="Tiempo completo">Tiempo completo</option>
+                                <option value="otro">Otro...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="personal-dias">Días de trabajo</label>
+                            <input type="text" id="personal-dias" placeholder="Ej: Lun a Sáb">
+                        </div>
+                    </div>
+                    <div class="form-group" id="personal-horario-otro-group" style="display:none;">
+                        <label for="personal-horario-otro">Especifica el horario</label>
+                        <input type="text" id="personal-horario-otro" placeholder="Ej: 6am - 2pm">
+                    </div>
+                    <div class="form-group">
+                        <label for="personal-vacaciones">Vacaciones</label>
+                        <input type="text" id="personal-vacaciones" placeholder="Ej: 1-15 Ene">
+                    </div>
+                </div>
+                <div id="grupo-fijo" style="display:none;">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="fijo-categoria">Categoría</label>
+                            <select id="fijo-categoria">
+                                <option value="ascensores">Mant. Ascensores</option>
+                                <option value="puerta">Mant. Puerta Garaje</option>
+                                <option value="tanque">Mant. Tanque Agua</option>
+                                <option value="tuberia">Tubería y Válvulas</option>
+                                <option value="intercomunicador">Intercomunicador</option>
+                                <option value="limpieza">Limpieza</option>
+                                <option value="fumigacion">Fumigación</option>
+                                <option value="arreglos">Arreglos Varios</option>
+                                <option value="materiales">Materiales</option>
+                                <option value="otros">Otros</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="fijo-monto">Monto (S/)</label>
+                            <input type="number" id="fijo-monto" step="0.01" min="0" placeholder="Ej: 300">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="fijo-frecuencia">Cada cuánto se hace</label>
+                            <select id="fijo-frecuencia">
+                                <option value="mensual">Mensual</option>
+                                <option value="trimestral">Cada 3 meses</option>
+                                <option value="semestral">Cada 6 meses</option>
+                                <option value="anual">Cada 12 meses</option>
+                                <option value="unico">Único</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Desde el mes</label>
+                            <div style="display:flex;gap:6px;">
+                                <select id="fijo-mes-desde-mes" style="flex:1;"></select>
+                                <select id="fijo-mes-desde-anio" style="flex:1;"></select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="personal-notas">Notas (opcional)</label>
+                    <textarea id="personal-notas" rows="2"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Guardar</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Agregar/Editar Trabajo de Jardinería -->
+    <div id="modal-jardineria" class="modal" style="display:none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-jardineria-title">Nuevo Trabajo</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <form id="form-jardineria">
+                <input type="hidden" id="jardineria-id">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="jardineria-fecha">Fecha</label>
+                        <input type="date" id="jardineria-fecha" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="jardineria-estado">Estado</label>
+                        <select id="jardineria-estado">
+                            <option value="a-realizar">A realizar</option>
+                            <option value="realizado">Realizado</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="jardineria-descripcion">Descripción</label>
+                    <input type="text" id="jardineria-descripcion" required placeholder="Ej: Poda de jardín">
+                </div>
+                <div class="form-group">
+                    <label for="jardineria-notas">Notas (opcional)</label>
+                    <textarea id="jardineria-notas" rows="2"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Guardar</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Factura del Agua -->
+    <div id="modal-agua-formula" class="modal" style="display:none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="agua-factura-title">Factura del Agua</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <form id="form-agua-formula">
+                <p class="form-hint">Escribe el consumo del recibo y ajusta los montos si la factura real difiere del cálculo.</p>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="agua-consumo">Consumo del recibo (m³)</label>
+                        <input type="number" id="agua-consumo" step="0.001" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="agua-cargo-fijo">Cargo fijo (S/)</label>
+                        <input type="number" id="agua-cargo-fijo" step="0.01" min="0">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="agua-igv">IGV (%)</label>
+                        <input type="number" id="agua-igv" step="0.01" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="agua-igv-monto">IGV (S/)</label>
+                        <input type="number" id="agua-igv-monto" step="0.01" min="0">
+                    </div>
+                </div>
+                <h4 class="tramo-heading">Detalle de facturación</h4>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="agua-potable">Concepto de agua potable (S/)</label>
+                        <input type="number" id="agua-potable" step="0.01" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="agua-alcantarillado">Servicio de alcantarillado (S/)</label>
+                        <input type="number" id="agua-alcantarillado" step="0.01" min="0">
+                    </div>
+                </div>
+                <div id="agua-factura-total" class="factura-total">Total: S/. 0.00</div>
+
+                <details class="tarifa-collapse">
+                    <summary>Tarifa Doméstico 1 (S/ por m³) — solo si tu recibo cambia</summary>
+                    <h4 class="tramo-heading">Agua potable</h4>
+                    <div class="tramo-row">
+                        <span class="tramo-tag">Tramo 1</span>
+                        <input type="number" id="agua-t1-hasta" placeholder="Hasta m³">
+                        <input type="number" id="agua-t1-precio" placeholder="Precio S/" step="0.001">
+                    </div>
+                    <div class="tramo-row">
+                        <span class="tramo-tag">Tramo 2</span>
+                        <input type="number" id="agua-t2-hasta" placeholder="Hasta m³">
+                        <input type="number" id="agua-t2-precio" placeholder="Precio S/" step="0.001">
+                    </div>
+                    <div class="tramo-row">
+                        <span class="tramo-tag">Tramo 3</span>
+                        <input type="number" id="agua-t3-hasta" placeholder="Sin límite si vacío">
+                        <input type="number" id="agua-t3-precio" placeholder="Precio S/" step="0.001">
+                    </div>
+                    <h4 class="tramo-heading">Alcantarillado</h4>
+                    <div class="tramo-row">
+                        <span class="tramo-tag">Tramo 1</span>
+                        <input type="number" id="agua-a-t1-hasta" placeholder="Hasta m³">
+                        <input type="number" id="agua-a-t1-precio" placeholder="Precio S/" step="0.001">
+                    </div>
+                    <div class="tramo-row">
+                        <span class="tramo-tag">Tramo 2</span>
+                        <input type="number" id="agua-a-t2-hasta" placeholder="Hasta m³">
+                        <input type="number" id="agua-a-t2-precio" placeholder="Precio S/" step="0.001">
+                    </div>
+                    <div class="tramo-row">
+                        <span class="tramo-tag">Tramo 3</span>
+                        <input type="number" id="agua-a-t3-hasta" placeholder="Sin límite si vacío">
+                        <input type="number" id="agua-a-t3-precio" placeholder="Precio S/" step="0.001">
+                    </div>
+                </details>
+
+                <button type="submit" class="btn btn-primary btn-block">Guardar factura</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Confirmación -->
+    <div id="modal-confirm" class="modal" style="display:none;">
+        <div class="modal-content modal-small">
+            <h3 id="confirm-title">Confirmar</h3>
+            <p id="confirm-message"></p>
+            <div class="modal-actions">
+                <button id="confirm-cancel" class="btn btn-outline">Cancelar</button>
+                <button id="confirm-save" class="btn btn-success" style="display:none;">Guardar</button>
+                <button id="confirm-ok" class="btn btn-danger">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast notifications -->
+    <div id="toast-container"></div>
+
+    <script src="lib/supabase.min.js"></script>
+    <script src="lib/jspdf.umd.min.js"></script>
+    <script src="lib/jspdf.plugin.autotable.min.js"></script>
+    <script src="lib/xlsx.full.min.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/engine.js"></script>
+    <script src="js/db.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/calculos.js"></script>
+    <script src="js/app.js"></script>
+    <!-- Error del servidor: el detalle de Postgres solo viaja en el
+         cuerpo de la respuesta, la consola del navegador no lo muestra -->
+    <div id="error-panel" class="error-panel" hidden>
+        <div class="error-panel-head">
+            <strong>Error del servidor</strong>
+            <button type="button" id="error-panel-close" class="error-panel-close">Cerrar</button>
+        </div>
+        <pre id="error-panel-msg" class="error-panel-msg"></pre>
+        <p class="error-panel-foot">Este texto no aparece en la consola del navegador. Copialo si lo vas a reportar.</p>
+    </div>
+
+</body>
+</html>

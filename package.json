@@ -1,0 +1,20 @@
+{
+  "name": "gastos-edificio-supabase",
+  "version": "1.0.0",
+  "description": "App de administración del edificio (web + Android + iOS)",
+  "private": true,
+  "scripts": {
+    "build": "node build.mjs",
+    "deploy": "npm run build && netlify deploy --prod --dir=www",
+    "apk": "npm run build && npx cap sync android && cd android && gradlew.bat assembleDebug"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.5.0",
+    "@capacitor/cli": "^8.5.0",
+    "@capacitor/core": "^8.5.0",
+    "@capacitor/ios": "^8.5.0"
+  },
+  "devDependencies": {
+    "netlify-cli": "^27.0.1"
+  }
+}
