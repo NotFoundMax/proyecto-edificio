@@ -1,23 +1,23 @@
 const CATEGORIAS = {
-    porteria: { label: 'Portería', icon: '💂' },
-    descansero: { label: 'Descansero', icon: '🏠' },
-    mantenimiento: { label: 'Mantenimiento', icon: '🛠' },
-    administracion: { label: 'Administración', icon: '📋' },
-    limpieza: { label: 'Limpieza', icon: '🧹' },
-    jardineria: { label: 'Jardinería', icon: '🌿' },
-    fumigacion: { label: 'Fumigación', icon: '🐛' },
-    ascensores: { label: 'Mant. Ascensores', icon: '🛗' },
-    puerta: { label: 'Mant. Puerta Garaje', icon: '🚗' },
-    tanque: { label: 'Mant. Tanque Agua', icon: '💧' },
-    tuberia: { label: 'Tubería y Válvulas', icon: '🔧' },
-    intercomunicador: { label: 'Intercomunicador', icon: '📞' },
-    agua: { label: 'Servicio de Agua', icon: '🚰' },
-    luz: { label: 'Servicio de Luz', icon: '💡' },
-    materiales: { label: 'Materiales', icon: '📦' },
-    vacaciones: { label: 'Vacaciones', icon: '🏖' },
-    gratificaciones: { label: 'Gratificaciones', icon: '🎁' },
-    arreglos: { label: 'Arreglos Varios', icon: '🔨' },
-    otros: { label: 'Otros', icon: '📌' }
+    porteria: { label: 'Portería', icon: '' },
+    descansero: { label: 'Descansero', icon: '' },
+    mantenimiento: { label: 'Mantenimiento', icon: '' },
+    administracion: { label: 'Administración', icon: '' },
+    limpieza: { label: 'Limpieza', icon: '' },
+    jardineria: { label: 'Jardinería', icon: '' },
+    fumigacion: { label: 'Fumigación', icon: '' },
+    ascensores: { label: 'Mant. Ascensores', icon: '' },
+    puerta: { label: 'Mant. Puerta Garaje', icon: '' },
+    tanque: { label: 'Mant. Tanque Agua', icon: '' },
+    tuberia: { label: 'Tubería y Válvulas', icon: '' },
+    intercomunicador: { label: 'Intercomunicador', icon: '' },
+    agua: { label: 'Servicio de Agua', icon: '' },
+    luz: { label: 'Servicio de Luz', icon: '' },
+    materiales: { label: 'Materiales', icon: '' },
+    vacaciones: { label: 'Vacaciones', icon: '' },
+    gratificaciones: { label: 'Gratificaciones', icon: '' },
+    arreglos: { label: 'Arreglos Varios', icon: '' },
+    otros: { label: 'Otros', icon: '' }
 };
 
 const FRECUENCIAS = {
@@ -297,7 +297,7 @@ const Calculos = {
     },
 
     categoriaIcon(cat) {
-        return CATEGORIAS[cat] ? CATEGORIAS[cat].icon : '📌';
+        return CATEGORIAS[cat] ? CATEGORIAS[cat].icon : '';
     },
 
     frecuenciaLabel(freq) {

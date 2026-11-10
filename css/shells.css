@@ -1,0 +1,32 @@
+/* Shells responsivos (Fase 2) */
+:root { --bottom-nav-height: 64px; }
+
+.app-shell { display: flex; min-height: 100vh; }
+.app-sidebar {
+    width: 240px; flex-shrink: 0;
+    background: var(--md-sys-color-surface-container);
+    border-right: 1px solid var(--md-sys-color-outline-variant);
+    padding: var(--space-4);
+    display: none; /* mobile-first: oculto en mobile */
+}
+.app-main { flex: 1; min-width: 0; padding-bottom: var(--bottom-nav-height); }
+
+.bottom-nav {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    height: var(--bottom-nav-height);
+    background: var(--md-sys-color-surface-container);
+    border-top: 1px solid var(--md-sys-color-outline-variant);
+    display: flex; justify-content: space-around; align-items: center;
+    z-index: 100;
+}
+
+/* Desktop: sidebar visible, bottom-nav oculto */
+@media (min-width: 905px) {
+    .app-sidebar { display: block; }
+    .app-main { padding-bottom: 0; }
+    .bottom-nav { display: none; }
+}
+
+/* Confortable density */
+.list-container .list-item { min-height: var(--density-row-height); }
+button, .btn { min-height: var(--density-control-height); }

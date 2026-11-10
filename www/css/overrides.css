@@ -1,0 +1,17 @@
+/* Overrides GitHub-like */
+.material-symbols-outlined { color: inherit; font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24; }
+body { background: var(--md-sys-color-background); color: var(--md-sys-color-on-background); }
+#app-header { background: var(--md-sys-color-surface); border-bottom: 1px solid var(--md-sys-color-outline); }
+#app-header h1 { font-weight: 600; font-size: 16px; }
+.screen-content { color: var(--md-sys-color-on-background); }
+.card, .login-card { background: var(--md-sys-color-surface); border: 1px solid var(--md-sys-color-outline); box-shadow: 0 1px 0 rgba(31,35,40,.04); }
+.modal { background: rgba(31,35,40,.5); }
+.modal > div, .modal-content { background: var(--md-sys-color-surface); border: 1px solid var(--md-sys-color-outline); box-shadow: 0 8px 24px rgba(31,35,40,.12); }
+input, select, textarea { border: 1px solid var(--md-sys-color-outline); background: var(--md-sys-color-surface); }
+input::placeholder { color: var(--md-sys-color-on-surface-variant); }
+.empty-state { color: var(--md-sys-color-on-surface-variant); }
+.list-item { border-bottom: 1px solid var(--md-sys-color-outline); }
+.list-item-title { color: var(--md-sys-color-on-surface); font-weight: 600; }
+.list-item-subtitle { color: var(--md-sys-color-on-surface-variant); }
+h1, h2, h3 { font-weight: 600; letter-spacing: -0.01em; }
+.nav-icon.material-symbols-outlined { font-size: 22px; color: inherit; }

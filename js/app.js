@@ -1854,12 +1854,12 @@ const App = {
 
         const extraInfo = document.getElementById('extra-info');
         let extraHtml = '';
-        extraHtml += `<div class="extra-info-item">📅 Total cuotas fijas: <strong>${Calculos.formatMoney(totalCuotasMensuales)}</strong> · Pagado: <strong>${Calculos.formatMoney(totalPagado)}</strong></div>`;
+        extraHtml += `<div class="extra-info-item"> Total cuotas fijas: <strong>${Calculos.formatMoney(totalCuotasMensuales)}</strong> · Pagado: <strong>${Calculos.formatMoney(totalPagado)}</strong></div>`;
         if (totalGastosExtra > 0) {
-            extraHtml += `<div class="extra-info-item">⚡ Gastos extraordinarios: <strong>${Calculos.formatMoney(totalGastosExtra)}</strong></div>`;
+            extraHtml += `<div class="extra-info-item"> Gastos extraordinarios: <strong>${Calculos.formatMoney(totalGastosExtra)}</strong></div>`;
         }
         if (balance < 0) {
-            extraHtml += `<div class="extra-info-item extra-deficit">⚠️ Déficit: Los gastos (${Calculos.formatMoney(totalGastosNormales)}) superan las cuotas (${Calculos.formatMoney(totalCuotasMensuales)})
+            extraHtml += `<div class="extra-info-item extra-deficit">️ Déficit: Los gastos (${Calculos.formatMoney(totalGastosNormales)}) superan las cuotas (${Calculos.formatMoney(totalCuotasMensuales)})
                 <div class="deficit-actions">
                     <button class="btn btn-sm btn-outline" onclick="App.cubrirDeficit('caja chica')">Usar Caja Chica</button>
                     <button class="btn btn-sm btn-outline" onclick="App.cubrirDeficit('extraordinario')">Crear Cuota Extra.</button>
@@ -2007,9 +2007,9 @@ const App = {
                         <div class="list-item-subtitle">Dpto ${p.departamento || '-'} · ${p.coeficiente}%${p.m2 ? ' · ' + p.m2 + 'm²' : ''}${p.cuotaMensual ? ' · Cuota: ' + Calculos.formatMoney(p.cuotaMensual) : ''}</div>
                     </div>
                     <div class="list-item-actions">
-                        <button class="btn-estado-propietario" data-id="${p.id}" title="Estado de cuenta">📊</button>
-                        <button class="btn-edit-propietario" data-id="${p.id}" title="Editar">✏️</button>
-                        <button class="btn-delete-propietario" data-id="${p.id}" title="Eliminar">🗑</button>
+                        <button class="btn-estado-propietario" data-id="${p.id}" title="Estado de cuenta"></button>
+                        <button class="btn-edit-propietario" data-id="${p.id}" title="Editar">️</button>
+                        <button class="btn-delete-propietario" data-id="${p.id}" title="Eliminar"></button>
                     </div>
                 </div>
             `;
@@ -2086,7 +2086,7 @@ const App = {
                             <span class="badge badge-${g.categoria}">${Calculos.categoriaLabel(g.categoria)}</span>
                             <span class="badge badge-freq">${freqLabel}</span>
                             ${divisionLabel ? `<span class="badge badge-freq">${divisionLabel}</span>` : ''}
-                            ${g.pagado ? '<span class="badge badge-pagado">✅ Pagado</span>' : '<span class="badge badge-pendiente">⏳ Por pagar</span>'}
+                            ${g.pagado ? '<span class="badge badge-pagado"> Pagado</span>' : '<span class="badge badge-pendiente"> Por pagar</span>'}
                             · ${g.fecha}
                             ${showEquiv ? '<br>Mensual equiv: ' + Calculos.formatMoney(equiv) : ''}
                         </div>
@@ -2094,9 +2094,9 @@ const App = {
                     <div style="display:flex;align-items:center;gap:4px;">
                         <span class="list-item-amount">${Calculos.formatMoney(g.monto)}</span>
                         <div class="list-item-actions">
-                            <button class="btn-toggle-pagado btn-icon" data-id="${g.id}" title="${g.pagado ? 'Marcar por pagar' : 'Marcar pagado'}">${g.pagado ? '⏳' : '✅'}</button>
-                            <button class="btn-edit-gasto" data-id="${g.id}" title="Editar">✏️</button>
-                            <button class="btn-delete-gasto" data-id="${g.id}" title="Eliminar">🗑</button>
+                            <button class="btn-toggle-pagado btn-icon" data-id="${g.id}" title="${g.pagado ? 'Marcar por pagar' : 'Marcar pagado'}">${g.pagado ? '' : ''}</button>
+                            <button class="btn-edit-gasto" data-id="${g.id}" title="Editar">️</button>
+                            <button class="btn-delete-gasto" data-id="${g.id}" title="Eliminar"></button>
                         </div>
                     </div>
                 </div>
@@ -2184,7 +2184,7 @@ const App = {
         html += `
             <div class="list-item periodo-card" style="background:var(--gray-50);">
                 <div class="list-item-info">
-                    <div class="list-item-title" style="font-size:0.85rem;">📅 Período de lectura (se aplica a todas las medidas)</div>
+                    <div class="list-item-title" style="font-size:0.85rem;"> Período de lectura (se aplica a todas las medidas)</div>
                     <div class="list-item-subtitle" style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
                         <span style="font-size:0.75rem;">Desde:</span>
                         ${dayOptions('periodo-dini', iniDisp)}
@@ -2206,7 +2206,7 @@ const App = {
             html += `
                 <div class="list-item">
                     <div class="list-item-info">
-                        <div class="list-item-title">🔥 ${p.departamento} — ${p.nombre} ${p.apellido || ''}</div>
+                        <div class="list-item-title"> ${p.departamento} — ${p.nombre} ${p.apellido || ''}</div>
                         <div class="list-item-subtitle" style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
                             <span style="font-size:0.75rem;">Lectura inicial:</span>
                             <input type="number" class="gas-ini" data-dept="${p.departamento}" value="${lecturaIni}" step="0.001"${ro} style="width:80px;font-size:0.8rem;padding:4px;border:1px solid var(--border);border-radius:4px;">
@@ -2229,7 +2229,7 @@ const App = {
         });
 
         const rango = (fechas.inicio && fechas.fin)
-            ? ` · 📅 ${Calculos.formatFecha(fechas.inicio)} → ${Calculos.formatFecha(fechas.fin)}`
+            ? ` ·  ${Calculos.formatFecha(fechas.inicio)} → ${Calculos.formatFecha(fechas.fin)}`
             : '';
         html += `
             <div class="list-item total-row" style="background:var(--gray-50);font-weight:bold;">
@@ -2307,7 +2307,7 @@ const App = {
             html += `
                 <div class="list-item">
                     <div class="list-item-info">
-                        <div class="list-item-title">💧 ${p.departamento} — ${p.nombre} ${p.apellido || ''}</div>
+                        <div class="list-item-title"> ${p.departamento} — ${p.nombre} ${p.apellido || ''}</div>
                         <div class="list-item-subtitle" style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
                             <span style="font-size:0.75rem;">Lectura inicial:</span>
                             <input type="number" class="agua-ini" data-dept="${p.departamento}" value="${lecturaIni}" step="0.001"${ro} style="width:80px;font-size:0.8rem;padding:4px;border:1px solid var(--border);border-radius:4px;">
@@ -2393,8 +2393,8 @@ const App = {
                             </div>
                         </div>
                         <div class="list-item-actions">
-                            <button class="btn-edit-personal" data-id="${p.id}" title="Editar">✏️</button>
-                            <button class="btn-delete-personal" data-id="${p.id}" title="Eliminar">🗑</button>
+                            <button class="btn-edit-personal" data-id="${p.id}" title="Editar">️</button>
+                            <button class="btn-delete-personal" data-id="${p.id}" title="Eliminar"></button>
                         </div>
                     </div>
                 `;
@@ -2403,18 +2403,18 @@ const App = {
             return `
                 <div class="list-item" data-id="${p.id}">
                     <div class="list-item-info">
-                        <div class="list-item-title">${rol.categoria === 'porteria' ? '💂' : ''}${rol.categoria === 'descansero' ? '🏠' : ''}${rol.categoria === 'mantenimiento' ? '🛠' : ''}${rol.categoria === 'jardineria' ? '🌿' : ''}${rol.categoria === 'administracion' ? '📋' : ''} ${p.nombre} <span class="badge badge-freq">${rol.label}</span></div>
+                        <div class="list-item-title">${rol.categoria === 'porteria' ? '' : ''}${rol.categoria === 'descansero' ? '' : ''}${rol.categoria === 'mantenimiento' ? '' : ''}${rol.categoria === 'jardineria' ? '' : ''}${rol.categoria === 'administracion' ? '' : ''} ${p.nombre} <span class="badge badge-freq">${rol.label}</span></div>
                         <div class="list-item-subtitle">
                             Sueldo: <strong>${p.sueldoMensual ? Calculos.formatMoney(p.sueldoMensual) : '—'}</strong>
                             ${p.horario ? ' · Horario: ' + p.horario : ''}
                             ${p.dias ? ' · Días: ' + p.dias : ''}
-                            ${p.vacaciones ? '<br>🏖 Vacaciones: ' + p.vacaciones : ''}
+                            ${p.vacaciones ? '<br> Vacaciones: ' + p.vacaciones : ''}
                             ${p.notas ? '<br>' + p.notas : ''}
                         </div>
                     </div>
                     <div class="list-item-actions">
-                        <button class="btn-edit-personal" data-id="${p.id}" title="Editar">✏️</button>
-                        <button class="btn-delete-personal" data-id="${p.id}" title="Eliminar">🗑</button>
+                        <button class="btn-edit-personal" data-id="${p.id}" title="Editar">️</button>
+                        <button class="btn-delete-personal" data-id="${p.id}" title="Eliminar"></button>
                     </div>
                 </div>
             `;
@@ -2453,20 +2453,20 @@ const App = {
         }
         container.innerHTML = items.map(j => {
             const badge = j.estado === 'realizado'
-                ? '<span class="badge badge-pagado">✅ Realizado</span>'
-                : '<span class="badge badge-pendiente">⏳ A realizar</span>';
+                ? '<span class="badge badge-pagado"> Realizado</span>'
+                : '<span class="badge badge-pendiente"> A realizar</span>';
             return `
                 <div class="list-item" data-id="${j.id}">
                     <div class="list-item-info">
-                        <div class="list-item-title">🌿 ${j.descripcion}</div>
+                        <div class="list-item-title"> ${j.descripcion}</div>
                         <div class="list-item-subtitle">
                             ${badge} · ${j.fecha || ''}
                             ${j.notas ? '<br>' + j.notas : ''}
                         </div>
                     </div>
                     <div class="list-item-actions">
-                        <button class="btn-edit-jardineria" data-id="${j.id}" title="Editar">✏️</button>
-                        <button class="btn-delete-jardineria" data-id="${j.id}" title="Eliminar">🗑</button>
+                        <button class="btn-edit-jardineria" data-id="${j.id}" title="Editar">️</button>
+                        <button class="btn-delete-jardineria" data-id="${j.id}" title="Eliminar"></button>
                     </div>
                 </div>
             `;
@@ -2603,12 +2603,12 @@ const App = {
                             <span style="font-size:0.75rem;color:var(--text-muted);">Historial de pagos:</span>
                 `;
                 pagosDepto.forEach(pg => {
-                    const tipoLabel = pg.tipo === 'extraordinaria' ? '⚡ Extra' : (pg.tipo === 'gas' ? '🔥 Gas' : (pg.tipo === 'agua' ? '💧 Agua' : '📅 Fija'));
+                    const tipoLabel = pg.tipo === 'extraordinaria' ? ' Extra' : (pg.tipo === 'gas' ? ' Gas' : (pg.tipo === 'agua' ? ' Agua' : ' Fija'));
                     html += `
                             <div style="display:flex;align-items:center;gap:6px;font-size:0.8rem;">
                                 <span>${tipoLabel} ${Calculos.formatMoney(pg.monto)} <span style="color:var(--text-muted)">${pg.fecha}</span></span>
-                                <button class="btn-icon btn-edit-pago" data-id="${pg.id}" title="Editar">✏️</button>
-                                <button class="btn-icon btn-delete-pago" data-id="${pg.id}" title="Eliminar">🗑️</button>
+                                <button class="btn-icon btn-edit-pago" data-id="${pg.id}" title="Editar">️</button>
+                                <button class="btn-icon btn-delete-pago" data-id="${pg.id}" title="Eliminar">️</button>
                             </div>
                     `;
                 });
@@ -2620,14 +2620,14 @@ const App = {
             html += `
                         <div class="calc-breakdown-item" style="flex-wrap:wrap;gap:6px;margin-top:6px;">
                             <button class="btn btn-sm btn-primary btn-pagar-fija" data-id="${p.id}">
-                                💵 Pagar Cuota
+                                 Pagar Cuota
                             </button>
                 `;
 
             if (gastosExtra.length > 0) {
                 html += `
                             <button class="btn btn-sm btn-primary btn-pagar-extra" data-id="${p.id}">
-                                ⚡ Pagar Cuota Extra
+                                 Pagar Cuota Extra
                             </button>
                 `;
             }
@@ -2635,7 +2635,7 @@ const App = {
             if (gasActual) {
                 html += `
                             <button class="btn btn-sm btn-primary btn-pagar-gas" data-id="${p.id}">
-                                🔥 Pagar Gas (${Calculos.formatMoney(gasActual.total)})
+                                 Pagar Gas (${Calculos.formatMoney(gasActual.total)})
                             </button>
                 `;
             }
@@ -2703,7 +2703,7 @@ const App = {
         select.style.display = esFijo ? 'none' : '';
         fijoLabel.style.display = esFijo ? '' : 'none';
         if (esFijo) {
-            fijoLabel.textContent = `🔥 Gas de ${Calculos.getMesLabel(mes)}`;
+            fijoLabel.textContent = ` Gas de ${Calculos.getMesLabel(mes)}`;
         }
 
         select.innerHTML = '';
@@ -2714,11 +2714,11 @@ const App = {
                 opt.textContent = label;
                 select.appendChild(opt);
             };
-            addOpt({ tipo: 'fija', gastoId: null }, `📅 Cuota fija de ${Calculos.getMesLabel(mes)}`);
+            addOpt({ tipo: 'fija', gastoId: null }, ` Cuota fija de ${Calculos.getMesLabel(mes)}`);
             const extras = DB.getGastos({ mes }).filter(g => g.frecuencia === 'extraordinario');
-            if (extras.length > 0) addOpt({ tipo: 'extraordinaria', gastoId: null }, `⚡ Cuota extra de ${Calculos.getMesLabel(mes)}`);
+            if (extras.length > 0) addOpt({ tipo: 'extraordinaria', gastoId: null }, ` Cuota extra de ${Calculos.getMesLabel(mes)}`);
             const aguaR = Calculos.calcAguaDepto(mes, propietario.departamento);
-            if (aguaR) addOpt({ tipo: 'agua', gastoId: null }, `💧 Agua de ${Calculos.getMesLabel(mes)}`);
+            if (aguaR) addOpt({ tipo: 'agua', gastoId: null }, ` Agua de ${Calculos.getMesLabel(mes)}`);
 
             const preset = editando ? (pago.tipo || 'fija') : tipoPreset;
             let matched = false;
@@ -2864,7 +2864,7 @@ const App = {
 
         const gasFechas = DB.getGasFechas(this.currentMes);
         const gasRango = (gasFechas.inicio && gasFechas.fin)
-            ? ` · 📅 ${Calculos.formatFecha(gasFechas.inicio)} → ${Calculos.formatFecha(gasFechas.fin)}`
+            ? ` ·  ${Calculos.formatFecha(gasFechas.inicio)} → ${Calculos.formatFecha(gasFechas.fin)}`
             : '';
 
         if (gastos.length === 0 && totalGas === 0 && totalAgua === 0) {
@@ -2882,8 +2882,8 @@ const App = {
                     ${gastos.map(g => {
                         const showEquiv = g.frecuencia !== 'mensual' && g.frecuencia !== 'extraordinario' && g.origen !== 'fijo';
                         const estadoBadge = g.pagado
-                            ? '<span class="badge badge-pagado">✅</span>'
-                            : '<span class="badge badge-pendiente">⏳</span>';
+                            ? '<span class="badge badge-pagado"></span>'
+                            : '<span class="badge badge-pendiente"></span>';
                         return `
                             <div class="calc-breakdown-item">
                                 <span>${Calculos.categoriaIcon(g.categoria)} ${g.concepto} <span class="badge badge-freq">${Calculos.frecuenciaLabel(g.frecuencia)}</span> ${estadoBadge}</span>
@@ -2894,11 +2894,11 @@ const App = {
                 </div>
                 <div class="calc-breakdown" style="border-top:1px solid var(--border);margin-top:8px;padding-top:8px;">
                     <div class="calc-breakdown-item">
-                        <span>✅ Pagados (${gastosPagados.length})</span>
+                        <span> Pagados (${gastosPagados.length})</span>
                         <span class="calc-share status-pagado">${Calculos.formatMoney(totalPagados)}</span>
                     </div>
                     <div class="calc-breakdown-item">
-                        <span>⏳ Por pagar (${gastosPendientes.length})</span>
+                        <span> Por pagar (${gastosPendientes.length})</span>
                         <span class="calc-share status-debe">${Calculos.formatMoney(totalPendientes)}</span>
                     </div>
                 </div>
@@ -2909,7 +2909,7 @@ const App = {
             html += `
                 <div class="calc-detail">
                     <div class="calc-detail-header">
-                        <h4>🔥 Gas${gasRango}</h4>
+                        <h4> Gas${gasRango}</h4>
                         <span class="calc-amount">${Calculos.formatMoney(totalGas)}</span>
                     </div>
                     <div class="calc-breakdown">
@@ -2932,7 +2932,7 @@ const App = {
             html += `
                 <div class="calc-detail">
                     <div class="calc-detail-header">
-                        <h4>💧 Agua</h4>
+                        <h4> Agua</h4>
                         <span class="calc-amount">${Calculos.formatMoney(totalAgua)}</span>
                     </div>
                     <div class="calc-breakdown">
@@ -2962,7 +2962,7 @@ const App = {
                     <span class="calc-share ${p.saldo <= 0.01 ? 'status-pagado' : 'status-debe'}">
                         Cuota: ${Calculos.formatMoney(Math.max(0, p.saldo))}
                         ${extra > 0 ? ' · Gas/Agua: ' + Calculos.formatMoney(extra) : ''}
-                        ${p.estado === 'pagado' ? ' ✅' : ''}
+                        ${p.estado === 'pagado' ? ' ' : ''}
                     </span>
                 </div>
             `;

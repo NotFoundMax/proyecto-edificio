@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Los Castaños</title>
     <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/shells.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/tokens.css">
+    <link rel="stylesheet" href="css/overrides.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
 </head>
 <body>
     <header id="app-header">
@@ -18,37 +23,40 @@
                     <path d="M6.2 6.2a8 8 0 1 0 11.6 0"/>
                 </svg>
             </button>
-            <button id="btn-config" class="icon-btn" title="Configuración">⚙</button>
+            <button id="btn-config" class="icon-btn" title="Configuración"><span class="material-symbols-outlined" style="font-size:20px;">settings</span></button>
         </div>
     </header>
 
     <main id="app-main">
         <!-- Login -->
         <section id="screen-login" class="screen active">
-            <div class="screen-content login-content">
-                <div class="login-card">
-                    <div class="login-logo">🏢</div>
-                    <h1 id="login-title">Ingresar</h1>
-                    <p id="login-subtitle" class="login-subtitle">Ingresa para ver los estados de cuenta del edificio.</p>
+            <div class="screen-content login-content" style="display:flex;align-items:center;justify-content:center;min-height:100vh;padding:var(--space-6);">
+                <div class="card login-card" style="width:100%;max-width:420px;padding:var(--space-8);">
+                    <div style="text-align:center;margin-bottom:var(--space-6);">
+                        <h1 id="login-title" style="margin:0;font:var(--md-sys-typescale-headline-medium);">Ingresar</h1>
+                        <p id="login-subtitle" style="color:var(--md-sys-color-on-surface-variant);margin:var(--space-2) 0 0;">Ingresa para ver los estados de cuenta del edificio.</p>
+                    </div>
                     <form id="form-login">
-                        <div class="form-group">
-                            <label for="login-email">Email</label>
-                            <input type="email" id="login-email" required autocomplete="email" placeholder="tu@email.com">
+                        <div class="form-group" style="margin-bottom:var(--space-4);">
+                            <label for="login-email" style="display:block;margin-bottom:var(--space-1);font:var(--md-sys-typescale-label-large);">Email</label>
+                            <input type="email" id="login-email" required autocomplete="email" placeholder="tu@email.com" class="input" style="width:100%;">
                         </div>
-                        <div class="form-group">
-                            <label for="login-password">Contraseña</label>
-                            <input type="password" id="login-password" autocomplete="current-password" placeholder="••••••••">
+                        <div class="form-group" style="margin-bottom:var(--space-4);">
+                            <label for="login-password" style="display:block;margin-bottom:var(--space-1);font:var(--md-sys-typescale-label-large);">Contraseña</label>
+                            <input type="password" id="login-password" autocomplete="current-password" placeholder="••••••••" class="input" style="width:100%;">
                         </div>
-                        <div class="form-group" id="login-password2-group" style="display:none;">
-                            <label for="login-password2">Repetí la contraseña</label>
-                            <input type="password" id="login-password2" autocomplete="new-password" placeholder="••••••••">
+                        <div class="form-group" id="login-password2-group" style="display:none;margin-bottom:var(--space-4);">
+                            <label for="login-password2" style="display:block;margin-bottom:var(--space-1);font:var(--md-sys-typescale-label-large);">Repetí la contraseña</label>
+                            <input type="password" id="login-password2" autocomplete="new-password" placeholder="••••••••" class="input" style="width:100%;">
                         </div>
                         <button type="submit" id="btn-login-submit" class="btn btn-primary btn-block">Ingresar</button>
                     </form>
-                    <div id="login-error" class="login-error" style="display:none;"></div>
-                    <div id="login-info" class="login-info" style="display:none;"></div>
-                    <button id="btn-toggle-signup" class="login-link">¿No tienes cuenta? Crea una</button>
-                    <button id="btn-forgot-password" class="login-link">¿Olvidaste tu contraseña?</button>
+                    <div id="login-error" class="login-error" style="display:none;margin-top:var(--space-3);color:var(--md-sys-color-error);"></div>
+                    <div id="login-info" class="login-info" style="display:none;margin-top:var(--space-3);color:var(--md-sys-color-on-surface-variant);"></div>
+                    <div style="display:flex;flex-direction:column;gap:var(--space-2);margin-top:var(--space-4);">
+                        <button id="btn-toggle-signup" class="btn btn-text" style="width:100%;">¿No tienes cuenta? Crea una</button>
+                        <button id="btn-forgot-password" class="btn btn-text" style="width:100%;">¿Olvidaste tu contraseña?</button>
+                    </div>
                 </div>
             </div>
         </section>
@@ -57,7 +65,7 @@
         <section id="screen-pendiente" class="screen">
             <div class="screen-content login-content">
                 <div class="login-card">
-                    <div class="login-logo">⏳</div>
+                    <div class="login-logo"><span class="material-symbols-outlined" style="font-size:48px;">hourglass_empty</span></div>
                     <h1>Cuenta en revisión</h1>
                     <p class="login-subtitle" id="pendiente-detalle">Tu solicitud fue enviada. El administrador del edificio tiene que aprobarla antes de que puedas ver los estados de cuenta.</p>
                     <button id="btn-logout-pendiente" class="btn btn-outline btn-block">Cerrar sesión</button>
@@ -69,7 +77,7 @@
         <section id="screen-acceso" class="screen">
             <div class="screen-content login-content">
                 <div class="login-card">
-                    <div class="login-logo">🏢</div>
+                    <div class="login-logo"><span class="material-symbols-outlined" style="font-size:48px;">apartment</span></div>
                     <h1>Elegí tu edificio</h1>
                     <p class="login-subtitle">Tu cuenta está creada. Para ver los estados de cuenta necesitás que te aprueben el acceso en un edificio.</p>
 
@@ -110,7 +118,7 @@
         <section id="screen-edificios" class="screen">
             <div class="screen-content login-content">
                 <div class="login-card">
-                    <div class="login-logo">🏢</div>
+                    <div class="login-logo"><span class="material-symbols-outlined" style="font-size:48px;">apartment</span></div>
                     <h1>Tus edificios</h1>
                     <p class="login-subtitle">Elegí el edificio que querés administrar. Cada uno tiene sus propios gastos, pagos y miembros.</p>
 
@@ -138,46 +146,48 @@
         </section>
         <!-- Dashboard -->
         <section id="screen-dashboard" class="screen active">
-            <div class="screen-content">
-                <div class="month-selector">
-                    <button id="btn-prev-month" class="icon-btn">◀</button>
-                    <span id="current-month-label">Julio 2026</span>
-                    <button id="btn-next-month" class="icon-btn">▶</button>
+            <div class="screen-content" style="padding:var(--space-4);max-width:1200px;margin:0 auto;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-4);">
+                    <button id="btn-prev-month" class="btn btn-text">◀</button>
+                    <span id="current-month-label" style="font:var(--md-sys-typescale-title-large);">Julio 2026</span>
+                    <button id="btn-next-month" class="btn btn-text">▶</button>
                 </div>
 
-                <div class="caja-chica-bar" id="caja-chica-bar">
-                    <span>💰 Caja Chica:</span>
-                    <span id="caja-chica-monto" class="caja-chica-amount">S/. 0</span>
-                    <button id="btn-edit-caja" class="btn btn-sm btn-outline">✏️</button>
+                <details class="accordion" style="margin-bottom:var(--space-4);">
+                    <summary style="cursor:pointer;font:var(--md-sys-typescale-title-medium);display:flex;align-items:center;gap:var(--space-2);"><span class="material-symbols-outlined">savings</span> Caja Chica</summary>
+                    <div id="caja-chica-bar" style="display:flex;align-items:center;gap:var(--space-3);padding:var(--space-3) 0;">
+                        <span id="caja-chica-monto" style="font:var(--md-sys-typescale-title-medium);">S/. 0</span>
+                        <button id="btn-edit-caja" class="btn btn-sm btn-outline"><span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle;">edit</span> Editar</button>
+                    </div>
+                </details>
+
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:var(--space-4);margin-bottom:var(--space-6);">
+                    <div class="card" style="text-align:center;">
+                        <div style="color:var(--md-sys-color-on-surface-variant);font:var(--md-sys-typescale-label-large);">Gastos Pagados</div>
+                        <div id="total-gastos" style="font:var(--md-sys-typescale-headline-medium);color:var(--md-sys-color-primary);">S/. 0</div>
+                    </div>
+                    <div class="card" style="text-align:center;">
+                        <div style="color:var(--md-sys-color-on-surface-variant);font:var(--md-sys-typescale-label-large);">Pagos Recibidos</div>
+                        <div id="total-pagado" style="font:var(--md-sys-typescale-headline-medium);color:var(--md-sys-color-tertiary);">S/. 0</div>
+                    </div>
+                    <div class="card" style="text-align:center;">
+                        <div style="color:var(--md-sys-color-on-surface-variant);font:var(--md-sys-typescale-label-large);">Balance Caja</div>
+                        <div id="total-balance" style="font:var(--md-sys-typescale-headline-medium);">S/. 0</div>
+                    </div>
                 </div>
 
-                <div class="summary-cards">
-                    <div class="card card-total">
-                        <span class="card-label">Gastos Pagados</span>
-                        <span id="total-gastos" class="card-value">S/. 0</span>
-                    </div>
-                    <div class="card card-pagado">
-                        <span class="card-label">Pagos Recibidos</span>
-                        <span id="total-pagado" class="card-value">S/. 0</span>
-                    </div>
-                    <div class="card card-balance">
-                        <span class="card-label">Balance Caja</span>
-                        <span id="total-balance" class="card-value">S/. 0</span>
-                    </div>
-                </div>
+                <div id="extra-info" style="margin-bottom:var(--space-4);"></div>
 
-                <div class="extra-info" id="extra-info"></div>
-
-                <h2>Cuota por Departamento</h2>
-                <div id="dashboard-propietarios" class="list-container">
+                <h2 style="font:var(--md-sys-typescale-title-large);margin-bottom:var(--space-3);">Cuota por Departamento</h2>
+                <div id="dashboard-propietarios" class="list-container" style="background:var(--md-sys-color-surface);border-radius:var(--md-sys-shape-corner-medium);padding:var(--space-2);">
                     <p class="empty-state">Cargando...</p>
                 </div>
 
-                <div class="dashboard-actions">
-                    <button id="btn-cerrar-mes" class="btn btn-secondary btn-block" onclick="App.cerrarMes()">📅 Cerrar Mes</button>
+                <div style="margin-top:var(--space-4);">
+                    <button id="btn-cerrar-mes" class="btn btn-secondary btn-block" onclick="App.cerrarMes()"><span class="material-symbols-outlined" style="font-size:18px;vertical-align:middle;">calendar_month</span> Cerrar Mes</button>
                 </div>
 
-                <button id="btn-add-gasto-dashboard" class="fab">+ Gasto</button>
+                <button id="btn-add-gasto-dashboard" class="fab">+</button>
             </div>
         </section>
 
@@ -214,10 +224,11 @@
                         <option value="extraordinario">Extraordinario</option>
                     </select>
                 </div>
-                <div id="luz-card" class="luz-card">
+                <details class="accordion">
+                    <summary style="display:flex;align-items:center;gap:var(--space-2);"><span class="material-symbols-outlined">lightbulb</span> Recibo de Luz</summary>
+                    <div id="luz-card" class="luz-card">
                     <div class="luz-card-info">
-                        <span class="luz-icon">💡</span>
-                        <div>
+                                                <div>
                             <div class="luz-title">Recibo de Luz — <span id="luz-mes-label"></span></div>
                             <div id="luz-status" class="luz-status"></div>
                         </div>
@@ -231,13 +242,14 @@
                         <button id="btn-luz-guardar" class="btn btn-sm btn-primary">Guardar</button>
                     </div>
                 </div>
+                </details>
                 <div id="gastos-totales" class="gastos-totales" style="display:none;">
                     <div class="gasto-total-item">
                         <span>Total</span>
                         <strong id="gastos-total-monto">S/. 0</strong>
                     </div>
                     <div class="gasto-total-item gasto-total-pagado">
-                        <span>✅ Pagado</span>
+                        <span>Pagado</span>
                         <strong id="gastos-pagados-monto">S/. 0</strong>
                     </div>
                     <div class="gasto-total-item gasto-total-pendiente">
@@ -262,7 +274,9 @@
                     <span id="gas-month-label">Julio 2026</span>
                     <button id="btn-next-month-gas" class="icon-btn">▶</button>
                 </div>
-                <div class="servicio-params">
+                <details class="accordion" open>
+                    <summary>Parámetros de gas</summary>
+                    <div class="servicio-params">
                     <div class="form-group form-inline">
                         <label>Precio balón S/</label>
                         <input type="number" id="gas-precio-balon" value="245" step="0.01">
@@ -280,6 +294,7 @@
                         <input type="number" id="gas-n-balones" value="3" step="1" min="1">
                     </div>
                 </div>
+                </details>
                 <div class="form-hint" id="gas-balones-total">Total balones del mes: S/ 735.00</div>
                 <div id="gas-lista" class="list-container">
                     <p class="empty-state">Carga los datos de gas este mes</p>
@@ -292,7 +307,7 @@
             <div class="screen-content">
                 <div class="screen-header">
                     <h2>Agua</h2>
-                    <button id="btn-agua-formula" class="btn btn-outline btn-sm" title="Ingresar factura del agua del mes">📄 Factura</button>
+                    <button id="btn-agua-formula" class="btn btn-outline btn-sm" title="Ingresar factura del agua del mes">Factura</button>
                 </div>
                 <div class="month-selector">
                     <button id="btn-prev-month-agua" class="icon-btn">◀</button>
@@ -364,8 +379,8 @@
                     <button id="btn-next-month-inf" class="icon-btn">▶</button>
                 </div>
                 <div class="informes-actions">
-                    <button id="btn-export-pdf" class="btn btn-outline">📄 Exportar PDF</button>
-                    <button id="btn-export-excel" class="btn btn-outline">📊 Exportar Excel</button>
+                    <button id="btn-export-pdf" class="btn btn-outline">Exportar PDF</button>
+                    <button id="btn-export-excel" class="btn btn-outline">Exportar Excel</button>
                 </div>
                 <div id="preview-informe" class="list-container">
                     <p class="empty-state">Selecciona un mes para generar el informe</p>
@@ -423,10 +438,10 @@
                     <h3 id="miembros-titulo">Miembros del edificio</h3>
                     <p class="empty-state" style="margin:0 0 8px;">Aprueba solicitudes, asigna departamentos y controla quién accede a este edificio.</p>
 
-                    <div id="solicitudes-wrap" style="display:none;">
-                        <h4>Solicitudes pendientes</h4>
+                    <details class="accordion" style="display:none;" id="solicitudes-wrap">
+                        <summary>Solicitudes pendientes</summary>
                         <div id="lista-solicitudes" class="list-container"></div>
-                    </div>
+                    </details>
 
                     <h4>Miembros</h4>
                     <div id="lista-usuarios" class="list-container">
@@ -463,12 +478,12 @@
 
                 <h3>Datos</h3>
                 <div class="config-actions">
-                    <button id="btn-export-backup" class="btn btn-outline btn-block">📦 Exportar Backup</button>
+                    <button id="btn-export-backup" class="btn btn-outline btn-block">Exportar Backup</button>
                     <label class="btn btn-outline btn-block" style="text-align:center;">
-                        📂 Importar Backup
+                        Importar Backup
                         <input type="file" id="btn-import-backup" accept=".json" style="display:none;">
                     </label>
-                    <button id="btn-reset-data" class="btn btn-danger btn-block">🗑 Borrar Todos los Datos</button>
+                    <button id="btn-reset-data" class="btn btn-danger btn-block">Borrar Todos los Datos</button>
                 </div>
             </div>
         </section>
@@ -477,35 +492,35 @@
     <!-- Bottom Navigation -->
     <nav id="bottom-nav">
         <button class="nav-btn active" data-screen="dashboard">
-            <span class="nav-icon">🏠</span>
+            <span class="nav-icon material-symbols-outlined">home</span>
             <span class="nav-label">Inicio</span>
         </button>
         <button class="nav-btn" data-screen="propietarios">
-            <span class="nav-icon">🏢</span>
+            <span class="nav-icon material-symbols-outlined">apartment</span>
             <span class="nav-label">Dptos</span>
         </button>
         <button class="nav-btn" data-screen="gastos">
-            <span class="nav-icon">💰</span>
+            <span class="nav-icon material-symbols-outlined">payments</span>
             <span class="nav-label">Gastos</span>
         </button>
         <button class="nav-btn" data-screen="gas">
-            <span class="nav-icon">🔥</span>
+            <span class="nav-icon material-symbols-outlined">local_fire_department</span>
             <span class="nav-label">Gas</span>
         </button>
         <button class="nav-btn" data-screen="agua">
-            <span class="nav-icon">💧</span>
+            <span class="nav-icon material-symbols-outlined">water_drop</span>
             <span class="nav-label">Agua</span>
         </button>
         <button class="nav-btn" data-screen="servicios">
-            <span class="nav-icon">📌</span>
+            <span class="nav-icon material-symbols-outlined">push_pin</span>
             <span class="nav-label">G. Fijos</span>
         </button>
         <button class="nav-btn" data-screen="calculo">
-            <span class="nav-icon">🧮</span>
+            <span class="nav-icon material-symbols-outlined">calculate</span>
             <span class="nav-label">Cálculo</span>
         </button>
         <button class="nav-btn" data-screen="informes">
-            <span class="nav-icon">📋</span>
+            <span class="nav-icon material-symbols-outlined">description</span>
             <span class="nav-label">Informes</span>
         </button>
     </nav>
@@ -697,8 +712,8 @@
                 <div class="form-group">
                     <label>Tipo de gasto</label>
                     <div style="display:flex;gap:12px;margin-top:4px;flex-wrap:wrap;">
-                        <label style="display:flex;align-items:center;gap:5px;font-size:0.85rem;"><input type="radio" name="gasto-tipo" value="personal" checked> 👤 Personal</label>
-                        <label style="display:flex;align-items:center;gap:5px;font-size:0.85rem;"><input type="radio" name="gasto-tipo" value="fijo"> 🛠 Gasto fijo</label>
+                        <label style="display:flex;align-items:center;gap:5px;font-size:0.85rem;"><input type="radio" name="gasto-tipo" value="personal" checked> Personal</label>
+                        <label style="display:flex;align-items:center;gap:5px;font-size:0.85rem;"><input type="radio" name="gasto-tipo" value="fijo"> Gasto fijo</label>
                     </div>
                 </div>
                 <div class="form-group">
