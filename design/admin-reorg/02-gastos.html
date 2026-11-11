@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1440,height=900">
+<title>02-gastos</title>
+<style>
+:root{--ink:#1f2328;--bg:#ffffff;--surface:#ffffff;--surface-low:#f6f8fa;--surface-high:#eaeef2;--outline:#d0d7de;--outline-var:#d8dee4;--muted:#57606a;--font:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif}
+*{box-sizing:border-box}
+body{margin:0;font-family:var(--font);background:var(--bg);color:var(--ink);display:flex;height:900px;overflow:hidden}
+.sidebar{width:220px;background:var(--surface-low);border-right:1px solid var(--outline-var);padding:16px 12px;display:flex;flex-direction:column;gap:4px}
+.logo{font-weight:700;font-size:16px;margin:8px 8px 16px}
+.nav a{display:block;padding:8px 12px;border-radius:6px;color:var(--ink);text-decoration:none;font-size:14px}
+.nav a.active{background:var(--surface-high);font-weight:600}
+.nav a:focus{outline:2px solid var(--ink);outline-offset:2px}
+.main{flex:1;display:flex;flex-direction:column}
+.header{height:56px;border-bottom:1px solid var(--outline-var);display:flex;align-items:center;justify-content:space-between;padding:0 24px}
+.header h1{font-size:18px;margin:0}
+.content{padding:24px;overflow:auto;flex:1}
+.tabs{display:flex;gap:8px;margin-bottom:20px}
+.tab{padding:8px 16px;border:1px solid var(--outline);border-radius:6px;background:var(--surface);cursor:pointer;font-size:14px}
+.tab.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+.tab:focus{outline:2px solid var(--ink);outline-offset:2px}
+.group{margin-bottom:20px}
+.group h3{font-size:13px;color:var(--ink);text-transform:uppercase;letter-spacing:.04em;margin:0 0 10px;padding:6px 10px;background:var(--surface-high);border-left:3px solid var(--ink);border-radius:4px;font-weight:700}
+.row{display:grid;grid-template-columns:1fr 160px 80px;align-items:center;padding:12px 0;border-bottom:1px solid var(--outline-var);gap:12px}
+.row .name{font-weight:500}
+.row .freq{font-size:12px;color:var(--muted)}
+.row .amt{font-variant-numeric:tabular-nums;font-weight:600;text-align:left}
+.row .acts{text-align:right}
+.row .acts button{border:none;background:none;cursor:pointer;font-size:14px;margin-left:8px}
+.row .acts button:focus{outline:2px solid var(--ink)}
+.btn{padding:6px 12px;border:1px solid var(--outline);border-radius:6px;background:var(--surface);cursor:pointer;font-size:13px}
+.btn.primary{background:var(--ink);color:#fff;border-color:var(--ink)}
+.panel{display:none}
+.panel.active{display:block}
+.form{display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:12px;align-items:end;margin-bottom:16px}
+.form label{font-size:12px;color:var(--muted);display:block;margin-bottom:4px}
+.form input,.form select{width:100%;padding:8px;border:1px solid var(--outline);border-radius:6px;font-size:14px}
+.table{width:100%;border-collapse:collapse}
+.table th,.table td{padding:10px 8px;border-bottom:1px solid var(--outline-var);text-align:left;font-size:14px}
+.table th{background:var(--surface-low);font-weight:600}
+.table .num{text-align:left;font-variant-numeric:tabular-nums}
+</style>
+</head>
+<body>
+<aside class="sidebar" aria-label="Navegación">
+<div class="logo">Los Castaños 104</div>
+<nav class="nav">
+<a href="#">Inicio</a>
+<a href="#" class="active" aria-current="page">Gastos</a>
+<a href="#">Cálculo</a>
+<a href="#">Informes</a>
+<a href="#">Config</a>
+</nav>
+</aside>
+<main class="main">
+<header class="header">
+<h1>Los Castaños</h1>
+<div style="font-size:14px;font-weight:600;color:var(--muted)">Noviembre 2026</div>
+<div style="display:flex;gap:12px;align-items:center;color:#1f2328">
+  <span role="img" aria-label="Cambiar tema" title="Cambiar tema">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>
+  </span>
+  <span role="img" aria-label="Configuración" title="Configuración">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19.14 12.94a7.43 7.43 0 0 0 .05-.94 7.43 7.43 0 0 0-.05-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.28 7.28 0 0 0-1.63-.94l-.36-2.54A.5.5 0 0 0 13.9 2h-3.8a.5.5 0 0 0-.49.42l-.36 2.54c-.58.23-1.12.54-1.63.94l-2.39-.96a.5.5 0 0 0-.6.22L2.71 8.48a.5.5 0 0 0 .12.64l2.03 1.58c-.03.31-.05.63-.05.94s.02.63.05.94l-2.03 1.58a.5.5 0 0 0-.12.64l1.92 3.32a.5.5 0 0 0 .6.22l2.39-.96c.5.4 1.05.71 1.63.94l.36 2.54a.5.5 0 0 0 .49.42h3.8a.5.5 0 0 0 .49-.42l.36-2.54c.58-.23 1.12-.54 1.63-.94l2.39.96a.5.5 0 0 0 .6-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58zM12 15.5A3.5 3.5 0 1 1 12 8a3.5 3.5 0 0 1 0 7.5z"/></svg>
+  </span>
+</div>
+</header>
+<section class="content">
+<div class="tabs" role="tablist">
+<button class="tab active" role="tab" aria-selected="true" onclick="show('fijos')">Fijos</button>
+<button class="tab" role="tab" aria-selected="false" onclick="show('vars')">Variables</button>
+</div>
+<div id="fijos" class="panel active">
+<button class="btn primary" style="margin-bottom:16px">+ Nuevo</button>
+<div class="group">
+<h3>Nómina</h3>
+<div class="row"><div><div class="name">Vigilancia</div><div class="freq">Mensual</div></div><div class="amt">S/ 1,800.00</div><div class="acts"><button aria-label="Editar">✎</button><button aria-label="Eliminar">🗑</button></div></div>
+<div class="row"><div><div class="name">Portería</div><div class="freq">Mensual</div></div><div class="amt">S/ 1,200.00</div><div class="acts"><button aria-label="Editar">✎</button><button aria-label="Eliminar">🗑</button></div></div>
+</div>
+</div>
+<div id="vars" class="panel">
+<button class="btn primary" style="margin-bottom:16px">+ Nuevo</button>
+<div class="group">
+<h3>Servicios</h3>
+<div class="row"><div><div class="name">Luz</div><div class="freq">Mensual</div></div><div class="amt">S/ 450.00</div><div class="acts"><button aria-label="Editar">✎</button><button aria-label="Eliminar">🗑</button></div></div>
+<div class="row"><div><div class="name">Agua</div><div class="freq">Mensual</div></div><div class="amt">S/ 380.00</div><div class="acts"><button aria-label="Editar">✎</button><button aria-label="Eliminar">🗑</button></div></div>
+<div class="row"><div><div class="name">Mant. ascensores</div><div class="freq">Mensual</div></div><div class="amt">S/ 600.00</div><div class="acts"><button aria-label="Editar">✎</button><button aria-label="Eliminar">🗑</button></div></div>
+</div>
+<div class="group">
+<h3>Jardinería</h3>
+<div class="row"><div><div class="name">Jardinería</div><div class="freq">Mensual</div></div><div class="amt">S/ 350.00</div><div class="acts"><button aria-label="Editar">✎</button><button aria-label="Eliminar">🗑</button></div></div>
+</div>
+<div class="group">
+<h3>Gastos del mes</h3>
+<form class="form">
+<div><label>Concepto</label><input type="text" placeholder="Concepto"></div>
+<div><label>Monto S/</label><input type="number" placeholder="0.00"></div>
+<div><label>Categoría</label><select><option>Materiales</option><option>Reparación</option><option>Otros</option></select></div>
+<div><label>Frecuencia</label><select><option>Único</option><option>Mensual</option></select></div>
+<div><button class="btn primary" type="button">Agregar</button></div>
+</form>
+<table class="table">
+<thead><tr><th>Concepto</th><th>Categoría</th><th>Frecuencia</th><th class="num">Monto</th><th></th></tr></thead>
+<tbody>
+<tr><td>Materiales</td><td>Materiales</td><td>Único</td><td class="num">S/ 220.00</td><td><button class="btn" aria-label="Editar">✎</button><button class="btn" aria-label="Eliminar">🗑</button></td></tr>
+<tr><td>Reparación</td><td>Reparación</td><td>Único</td><td class="num">S/ 180.00</td><td><button class="btn" aria-label="Editar">✎</button><button class="btn" aria-label="Eliminar">🗑</button></td></tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+</main>
+<script>
+function show(t){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.getElementById(t).classList.add('active');document.querySelectorAll('.tab').forEach(b=>{b.classList.remove('active');b.setAttribute('aria-selected','false')});event.target.classList.add('active');event.target.setAttribute('aria-selected','true')}
+</script>
+</body>
+</html>

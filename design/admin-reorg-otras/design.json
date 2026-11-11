@@ -1,0 +1,48 @@
+{
+  "title": "Otras vistas — Reorganización admin Los Castaños 104",
+  "brief": "Mockups de las ventanas restantes (Departamentos, Consumos, Informes, Configuración y vista Propietario) en el estilo de la reorganización admin, para revisar y ajustar antes de implementar.",
+  "artboards": [
+    {
+      "file": "01-departamentos.html",
+      "title": "Departamentos",
+      "tradeoff": "Vista dedicada a unidades con m², coeficiente automático (suma 100%) y estado del mes; concentra la gestión fuera del Inicio.",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "02-consumos.html",
+      "title": "Consumos (Agua/Gas)",
+      "tradeoff": "Unifica Agua y Gas en una sola pantalla con pestañas y resumen de factura; propuesta de integración frente a pantallas separadas.",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "03-informes.html",
+      "title": "Informes",
+      "tradeoff": "KPIs del mes, resumen por departamento y detalle de gastos con exportación; prioriza lectura y trazabilidad.",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "04-configuracion.html",
+      "title": "Configuración",
+      "tradeoff": "Datos del edificio, miembros/solicitudes/invitaciones y gestión de otro edificio agrupados en tarjetas claras.",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "05-propietario.html",
+      "title": "Vista propietario",
+      "tradeoff": "Vista mobile-preferred (responsive) centrada en saldo, desglose de cuota e historial de pagos del departamento.",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "06-metodo-calculo-agua.html",
+      "title": "Método de cálculo de agua",
+      "tradeoff": "Selector en Configuración/Servicios con 3 métodos (medidor interno m³ por defecto, coeficiente m², por ocupantes) y vista previa de cómo afecta Consumos y la ficha de departamento.",
+      "width": 1440,
+      "height": 1100
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "title": "Reorganización admin — Los Castaños 104",
+  "brief": "Mockups de reorganización del panel administrativo del edificio Los Castaños 104 (5 departamentos, Lima).",
+  "artboards": [
+    { "file": "01-dashboard.html", "title": "Inicio", "tradeoff": "Vista de control rápido: KPIs + semáforo + estado por departamento; prioriza glanceability.", "width": 1440, "height": 900 },
+    { "file": "02-gastos.html", "title": "Gastos", "tradeoff": "Gastos fijos agrupados por categoría + variables con formulario inline; reduce carga visual.", "width": 1440, "height": 900 },
+    { "file": "03-calculo.html", "title": "Cálculo mensual", "tradeoff": "Prorrateo transparente + semáforo + matriz de pagos; máxima trazabilidad.", "width": 1440, "height": 900 }
+  ]
+}

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Informes — Los Castaños 104</title>
+<style>
+:root{--primary:#1f2328;--bg:#fff;--on-bg:#1f2328;--surface:#f6f8fa;--surface-high:#eaeef2;--border:#d0d7de;--border-soft:#d8dee4;--muted:#57606a;--success:#1a7f37;--success-bg:#dafbe1;--warn:#9a6700;--warn-bg:#fff8c5;--font:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans",Helvetica,Arial,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}body{font:14px/1.5 var(--font);color:var(--on-bg);background:var(--bg)}
+.app{display:flex;min-height:100vh}.sidebar{width:220px;background:var(--surface);border-right:1px solid var(--border);padding:16px 12px;position:fixed;top:0;bottom:0;left:0}
+.brand{font-weight:700;font-size:15px;padding:8px 10px 16px;border-bottom:1px solid var(--border-soft);margin-bottom:8px}.brand small{display:block;font-weight:400;color:var(--muted);font-size:12px}
+.nav a{display:block;padding:8px 10px;border-radius:6px;color:var(--on-bg);text-decoration:none}.nav a.active{background:var(--surface-high);font-weight:600}
+.main{margin-left:220px;flex:1}.header{height:56px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;background:#fff;position:sticky;top:0}
+.header h1{font-size:18px;font-weight:600}.content{padding:24px;max-width:1100px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+.month{display:flex;align-items:center;gap:8px;font-weight:600}.btn{padding:8px 14px;border-radius:6px;border:1px solid var(--border);background:#fff;font:500 14px var(--font);cursor:pointer}.btn-primary{background:var(--primary);color:#fff;border-color:var(--primary)}
+.card{border:1px solid var(--border);border-radius:8px;background:#fff;margin-bottom:16px;overflow:hidden}
+.card-h{padding:14px 16px;border-bottom:1px solid var(--border-soft);display:flex;justify-content:space-between;align-items:center;background:var(--surface)}
+.card-b{padding:16px}.muted{color:var(--muted);font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}.kpi{border:1px solid var(--border-soft);border-radius:8px;padding:12px}.kpi .l{font-size:12px;color:var(--muted)}.kpi .v{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums}
+.kpi.semaforo{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.semaforo-light{width:16px;height:16px;border-radius:50%;flex:0 0 16px;box-shadow:0 0 0 2px rgba(0,0,0,.04) inset}
+.semaforo-light.warn{background:#d29922;box-shadow:0 0 0 2px #fff inset,0 0 10px rgba(210,153,34,.55)}
+.semaforo-light.ok{background:#1a7f37;box-shadow:0 0 0 2px #fff inset,0 0 10px rgba(26,127,55,.45)}
+.kpi.semaforo .txt{min-width:0}
+table{width:100%;border-collapse:collapse}th,td{padding:10px 12px;border-bottom:1px solid var(--border-soft);text-align:left}th{font-size:12px;color:var(--muted);text-transform:uppercase;background:var(--surface)}
+.num{text-align:right;font-variant-numeric:tabular-nums}.money{text-align:left;font-variant-numeric:tabular-nums}.badge{display:inline-flex;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:600}.ok{background:var(--success-bg);color:var(--success)}.pend{background:var(--warn-bg);color:var(--warn)}
+.actions{display:flex;gap:8px}
+@media(max-width:900px){.sidebar{display:none}.main{margin-left:0}.grid{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar"><div class="brand">Los Castaños 104<small>San Isidro</small></div><nav class="nav"><a href="#">Inicio</a><a href="#">Departamentos</a><a href="#">Gastos</a><a href="#">Cálculo</a><a href="#">Consumos</a><a class="active" href="#">Informes</a><a href="#">Configuración</a></nav></aside>
+  <main class="main">
+    <header class="header"><h1>Informes</h1><span class="muted">Junio 2026</span></header>
+    <div class="content">
+      <div class="row">
+        <div class="month">◀ <span>Junio 2026</span> ▶</div>
+        <div class="actions"><button class="btn">Exportar PDF</button><button class="btn">Exportar Excel</button></div>
+      </div>
+      <div class="grid">
+        <div class="kpi"><div class="l">Total gastos</div><div class="v">S/ 4,850.00</div></div>
+        <div class="kpi"><div class="l">Total cuotas</div><div class="v">S/ 4,850.00</div></div>
+        <div class="kpi"><div class="l">Cobrado</div><div class="v">S/ 4,574.50</div></div>
+        <div class="kpi semaforo" aria-label="Pendiente: semáforo en alerta">
+          <div class="txt"><div class="l">Pendiente</div><div class="v">S/ 275.50</div></div>
+          <span class="semaforo-light warn" title="Hay saldo pendiente"></span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-h"><strong>Resumen por departamento</strong><span class="muted">Estado de pago — Junio 2026</span></div>
+        <div class="card-b">
+          <table>
+            <thead><tr><th>Depto</th><th>Propietario</th><th class="money">Cuota</th><th class="money">Pagado</th><th class="money">Saldo</th><th>Estado</th></tr></thead>
+            <tbody>
+              <tr><td>501</td><td>Familia Mendoza</td><td class="money">S/ 1,611.64</td><td class="money">S/ 1,516.14</td><td class="money">S/ 95.50</td><td><span class="badge pend">Pendiente</span></td></tr>
+              <tr><td>401</td><td>Jorge Salazar Paredes</td><td class="money">S/ 701.31</td><td class="money">S/ 701.31</td><td class="money">S/ 0.00</td><td><span class="badge ok">Al día</span></td></tr>
+              <tr><td>301</td><td>Ana Lucía Torres</td><td class="money">S/ 934.60</td><td class="money">S/ 754.60</td><td class="money">S/ 180.00</td><td><span class="badge pend">Pendiente</span></td></tr>
+              <tr><td>201</td><td>Carlos Rojas Huamán</td><td class="money">S/ 944.30</td><td class="money">S/ 944.30</td><td class="money">S/ 0.00</td><td><span class="badge ok">Al día</span></td></tr>
+              <tr><td>101</td><td>María Elena Quispe</td><td class="money">S/ 658.15</td><td class="money">S/ 658.15</td><td class="money">S/ 0.00</td><td><span class="badge ok">Al día</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-h"><strong>Detalle de gastos — Junio 2026</strong></div>
+        <div class="card-b">
+          <table>
+            <thead><tr><th>Concepto</th><th>Tipo</th><th>Categoría</th><th class="money">Monto</th></tr></thead>
+            <tbody>
+              <tr><td>Portería (turno mañana)</td><td>Fijo · Nómina</td><td>Personal</td><td class="money">S/ 1,400.00</td></tr>
+              <tr><td>Descansero</td><td>Fijo · Nómina</td><td>Personal</td><td class="money">S/ 1,200.00</td></tr>
+              <tr><td>Mantenimiento de ascensor</td><td>Variable · Servicio</td><td>Servicios</td><td class="money">S/ 450.00</td></tr>
+              <tr><td>Agua (consumo)</td><td>Variable · Consumo</td><td>Servicios básicos</td><td class="money">S/ 243.97</td></tr>
+              <tr><td>Jardinería - poda mensual</td><td>Variable · Jardinería</td><td>Jardinería</td><td class="money">S/ 180.00</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+</body>
+</html>

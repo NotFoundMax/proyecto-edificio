@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Configuración — Los Castaños 104</title>
+<style>
+:root{--primary:#1f2328;--bg:#fff;--on-bg:#1f2328;--surface:#f6f8fa;--surface-high:#eaeef2;--border:#d0d7de;--border-soft:#d8dee4;--muted:#57606a;--danger:#cf222e;--font:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans",Helvetica,Arial,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}body{font:14px/1.5 var(--font);color:var(--on-bg);background:var(--bg)}
+.app{display:flex;min-height:100vh}.sidebar{width:220px;background:var(--surface);border-right:1px solid var(--border);padding:16px 12px;position:fixed;top:0;bottom:0;left:0}
+.brand{font-weight:700;font-size:15px;padding:8px 10px 16px;border-bottom:1px solid var(--border-soft);margin-bottom:8px}.brand small{display:block;font-weight:400;color:var(--muted);font-size:12px}
+.nav a{display:block;padding:8px 10px;border-radius:6px;color:var(--on-bg);text-decoration:none}.nav a.active{background:var(--surface-high);font-weight:600}
+.main{margin-left:220px;flex:1}.header{height:56px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;background:#fff;position:sticky;top:0}
+.header h1{font-size:18px;font-weight:600}.content{padding:24px;max-width:900px}
+.card{border:1px solid var(--border);border-radius:8px;background:#fff;margin-bottom:16px}.card-h{padding:14px 16px;border-bottom:1px solid var(--border-soft);font-weight:600}.card-b{padding:16px}
+.form-group{margin-bottom:14px}.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+label{display:block;font-size:13px;font-weight:500;margin-bottom:4px;color:var(--on-bg)}input,select{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font:14px var(--font);background:#fff}
+.btn{padding:8px 14px;border-radius:6px;border:1px solid var(--border);background:#fff;font:500 14px var(--font);cursor:pointer}.btn-primary{background:var(--primary);color:#fff;border-color:var(--primary)}.btn-block{width:100%}
+.muted{color:var(--muted);font-size:13px}.list{display:flex;flex-direction:column;gap:8px}
+.item{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border:1px solid var(--border-soft);border-radius:6px;gap:12px}
+.item .t{font-weight:500}.item .s{font-size:12px;color:var(--muted)}
+.badge{display:inline-flex;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:600;background:var(--surface-high);color:var(--muted)}
+.section-title{font-size:14px;font-weight:600;margin:16px 0 8px}
+hr{border:none;border-top:1px solid var(--border-soft);margin:16px 0}
+@media(max-width:900px){.sidebar{display:none}.main{margin-left:0}.form-row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar"><div class="brand">Los Castaños 104<small>San Isidro</small></div><nav class="nav"><a href="#">Inicio</a><a href="#">Departamentos</a><a href="#">Gastos</a><a href="#">Cálculo</a><a href="#">Consumos</a><a href="#">Informes</a><a class="active" href="#">Configuración</a></nav></aside>
+  <main class="main">
+    <header class="header"><h1>Configuración</h1><span class="muted">Junio 2026</span></header>
+    <div class="content">
+      <div class="card"><div class="card-h">Datos del edificio</div><div class="card-b">
+        <div class="form-group"><label for="nombre">Nombre del edificio</label><input id="nombre" type="text" value="Los Castaños 104"></div>
+        <div class="form-group"><label for="dir">Dirección</label><input id="dir" type="text" value="Calle Los Castaños 104, San Isidro, Lima"></div>
+        <div class="form-row">
+          <div class="form-group"><label for="moneda">Moneda</label><select id="moneda"><option selected>Soles (S/)</option></select></div>
+          <div class="form-group"><label for="mes">Mes de inicio</label><select id="mes"><option>Enero</option><option>Febrero</option><option>Marzo</option><option>Abril</option><option>Mayo</option><option selected>Junio</option></select></div>
+        </div>
+        <button class="btn btn-primary btn-block">Guardar cambios</button>
+      </div></div>
+
+      <div class="card"><div class="card-h">Miembros del edificio</div><div class="card-b">
+        <p class="muted" style="margin-bottom:12px">Aprueba solicitudes, asigna departamentos y controla quién accede a este edificio.</p>
+        <div class="section-title">Solicitudes pendientes</div>
+        <p class="muted">No hay solicitudes pendientes.</p>
+
+        <div class="section-title">Administradores</div>
+        <div class="list" style="margin-bottom:12px">
+          <div class="item"><div><div class="t">Max (tú)</div><div class="s">admin@loscastanos.pe · Administrador</div></div><span class="badge">Owner</span></div>
+        </div>
+
+        <div class="section-title">Propietarios por departamento</div>
+        <p class="muted" style="margin-bottom:8px">Ordenados de mayor a menor. Se muestran también los departamentos sin propietario registrado. <strong>Registrados: 5/5</strong></p>
+        <div style="overflow:auto;border:1px solid var(--border-soft);border-radius:8px">
+          <table style="width:100%;border-collapse:collapse">
+            <thead>
+              <tr style="background:var(--surface)">
+                <th style="padding:10px 12px;text-align:left;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--border-soft)">Depto</th>
+                <th style="padding:10px 12px;text-align:left;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--border-soft)">Propietario</th>
+                <th style="padding:10px 12px;text-align:left;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--border-soft)">Correo / contacto</th>
+                <th style="padding:10px 12px;text-align:left;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--border-soft)">Acceso</th>
+                <th style="padding:10px 12px;text-align:left;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--border-soft)">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td style="padding:10px 12px;border-bottom:1px solid var(--border-soft)"><strong>501</strong></td><td style="padding:10px 12px;border-bottom:1px solid var(--border-soft)">Familia Mendoza</td><td style="padding:10px 12px;border-bottom:1px solid var(--border-soft)" class="muted">Sin correo registrado</td><td style="padding:10px 12px;border-bottom:1px solid var(--border-soft)"><span class="badge">Sin acceso</span></td><td style="padding:10px 12px;border-bottom:1px solid var(--border-soft)"><button class="btn">Editar</button></td></tr>
+              <tr><td style="padding:10px 12px;border-bottom:1px solid var(--border-soft)"><strong>401</strong></td><td style="padding:10px 12px;border-bottom:1px solid var(--border-soft)">Jorge Salazar Paredes</td><td style="padding:10px 12px;border-bottom:1px solid var(--border-soft)" class="muted">Sin correo registrado</td><td style="padding:10px 12px;border-bottom:1px solid var(--border-soft)"><span class="badge">Sin acceso</span></td><td style="padding:10px 12px;border-bottom:1px solid var(--border-soft)"><button class="btn">Editar</button></td></tr>
+              <tr><td style="padding:10px 12px;border-bottom:1px solid var(--border-soft)"><strong>301</strong></td><td style="padding:10px 12px;border-bottom:1px solid var(--border-soft)">Ana Lucía Torres</td><td style="padding:10px 12px;border-bottom:1px solid var(--border-soft)" class="muted">Sin correo registrado</td><td style="padding:10px 12px;border-bottom:1px solid var(--border-soft)"><span class="badge">Sin acceso</span></td><td style="padding:10px 12px;border-bottom:1px solid var(--border-soft)"><button class="btn">Editar</button></td></tr>
+              <tr><td style="padding:10px 12px;border-bottom:1px solid var(--border-soft)"><strong>201</strong></td><td style="padding:10px 12px;border-bottom:1px solid var(--border-soft)">Carlos Rojas Huamán</td><td style="padding:10px 12px;border-bottom:1px solid var(--border-soft)">c.rojas@correo.com</td><td style="padding:10px 12px;border-bottom:1px solid var(--border-soft)"><span class="badge" style="background:#dafbe1;color:#1a7f37">Con acceso</span></td><td style="padding:10px 12px;border-bottom:1px solid var(--border-soft)"><button class="btn">Editar</button></td></tr>
+              <tr><td style="padding:10px 12px"><strong>101</strong></td><td style="padding:10px 12px">María Elena Quispe</td><td style="padding:10px 12px">maria.quispe@correo.com</td><td style="padding:10px 12px"><span class="badge" style="background:#dafbe1;color:#1a7f37">Con acceso</span></td><td style="padding:10px 12px"><button class="btn">Editar</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="muted" style="margin-top:8px">Si un departamento no tiene propietario registrado, aparecerá como <em>“— Vacío —”</em> para facilitar el control de unidades pendientes.</p>
+        <hr>
+        <div class="section-title">Invitar administrador</div>
+        <p class="muted" style="margin-bottom:8px">Quien se registre con ese correo verá la invitación al entrar y podrá aceptarla.</p>
+        <div class="form-group"><label for="inv">Correo del invitado</label><input id="inv" type="email" placeholder="correo@ejemplo.com"></div>
+        <button class="btn btn-block">Enviar invitación</button>
+      </div></div>
+
+      <div class="card"><div class="card-h">Administrar otro edificio</div><div class="card-b">
+        <p class="muted" style="margin-bottom:12px">Crea o vincula otro edificio para administrarlo desde tu cuenta.</p>
+        <div class="form-group"><label for="n2">Nombre del edificio</label><input id="n2" type="text" placeholder="Ej: Edificio Los Robles"></div>
+        <button class="btn btn-primary">Crear edificio</button>
+      </div></div>
+    </div>
+  </main>
+</div>
+</body>
+</html>

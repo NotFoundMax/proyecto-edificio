@@ -1,0 +1,13 @@
+{
+  "title": "Mejora UI/UX — Gastos",
+  "brief": "Propuesta para hacer más comprensible la gestión de gastos: pestañas Recurrentes / Del mes / Consumos, mes activo visible, CTAs específicos, subtotales por grupo y resumen del mes, estados y formulario contextual.",
+  "artboards": [
+    {
+      "file": "01-recurrentes-mes-consumos.html",
+      "title": "Recurrentes, Del mes y resumen",
+      "tradeoff": "Aclara la taxonomía (recurrentes vs puntuales vs consumos), muestra mes activo y subtotales, y usa CTAs/etiquetas específicas; concentra más información en pantalla a cambio de mayor claridad.",
+      "width": 1440,
+      "height": 1100
+    }
+  ]
+}

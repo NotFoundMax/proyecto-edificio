@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cálculo mensual — Propuesta</title>
+<style>
+:root{--primary:#1f2328;--bg:#fff;--on-bg:#1f2328;--surface:#f6f8fa;--surface-high:#eaeef2;--border:#d0d7de;--border-soft:#d8dee4;--muted:#57606a;--success:#1a7f37;--success-bg:#dafbe1;--warn:#9a6700;--warn-bg:#fff8c5;--danger:#cf222e;--danger-bg:#ffebe9;--info:#0969da;--info-bg:#ddf4ff;--font:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans",Helvetica,Arial,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}body{font:14px/1.5 var(--font);color:var(--on-bg);background:var(--bg)}
+.app{display:flex;min-height:100vh}.sidebar{width:220px;background:var(--surface);border-right:1px solid var(--border);padding:16px 12px;position:fixed;inset:0 auto 0 0}
+.brand{font-weight:700;font-size:15px;padding:8px 10px 16px;border-bottom:1px solid var(--border-soft);margin-bottom:8px}.brand small{display:block;font-weight:400;color:var(--muted);font-size:12px}
+.nav a{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:6px;color:var(--on-bg);text-decoration:none}.nav a.active{background:var(--surface-high);font-weight:600}
+.main{margin-left:220px;flex:1}.header{height:56px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;background:#fff;position:sticky;top:0;z-index:2}
+.header h1{font-size:18px;font-weight:600}.content{padding:24px;max-width:1240px}
+.top{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:16px}
+.month{display:inline-flex;align-items:center;gap:10px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface);font-weight:600;font-size:16px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:6px;border:1px solid var(--border);background:#fff;color:var(--on-bg);font:500 14px var(--font);cursor:pointer}.btn-primary{background:var(--primary);color:#fff;border-color:var(--primary)}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:18px}
+.kpi{border:1px solid var(--border-soft);border-radius:10px;padding:12px 14px;background:#fff}.kpi .l{font-size:12px;color:var(--muted);margin-bottom:4px}.kpi .v{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.2}.kpi .s{font-size:12px;color:var(--muted);margin-top:4px}
+.kpi.emph{background:var(--info-bg);border-color:#54aeff66}.kpi.emph .v{font-size:26px;color:#0550ae}.kpi.ok .v{color:var(--success)}
+.section{border:1px solid var(--border-soft);border-radius:10px;background:#fff;margin-bottom:16px;overflow:hidden}
+.section-h{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border-soft);background:var(--surface)}
+.section-h h2{font-size:15px;font-weight:700}.section-h p{font-size:13px;color:var(--muted);margin-top:2px}
+.section-b{padding:14px 16px}
+.note{font-size:13px;color:var(--muted);background:var(--surface);border:1px solid var(--border-soft);border-radius:8px;padding:10px 12px;margin-bottom:12px}
+table{width:100%;border-collapse:collapse}th,td{padding:10px 8px;border-bottom:1px solid var(--border-soft);text-align:left;font-size:14px}th{font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.02em;background:#fff}td.num,th.num{text-align:left;font-variant-numeric:tabular-nums}td.right,th.right{text-align:right}
+tfoot td{font-weight:700;background:var(--surface);border-bottom:none}
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600}.badge.ok{background:var(--success-bg);color:var(--success)}.badge.warn{background:var(--warn-bg);color:var(--warn)}.badge.danger{background:var(--danger-bg);color:var(--danger)}
+.row-actions{display:flex;gap:6px;justify-content:flex-end}.btn-sm{padding:5px 10px;font-size:12px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:10px}
+.split{display:grid;grid-template-columns:1.6fr 1fr;gap:16px}
+.callout{border:1px solid #54aeff66;background:var(--info-bg);color:#0550ae;border-radius:8px;padding:12px;font-size:13px}
+@media(max-width:980px){.sidebar{display:none}.main{margin-left:0}.kpis{grid-template-columns:1fr 1fr}.split{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">Los Castaños 104<small>San Isidro</small></div>
+    <nav class="nav"><a href="#">Inicio</a><a href="#">Dptos</a><a href="#">Gastos</a><a class="active" href="#">Cálculo</a><a href="#">Informes</a></nav>
+  </aside>
+  <main class="main">
+    <header class="header"><h1>Cálculo mensual</h1></header>
+    <div class="content">
+      <div class="top">
+        <div>
+          <div class="month">◀ Junio 2026 ▶</div>
+          <div style="font-size:13px;color:var(--muted);margin-top:6px">Prorrateo por coeficiente (m²) + consumos registrados. Revisa antes de emitir boletas.</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn">Ver origen en Gastos</button>
+          <button class="btn btn-primary">Generar y enviar boletas</button>
+        </div>
+      </div>
+
+      <div class="kpis">
+        <div class="kpi"><div class="l">Gastos comunes a distribuir</div><div class="v">S/ 3,430.00</div><div class="s">Fijos + variables del mes</div></div>
+        <div class="kpi"><div class="l">Consumos del mes</div><div class="v">S/ 423.97</div><div class="s">Agua, gas y luz</div></div>
+        <div class="kpi"><div class="l">Total a cobrar</div><div class="v">S/ 3,853.97</div><div class="s">5 departamentos</div></div>
+        <div class="kpi emph"><div class="l">Recaudado / Pendiente</div><div class="v">S/ 1,684.00</div><div class="s">Pendiente: S/ 2,169.97 · 1 de 5 al día</div></div>
+      </div>
+
+      <div class="section">
+        <div class="section-h">
+          <div><h2>1. Detalle de prorrateo por departamento</h2><p>Distribución según coeficiente (m²). Los montos cuadran con el total del mes.</p></div>
+        </div>
+        <div class="section-b">
+          <div class="note"><strong>Cómo se calcula:</strong> Gastos comunes × coeficiente del dpto. + consumos individuales (agua/gas según lectura) = total a pagar. Los coeficientes suman 100%.</div>
+          <table>
+            <thead>
+              <tr>
+                <th>Depto</th><th>m²</th><th>Coeficiente</th><th>Gastos comunes</th><th>Consumos</th><th>Total a pagar</th><th>Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>501</strong></td><td>345.90</td><td>33.23%</td><td class="num">S/ 1,139.79</td><td class="num">S/ 140.92</td><td class="num"><strong>S/ 1,280.71</strong></td><td><span class="badge warn">Parcial</span></td></tr>
+              <tr><td><strong>401</strong></td><td>150.51</td><td>14.46%</td><td class="num">S/ 496.00</td><td class="num">S/ 61.32</td><td class="num"><strong>S/ 557.32</strong></td><td><span class="badge danger">Pendiente</span></td></tr>
+              <tr><td><strong>301</strong></td><td>200.56</td><td>19.27%</td><td class="num">S/ 661.00</td><td class="num">S/ 81.70</td><td class="num"><strong>S/ 742.70</strong></td><td><span class="badge ok">Pagado</span></td></tr>
+              <tr><td><strong>201</strong></td><td>202.72</td><td>19.47%</td><td class="num">S/ 667.82</td><td class="num">S/ 82.55</td><td class="num"><strong>S/ 750.37</strong></td><td><span class="badge danger">Pendiente</span></td></tr>
+              <tr><td><strong>101</strong></td><td>141.29</td><td>13.57%</td><td class="num">S/ 465.39</td><td class="num">S/ 57.48</td><td class="num"><strong>S/ 522.87</strong></td><td><span class="badge warn">Parcial</span></td></tr>
+            </tbody>
+            <tfoot>
+              <tr><td><strong>Total</strong></td><td><strong>1040.98</strong></td><td><strong>100.00%</strong></td><td class="num"><strong>S/ 3,430.00</strong></td><td class="num"><strong>S/ 423.97</strong></td><td class="num"><strong>S/ 3,853.97</strong></td><td></td></tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
+      <div class="split">
+        <div class="section">
+          <div class="section-h">
+            <div><h2>2. Estado de cobros</h2><p>Pagos registrados vs total a pagar por departamento.</p></div>
+          </div>
+          <div class="section-b" style="padding:0">
+            <table>
+              <thead><tr><th>Depto</th><th>Total</th><th>Pagado</th><th>Saldo</th><th>Estado</th><th></th></tr></thead>
+              <tbody>
+                <tr><td><strong>501</strong></td><td class="num">S/ 1,280.71</td><td class="num">S/ 800.00</td><td class="num">S/ 480.71</td><td><span class="badge warn">Parcial</span></td><td class="right"><button class="btn btn-sm">Registrar abono</button></td></tr>
+                <tr><td><strong>401</strong></td><td class="num">S/ 557.32</td><td class="num">S/ 0.00</td><td class="num">S/ 557.32</td><td><span class="badge danger">Pendiente</span></td><td class="right"><button class="btn btn-sm">Registrar abono</button></td></tr>
+                <tr><td><strong>301</strong></td><td class="num">S/ 742.70</td><td class="num">S/ 742.70</td><td class="num">S/ 0.00</td><td><span class="badge ok">Pagado</span></td><td class="right"><button class="btn btn-sm">Ver comprobante</button></td></tr>
+                <tr><td><strong>201</strong></td><td class="num">S/ 750.37</td><td class="num">S/ 0.00</td><td class="num">S/ 750.37</td><td><span class="badge danger">Pendiente</span></td><td class="right"><button class="btn btn-sm">Registrar abono</button></td></tr>
+                <tr><td><strong>101</strong></td><td class="num">S/ 522.87</td><td class="num">S/ 141.30</td><td class="num">S/ 381.57</td><td><span class="badge warn">Parcial</span></td><td class="right"><button class="btn btn-sm">Registrar abono</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div class="section">
+            <div class="section-h"><div><h2>Acciones del mes</h2><p>Después de revisar el cálculo.</p></div></div>
+            <div class="section-b" style="display:flex;flex-direction:column;gap:10px">
+              <button class="btn btn-primary" style="justify-content:center">Generar y enviar boletas</button>
+              <button class="btn" style="justify-content:center">Exportar cálculo (PDF/Excel)</button>
+              <div class="callout"><strong>Nota:</strong> “Generar boletas” usa los montos calculados de este mes. Verifica gastos y consumos antes de enviarlas.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+</body>
+</html>

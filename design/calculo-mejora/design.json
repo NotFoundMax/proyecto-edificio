@@ -1,0 +1,13 @@
+{
+  "title": "Mejora UI/UX — Cálculo mensual",
+  "brief": "Propuesta para hacer más claro el cálculo mensual: resumen del mes, detalle de prorrateo y estado de cobros en secciones jerarquizadas, con acciones contextualizadas.",
+  "artboards": [
+    {
+      "file": "01-calculo-claridad.html",
+      "title": "Cálculo mensual con jerarquía clara",
+      "tradeoff": "Prioriza comprensión y seguimiento (resumen, detalle, cobros) frente a una vista más compacta; separa mejor la información y las acciones.",
+      "width": 1440,
+      "height": 1100
+    }
+  ]
+}

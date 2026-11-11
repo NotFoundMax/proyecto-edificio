@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Consumos — Los Castaños 104</title>
+<style>
+:root{--primary:#1f2328;--bg:#fff;--on-bg:#1f2328;--surface:#f6f8fa;--surface-high:#eaeef2;--border:#d0d7de;--border-soft:#d8dee4;--muted:#57606a;--success:#1a7f37;--success-bg:#dafbe1;--warn:#9a6700;--warn-bg:#fff8c5;--danger:#cf222e;--radius:6px;--font:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans",Helvetica,Arial,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}body{font:14px/1.5 var(--font);color:var(--on-bg);background:var(--bg)}
+.app{display:flex;min-height:100vh}.sidebar{width:220px;background:var(--surface);border-right:1px solid var(--border);padding:16px 12px;position:fixed;top:0;bottom:0;left:0}
+.brand{font-weight:700;font-size:15px;padding:8px 10px 16px;border-bottom:1px solid var(--border-soft);margin-bottom:8px}.brand small{display:block;font-weight:400;color:var(--muted);font-size:12px}
+.nav a{display:block;padding:8px 10px;border-radius:6px;color:var(--on-bg);text-decoration:none}.nav a.active{background:var(--surface-high);font-weight:600}
+.main{margin-left:220px;flex:1}.header{height:56px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;background:var(--bg);position:sticky;top:0}
+.header h1{font-size:18px;font-weight:600}.content{padding:24px;max-width:1200px}
+.tabs{display:flex;gap:4px;margin-bottom:16px;border-bottom:1px solid var(--border-soft)}.tab{padding:8px 14px;border:none;background:none;font:500 14px var(--font);color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}.tab.active{color:var(--on-bg);border-bottom-color:var(--primary);font-weight:600}
+.card{background:#fff;border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:16px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.btn{padding:8px 14px;border-radius:6px;border:1px solid var(--border);background:#fff;font:500 14px var(--font);cursor:pointer}.btn-primary{background:var(--primary);color:#fff;border-color:var(--primary)}.btn-sm{padding:5px 10px;font-size:13px}
+.muted{color:var(--muted);font-size:13px}.month{display:flex;align-items:center;gap:8px;font-weight:600}
+table{width:100%;border-collapse:collapse}th,td{padding:10px 12px;border-bottom:1px solid var(--border-soft);text-align:left}th{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;background:var(--surface)}
+.num{text-align:right;font-variant-numeric:tabular-nums}input[type=number]{width:110px;padding:6px 8px;border:1px solid var(--border);border-radius:6px;font:14px var(--font)}
+.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}.kpi{border:1px solid var(--border-soft);border-radius:8px;padding:12px;background:var(--surface)}.kpi .l{font-size:12px;color:var(--muted)}.kpi .v{font-size:18px;font-weight:700;font-variant-numeric:tabular-nums}
+.note{background:#ddf4ff;color:#0550ae;border:1px solid #b6e3ff;border-radius:6px;padding:10px 12px;font-size:13px;margin-bottom:16px}
+@media(max-width:900px){.sidebar{display:none}.main{margin-left:0}.summary{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar"><div class="brand">Los Castaños 104<small>San Isidro</small></div><nav class="nav"><a href="#">Inicio</a><a href="#">Departamentos</a><a href="#">Gastos</a><a href="#">Cálculo</a><a class="active" href="#">Consumos</a><a href="#">Informes</a><a href="#">Configuración</a></nav></aside>
+  <main class="main">
+    <header class="header"><h1>Consumos</h1><span class="muted">Junio 2026</span></header>
+    <div class="content">
+      <div class="note">Propuesta de reorganización: organizar los consumos en una sola pantalla con pestañas separadas para <strong>Agua</strong>, <strong>Gas</strong> y <strong>Luz</strong> (incluidos los consumos de áreas comunes cuando corresponda), en lugar de entradas dispersas. Cada consumo/servicio se prorratea según corresponda e impacta el cálculo mensual.</div>
+      <div class="tabs"><button class="tab active">Agua</button><button class="tab">Gas</button><button class="tab">Luz</button></div>
+      <div class="card">
+        <div class="row">
+          <div class="month">◀ <span>Junio 2026</span> ▶</div>
+          <button class="btn btn-sm">Ingresar factura del mes</button>
+        </div>
+        <table>
+          <thead><tr><th>Depto</th><th>Propietario</th><th class="num">Lect. anterior (m³)</th><th class="num">Lect. actual (m³)</th><th class="num">Consumo (m³)</th><th class="num">Monto S/</th></tr></thead>
+          <tbody>
+            <tr><td>501</td><td>Familia Mendoza</td><td class="num">1,500.3</td><td class="num"><input type="number" value="1522.7" step="0.1" aria-label="Lectura actual m³"></td><td class="num">22.4</td><td class="num">S/ 69.44</td></tr>
+            <tr><td>401</td><td>Jorge Salazar Paredes</td><td class="num">870.0</td><td class="num"><input type="number" value="881.5" step="0.1" aria-label="Lectura actual m³"></td><td class="num">11.5</td><td class="num">S/ 35.65</td></tr>
+            <tr><td>301</td><td>Ana Lucía Torres</td><td class="num">1,102.5</td><td class="num"><input type="number" value="1116.1" step="0.1" aria-label="Lectura actual m³"></td><td class="num">13.6</td><td class="num">S/ 42.16</td></tr>
+            <tr><td>201</td><td>Carlos Rojas Huamán</td><td class="num">980.2</td><td class="num"><input type="number" value="998.0" step="0.1" aria-label="Lectura actual m³"></td><td class="num">17.8</td><td class="num">S/ 55.18</td></tr>
+            <tr><td>101</td><td>María Elena Quispe</td><td class="num">1,245.0</td><td class="num"><input type="number" value="1258.4" step="0.1" aria-label="Lectura actual m³"></td><td class="num">13.4</td><td class="num">S/ 41.54</td></tr>
+          </tbody>
+        </table>
+        <div class="summary">
+          <div class="kpi"><div class="l">Consumo total</div><div class="v">78.7</div></div>
+          <div class="kpi"><div class="l">Factura del mes</div><div class="v">S/ 243.97</div></div>
+          <div class="kpi"><div class="l">Tarifa por m³</div><div class="v">S/ 3.10</div></div>
+        </div>
+      </div>
+      <p class="muted">Al guardar lecturas se recalcula el monto por departamento y se refleja en el Cálculo mensual.</p>
+    </div>
+  </main>
+</div>
+</body>
+</html>

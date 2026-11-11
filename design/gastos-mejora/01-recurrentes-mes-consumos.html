@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gastos — Propuesta de mejora</title>
+<style>
+:root{--primary:#1f2328;--bg:#fff;--on-bg:#1f2328;--surface:#f6f8fa;--surface-high:#eaeef2;--border:#d0d7de;--border-soft:#d8dee4;--muted:#57606a;--success:#1a7f37;--success-bg:#dafbe1;--warn:#9a6700;--warn-bg:#fff8c5;--info:#0969da;--info-bg:#ddf4ff;--danger:#cf222e;--font:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans",Helvetica,Arial,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}body{font:14px/1.5 var(--font);color:var(--on-bg);background:var(--bg)}
+.app{display:flex;min-height:100vh}.sidebar{width:220px;background:var(--surface);border-right:1px solid var(--border);padding:16px 12px;position:fixed;top:0;bottom:0;left:0}
+.brand{font-weight:700;font-size:15px;padding:8px 10px 16px;border-bottom:1px solid var(--border-soft);margin-bottom:8px}.brand small{display:block;font-weight:400;color:var(--muted);font-size:12px}
+.nav a{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:6px;color:var(--on-bg);text-decoration:none;font-size:14px}.nav a.active{background:var(--surface-high);font-weight:600}
+.main{margin-left:220px;flex:1}.header{height:56px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;background:#fff;position:sticky;top:0;z-index:2}
+.header h1{font-size:18px;font-weight:600}.content{padding:24px;max-width:1200px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.month{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface);font-weight:600}
+.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.kpi{border:1px solid var(--border-soft);border-radius:8px;padding:10px 12px;background:#fff}.kpi .l{font-size:12px;color:var(--muted)}.kpi .v{font-size:18px;font-weight:700;font-variant-numeric:tabular-nums}.kpi.total{background:var(--surface)}
+.tabs{display:flex;gap:4px;margin-bottom:16px;border-bottom:1px solid var(--border-soft)}.tab{padding:8px 14px;border:none;background:none;font:500 14px var(--font);color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}.tab.active{color:var(--on-bg);border-bottom-color:var(--primary);font-weight:600}
+.group{margin-bottom:18px}.group-h{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;background:var(--surface);border:1px solid var(--border-soft);border-left:3px solid var(--primary);border-radius:6px;margin-bottom:8px}
+.group-h .t{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.03em}.group-h .meta{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:6px;border:1px solid var(--border);background:#fff;color:var(--on-bg);font:500 13px var(--font);cursor:pointer}.btn-primary{background:var(--primary);color:#fff;border-color:var(--primary)}.btn-sm{padding:5px 10px;font-size:12px}
+.row{display:grid;grid-template-columns:1fr 220px 140px 90px;gap:12px;align-items:center;padding:10px 4px;border-bottom:1px solid var(--border-soft)}
+.row .name{font-weight:500}.row .sub{font-size:12px;color:var(--muted);margin-top:2px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}.chip{display:inline-flex;align-items:center;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600;background:var(--surface-high);color:var(--muted)}.chip.ok{background:var(--success-bg);color:var(--success)}.chip.warn{background:var(--warn-bg);color:var(--warn)}
+.money{text-align:left;font-variant-numeric:tabular-nums;font-weight:600}
+.actions{display:inline-flex;gap:4px;justify-content:flex-end}.actions button{width:28px;height:28px;border:none;background:none;border-radius:6px;color:var(--muted);cursor:pointer;display:inline-flex;align-items:center;justify-content:center}.actions button:hover{background:var(--surface-high);color:var(--on-bg)}
+.form-card{border:1px dashed var(--border);border-radius:8px;padding:12px;background:var(--surface);margin-bottom:10px}
+.form-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:10px;align-items:end}
+label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}input,select{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font:14px var(--font);background:#fff}
+.note{background:var(--info-bg);color:#0550ae;border:1px solid #b6e3ff;border-radius:6px;padding:10px 12px;font-size:13px;margin-bottom:16px}
+.help{font-size:13px;color:var(--muted);margin-top:8px}
+.empty{border:1px dashed var(--border);border-radius:8px;padding:16px;text-align:center;color:var(--muted);background:var(--surface)}
+@media(max-width:900px){.sidebar{display:none}.main{margin-left:0}.summary{grid-template-columns:1fr 1fr}.row{grid-template-columns:1fr;gap:6px}.actions{justify-content:flex-start}.form-grid{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">Los Castaños 104<small>San Isidro</small></div>
+    <nav class="nav">
+      <a href="#">Inicio</a><a href="#">Departamentos</a><a class="active" href="#">Gastos</a><a href="#">Cálculo</a><a href="#">Informes</a>
+    </nav>
+  </aside>
+  <main class="main">
+    <header class="header"><h1>Gastos</h1><span class="muted">Propuesta de mejora UI/UX</span></header>
+    <div class="content">
+      <div class="topbar">
+        <div class="month" aria-label="Mes activo">◀ <span>Junio 2026</span> ▶ <span class="chip" style="margin-left:4px">Mes activo</span></div>
+        <div class="help" style="margin:0">Todo lo que registres aquí impacta el cálculo de <strong>Junio 2026</strong>.</div>
+      </div>
+
+      <div class="summary" aria-label="Resumen del mes">
+        <div class="kpi"><div class="l">Recurrentes</div><div class="v">S/ 3,050.00</div></div>
+        <div class="kpi"><div class="l">Del mes (puntuales)</div><div class="v">S/ 380.00</div></div>
+        <div class="kpi"><div class="l">Consumos</div><div class="v">S/ 423.97</div></div>
+        <div class="kpi total"><div class="l">Total del mes</div><div class="v">S/ 3,853.97</div></div>
+      </div>
+
+      <div class="note"><strong>Criterio claro:</strong> <em>Recurrentes</em> = se repiten (nómina, servicios/contratos). <em>Del mes</em> = gastos puntuales de este mes. <em>Consumos</em> = agua, gas y luz (mediciones/recibos). Así evitamos mezclar conceptos.</div>
+
+      <div class="tabs" role="tablist" aria-label="Tipo de gastos">
+        <button class="tab active" role="tab" aria-selected="true">Recurrentes</button>
+        <button class="tab" role="tab" aria-selected="false">Del mes</button>
+        <button class="tab" role="tab" aria-selected="false">Consumos</button>
+      </div>
+
+      <section aria-label="Recurrentes">
+        <div class="group">
+          <div class="group-h"><div class="t">Nómina</div><div style="display:flex;align-items:center;gap:10px"><span class="meta">2 ítems · S/ 2,600.00/mes</span><button class="btn btn-primary btn-sm">+ Nómina</button></div></div>
+          <div class="row">
+            <div><div class="name">Juan Pérez</div><div class="sub">Portería · Turno mañana</div></div>
+            <div class="chips"><span class="chip">Mensual</span><span class="chip ok">Activo</span></div>
+            <div class="money">S/ 1,400.00</div>
+            <div class="actions"><button title="Editar" aria-label="Editar">✎</button><button title="Eliminar" aria-label="Eliminar">🗑</button></div>
+          </div>
+          <div class="row" style="border-bottom:none">
+            <div><div class="name">Luis Gómez</div><div class="sub">Descansero</div></div>
+            <div class="chips"><span class="chip">Mensual</span><span class="chip ok">Activo</span></div>
+            <div class="money">S/ 1,200.00</div>
+            <div class="actions"><button title="Editar" aria-label="Editar">✎</button><button title="Eliminar" aria-label="Eliminar">🗑</button></div>
+          </div>
+        </div>
+
+        <div class="group">
+          <div class="group-h"><div class="t">Servicios y contratos</div><div style="display:flex;align-items:center;gap:10px"><span class="meta">1 ítem · S/ 450.00/mes</span><button class="btn btn-primary btn-sm">+ Servicio recurrente</button></div></div>
+          <div class="row" style="border-bottom:none">
+            <div><div class="name">Mantenimiento de ascensor</div><div class="sub">Contrato de mantenimiento</div></div>
+            <div class="chips"><span class="chip">Mensual</span><span class="chip">Prorrateable</span></div>
+            <div class="money">S/ 450.00</div>
+            <div class="actions"><button title="Editar" aria-label="Editar">✎</button><button title="Eliminar" aria-label="Eliminar">🗑</button></div>
+          </div>
+          <p class="help">Ejemplos: ascensor, portón, cisterna, internet de áreas comunes, vigilancia contratada.</p>
+        </div>
+
+        <div class="group">
+          <div class="group-h"><div class="t">Jardinería recurrente</div><div style="display:flex;align-items:center;gap:10px"><span class="meta">0 ítems · S/ 0.00</span><button class="btn btn-primary btn-sm">+ Jardinería recurrente</button></div></div>
+          <div class="empty">No hay servicios de jardinería recurrentes. <br><button class="btn btn-sm" style="margin-top:8px">+ Agregar jardinería recurrente</button></div>
+        </div>
+      </section>
+
+      <section aria-label="Del mes (ejemplo visual)" style="margin-top:24px">
+        <div class="group">
+          <div class="group-h"><div class="t">Gastos puntuales del mes</div><div style="display:flex;align-items:center;gap:10px"><span class="meta">2 ítems · S/ 380.00</span></div></div>
+          <div class="form-card">
+            <div style="font-size:13px;font-weight:600;margin-bottom:8px">+ Registrar gasto del mes (Junio 2026)</div>
+            <div class="form-grid">
+              <div><label for="c1">Concepto</label><input id="c1" type="text" placeholder="Ej: Compra de focos pasillo"></div>
+              <div><label for="m1">Monto (S/)</label><input id="m1" type="number" placeholder="0.00"></div>
+              <div><label for="cat1">Categoría</label><select id="cat1"><option>Materiales</option><option>Reparación</option><option>Limpieza</option><option>Otros</option></select></div>
+              <div><label for="st1">Estado</label><select id="st1"><option>Pendiente</option><option>Pagado</option></select></div>
+              <div><button class="btn btn-primary">Agregar</button></div>
+            </div>
+            <p class="help" style="margin-top:8px">Impacto: se prorratea entre departamentos en el cálculo de <strong>Junio 2026</strong> (salvo que lo marques como extraordinario).</p>
+          </div>
+          <div class="row">
+            <div><div class="name">Compra de focos pasillo</div><div class="sub">Registrado el 08/06/2026</div></div>
+            <div class="chips"><span class="chip">Único</span><span class="chip">Materiales</span><span class="chip warn">Pendiente</span></div>
+            <div class="money">S/ 120.00</div>
+            <div class="actions"><button title="Editar">✎</button><button title="Eliminar">🗑</button></div>
+          </div>
+          <div class="row" style="border-bottom:none">
+            <div><div class="name">Reparación de reja cochera</div><div class="sub">Registrado el 15/06/2026</div></div>
+            <div class="chips"><span class="chip">Único</span><span class="chip">Reparación</span><span class="chip ok">Pagado</span></div>
+            <div class="money">S/ 260.00</div>
+            <div class="actions"><button title="Editar">✎</button><button title="Eliminar">🗑</button></div>
+          </div>
+        </div>
+      </section>
+
+      <p class="help" style="margin-top:18px"><strong>Pestaña Consumos</strong> (no mostrada aquí): mantiene Agua, Gas y Luz con su propio selector de mes y subtotales, usando el mismo encabezado/resumen para consistencia.</p>
+    </div>
+  </main>
+</div>
+</body>
+</html>
