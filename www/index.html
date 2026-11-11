@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <script>
+      (function(){try{var t=localStorage.getItem('theme');if(t==='dark'||t==='light'){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();
+    </script>
     <title>Los Castaños</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/shells.css">
@@ -23,6 +26,7 @@
                     <path d="M6.2 6.2a8 8 0 1 0 11.6 0"/>
                 </svg>
             </button>
+            <button id="btn-theme" class="icon-btn" title="Cambiar tema" aria-label="Cambiar tema claro/oscuro"><span class="material-symbols-outlined" style="font-size:20px;">dark_mode</span></button>
             <button id="btn-config" class="icon-btn" title="Configuración"><span class="material-symbols-outlined" style="font-size:20px;">settings</span></button>
         </div>
     </header>
@@ -146,48 +150,66 @@
         </section>
         <!-- Dashboard -->
         <section id="screen-dashboard" class="screen active">
-            <div class="screen-content" style="padding:var(--space-4);max-width:1200px;margin:0 auto;">
-                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-4);">
-                    <button id="btn-prev-month" class="btn btn-text">◀</button>
+            <div class="screen-content" style="padding:var(--space-4);">
+                <div class="month-selector" style="display:flex;align-items:center;justify-content:center;gap:var(--space-4);margin-bottom:var(--space-4);">
+                    <button id="btn-prev-month" class="btn btn-text" aria-label="Mes anterior">◀</button>
                     <span id="current-month-label" style="font:var(--md-sys-typescale-title-large);">Julio 2026</span>
-                    <button id="btn-next-month" class="btn btn-text">▶</button>
+                    <button id="btn-next-month" class="btn btn-text" aria-label="Mes siguiente">▶</button>
                 </div>
 
-                <details class="accordion" style="margin-bottom:var(--space-4);">
-                    <summary style="cursor:pointer;font:var(--md-sys-typescale-title-medium);display:flex;align-items:center;gap:var(--space-2);"><span class="material-symbols-outlined">savings</span> Caja Chica</summary>
-                    <div id="caja-chica-bar" style="display:flex;align-items:center;gap:var(--space-3);padding:var(--space-3) 0;">
-                        <span id="caja-chica-monto" style="font:var(--md-sys-typescale-title-medium);">S/. 0</span>
-                        <button id="btn-edit-caja" class="btn btn-sm btn-outline"><span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle;">edit</span> Editar</button>
+                <div class="dashboard-kpis">
+                    <div class="card kpi-card">
+                        <div class="kpi-label">Gastos comunes (mes)</div>
+                        <div id="kpi-gastos" class="kpi-value">S/. 0.00</div>
                     </div>
-                </details>
-
-                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:var(--space-4);margin-bottom:var(--space-6);">
-                    <div class="card" style="text-align:center;">
-                        <div style="color:var(--md-sys-color-on-surface-variant);font:var(--md-sys-typescale-label-large);">Gastos Pagados</div>
-                        <div id="total-gastos" style="font:var(--md-sys-typescale-headline-medium);color:var(--md-sys-color-primary);">S/. 0</div>
+                    <div class="card kpi-card">
+                        <div class="kpi-label">% Recaudado (del total)</div>
+                        <div id="kpi-recaudado" class="kpi-value">0%</div>
                     </div>
-                    <div class="card" style="text-align:center;">
-                        <div style="color:var(--md-sys-color-on-surface-variant);font:var(--md-sys-typescale-label-large);">Pagos Recibidos</div>
-                        <div id="total-pagado" style="font:var(--md-sys-typescale-headline-medium);color:var(--md-sys-color-tertiary);">S/. 0</div>
+                    <div class="card kpi-card">
+                        <div class="kpi-label">Caja chica</div>
+                        <div class="kpi-value-row">
+                            <span id="kpi-caja" class="kpi-value">S/. 0.00</span>
+                            <button id="btn-edit-caja" class="btn btn-sm btn-outline" title="Editar caja chica">Editar</button>
+                        </div>
                     </div>
-                    <div class="card" style="text-align:center;">
-                        <div style="color:var(--md-sys-color-on-surface-variant);font:var(--md-sys-typescale-label-large);">Balance Caja</div>
-                        <div id="total-balance" style="font:var(--md-sys-typescale-headline-medium);">S/. 0</div>
+                    <div class="card kpi-card">
+                        <div class="kpi-label">Estado del mes</div>
+                        <div id="kpi-estado-mes" class="kpi-value">Abierto</div>
                     </div>
                 </div>
 
                 <div id="extra-info" style="margin-bottom:var(--space-4);"></div>
 
-                <h2 style="font:var(--md-sys-typescale-title-large);margin-bottom:var(--space-3);">Cuota por Departamento</h2>
-                <div id="dashboard-propietarios" class="list-container" style="background:var(--md-sys-color-surface);border-radius:var(--md-sys-shape-corner-medium);padding:var(--space-2);">
-                    <p class="empty-state">Cargando...</p>
+                <div id="semaforo-cuadre" class="card semaforo-card">
+                    <h3 class="semaforo-title">Semáforo de cuadre</h3>
+                    <div id="sc-alert" class="semaforo-alert-msg" role="status" aria-live="polite"></div>
+                    <div class="semaforo-grid">
+                        <div class="semaforo-col">
+                            <div class="semaforo-lbl">Total a cobrar</div>
+                            <div id="sc-gastos" class="semaforo-val">S/. 0.00</div>
+                        </div>
+                        <div class="semaforo-col">
+                            <div class="semaforo-lbl">Cargos calculados</div>
+                            <div id="sc-cuotas" class="semaforo-val">S/. 0.00</div>
+                        </div>
+                        <div class="semaforo-col">
+                            <div class="semaforo-lbl">Pagos recibidos</div>
+                            <div id="sc-pagos" class="semaforo-val">S/. 0.00</div>
+                        </div>
+                    </div>
                 </div>
 
-                <div style="margin-top:var(--space-4);">
-                    <button id="btn-cerrar-mes" class="btn btn-secondary btn-block" onclick="App.cerrarMes()"><span class="material-symbols-outlined" style="font-size:18px;vertical-align:middle;">calendar_month</span> Cerrar Mes</button>
+                <div class="card" style="margin-top:var(--space-4);">
+                    <h2 style="font:var(--md-sys-typescale-title-large);margin:0 0 var(--space-3);">Departamentos</h2>
+                    <div id="dashboard-propietarios">
+                        <p class="empty-state">Cargando...</p>
+                    </div>
                 </div>
 
-                <button id="btn-add-gasto-dashboard" class="fab">+</button>
+                <button id="btn-cerrar-mes" class="btn btn-primary btn-block" style="margin-top:var(--space-4);" onclick="App.cerrarMes()">Cerrar Mes</button>
+
+                <button id="btn-add-gasto-dashboard" class="fab" aria-label="Agregar gasto">+</button>
             </div>
         </section>
 
@@ -195,174 +217,221 @@
         <section id="screen-propietarios" class="screen">
             <div class="screen-content">
                 <div class="screen-header">
-                    <h2>Departamentos</h2>
-                    <button id="btn-add-propietario" class="btn btn-primary">+ Nuevo</button>
+                    <div>
+                        <h2>Departamentos</h2>
+                        <p id="departamentos-subtitle" class="luz-status" style="margin-top:4px;"></p>
+                    </div>
+                    <button id="btn-add-propietario" class="btn btn-primary">+ Nuevo departamento</button>
                 </div>
-                <div class="coeficientes-info" id="coeficientes-info"></div>
-                <div id="lista-propietarios" class="list-container"></div>
+                <div id="departamentos-info" class="luz-status" style="margin-bottom:var(--space-3);"></div>
+                <div id="coeficientes-info" style="display:none;"></div>
+                <div id="lista-propietarios"></div>
+                <div id="departamentos-leyenda" class="card" style="margin-top:var(--space-4);">
+                    <div style="font-weight:600;margin-bottom:8px">Acciones por departamento (leyenda)</div>
+                    <ul style="margin:0;padding:0;list-style:none;color:var(--md-sys-color-on-surface-variant);font-size:13px;display:grid;gap:10px">
+                        <li style="display:flex;gap:10px;align-items:flex-start"><span class="legend-icon" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293z"/></svg></span><span><strong>Editar datos:</strong> corrige contacto y estado de ocupación. El <strong>Área (m²)</strong> aparece bloqueada por defecto o requiere confirmación especial para proteger el total y el prorrateo.</span></li>
+                        <li style="display:flex;gap:10px;align-items:flex-start"><span class="legend-icon" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6M5.216 14A2.24 2.24 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.3 6.3 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1zM4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5"/><path d="M13.5 5.5a.5.5 0 0 1 .5.5v1h1a.5.5 0 0 1 0 1h-1v1a.5.5 0 0 1-1 0v-1h-1a.5.5 0 0 1 0-1h1V6a.5.5 0 0 1 .5-.5"/></svg></span><span><strong>Transferir titularidad:</strong> asigna nuevo dueño o marca “Inmobiliaria / Sin asignar” sin borrar el departamento; conserva metraje e historial financiero.</span></li>
+                        <li style="display:flex;gap:10px;align-items:flex-start"><span class="legend-icon" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71z"/><path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0"/></svg></span><span><strong>Estado de cuenta / Historial:</strong> abre el registro cronológico de boletas, consumos y pagos del departamento.</span></li>
+                        <li style="display:flex;gap:10px;align-items:flex-start"><span style="display:inline-flex;gap:6px;align-items:center"><span class="legend-icon legend-icon-primary" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M4 10.781c.148 1.667 1.513 2.85 3.591 3.003V15h1.043v-1.216c2.27-.179 3.678-1.438 3.678-3.3 0-1.59-.947-2.51-2.956-3.028l-.722-.187V3.467c1.122.11 1.879.714 2.07 1.616h1.47c-.166-1.6-1.54-2.748-3.54-2.875V1H7.591v1.233c-1.939.23-3.27 1.472-3.27 3.156 0 1.454.966 2.483 2.661 2.917l.61.162v4.031c-1.149-.17-1.94-.8-2.131-1.718zm3.391-3.836c-1.043-.263-1.6-.825-1.6-1.616 0-.944.704-1.641 1.8-1.828v3.495l-.2-.05zm1.591 1.872c1.287.323 1.852.859 1.852 1.769 0 1.097-.826 1.828-2.2 1.939V8.73z"/></svg></span><span class="legend-icon" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M5 4a.5.5 0 0 0 0 1h6a.5.5 0 0 0 0-1zm-.5 2.5A.5.5 0 0 1 5 6h6a.5.5 0 0 1 0 1H5a.5.5 0 0 1-.5-.5M5 8a.5.5 0 0 0 0 1h6a.5.5 0 0 0 0-1z"/><path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2zm10-1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1"/></svg></span></span><span><strong>Registrar pago / Abono:</strong> acceso directo para asentar pagos. Si está <em>Pendiente</em> se destaca; si está <em>Al día</em> permite ver el último comprobante del mes.</span></li>
+                    </ul>
+                </div>
             </div>
         </section>
 
         <!-- Gastos -->
         <section id="screen-gastos" class="screen">
             <div class="screen-content">
-                <div class="screen-header">
-                    <h2>Gastos</h2>
-                    <button id="btn-add-gasto" class="btn btn-primary">+ Nuevo</button>
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px;">
+                    <div class="month-selector" style="margin:0;">
+                        <button id="btn-prev-month-gastos" class="icon-btn">◀</button>
+                        <span id="gastos-month-label">Junio 2026</span>
+                        <button id="btn-next-month-gastos" class="icon-btn">▶</button>
+                        <span class="badge" style="margin-left:4px;background:var(--md-sys-color-surface-container-high);color:var(--md-sys-color-on-surface-variant)">Mes activo</span>
+                    </div>
+                    <p id="gastos-impacto" class="luz-status" style="margin:0;">Todo lo que registres impacta el cálculo del mes.</p>
                 </div>
-                <div class="filters">
-                    <select id="filter-categoria">
-                        <option value="">Todas las categorías</option>
-                    </select>
-                    <select id="filter-frecuencia">
-                        <option value="">Todas las frecuencias</option>
-                        <option value="mensual">Mensual</option>
-                        <option value="trimestral">Trimestral</option>
-                        <option value="semestral">Semestral</option>
-                        <option value="anual">Anual</option>
-                        <option value="unico">Único</option>
-                        <option value="extraordinario">Extraordinario</option>
-                    </select>
+
+                <div id="gastos-resumen" class="calculo-summary" style="margin-bottom:16px;"></div>
+
+                <div class="luz-status" style="margin-bottom:16px;background:var(--md-sys-color-surface-container-low);border:1px solid var(--md-sys-color-outline-variant);border-radius:8px;padding:10px 12px;">
+                    <strong>Criterio:</strong> <em>Recurrentes</em> = se repiten (nómina, servicios/contratos). <em>Del mes</em> = gastos puntuales de este mes. <em>Consumos</em> = agua, gas y luz.
                 </div>
-                <details class="accordion">
-                    <summary style="display:flex;align-items:center;gap:var(--space-2);"><span class="material-symbols-outlined">lightbulb</span> Recibo de Luz</summary>
-                    <div id="luz-card" class="luz-card">
-                    <div class="luz-card-info">
-                                                <div>
-                            <div class="luz-title">Recibo de Luz — <span id="luz-mes-label"></span></div>
-                            <div id="luz-status" class="luz-status"></div>
+
+                <div class="tabs gastos-tabs" role="tablist" aria-label="Tipo de gastos">
+                    <button class="tab active" id="gastos-tab-recurrentes" role="tab" aria-selected="true" data-tab="recurrentes">Recurrentes</button>
+                    <button class="tab" id="gastos-tab-delmes" role="tab" aria-selected="false" data-tab="delmes">Del mes</button>
+                    <button class="tab" id="gastos-tab-consumos" role="tab" aria-selected="false" data-tab="consumos">Consumos</button>
+                </div>
+
+                <div id="panel-recurrentes" class="gastos-panel active">
+                    <div class="gastos-group">
+                        <div class="gastos-group-head" style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;background:var(--md-sys-color-surface-container-low);border:1px solid var(--md-sys-color-outline-variant);border-left:3px solid var(--md-sys-color-primary);border-radius:6px;margin-bottom:8px;">
+                            <div><div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.03em">Nómina</div><div id="meta-nomina" class="luz-status">0 ítems · S/ 0.00/mes</div></div>
+                            <button id="btn-add-nomina" class="btn btn-primary btn-sm">+ Nómina</button>
                         </div>
+                        <div id="gastos-nomina"></div>
                     </div>
-                    <div class="luz-controls">
-                        <input type="number" id="luz-monto" step="0.01" min="0" placeholder="Monto del recibo">
-                        <select id="luz-estado">
-                            <option value="pendiente">Por pagar</option>
-                            <option value="pagado">Pagado</option>
-                        </select>
-                        <button id="btn-luz-guardar" class="btn btn-sm btn-primary">Guardar</button>
+                    <div class="gastos-group">
+                        <div class="gastos-group-head" style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;background:var(--md-sys-color-surface-container-low);border:1px solid var(--md-sys-color-outline-variant);border-left:3px solid var(--md-sys-color-primary);border-radius:6px;margin-bottom:8px;">
+                            <div><div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.03em">Servicios y contratos</div><div id="meta-servicios" class="luz-status">0 ítems · S/ 0.00/mes</div></div>
+                            <button id="btn-add-servicio-rec" class="btn btn-primary btn-sm">+ Servicio recurrente</button>
+                        </div>
+                        <div id="gastos-servicios"></div>
+                        <p class="luz-status" style="margin-top:6px">Ejemplos: ascensor, portón, cisterna, internet de áreas comunes, vigilancia contratada.</p>
                     </div>
-                </div>
-                </details>
-                <div id="gastos-totales" class="gastos-totales" style="display:none;">
-                    <div class="gasto-total-item">
-                        <span>Total</span>
-                        <strong id="gastos-total-monto">S/. 0</strong>
-                    </div>
-                    <div class="gasto-total-item gasto-total-pagado">
-                        <span>Pagado</span>
-                        <strong id="gastos-pagados-monto">S/. 0</strong>
-                    </div>
-                    <div class="gasto-total-item gasto-total-pendiente">
-                        <span>⏳ Por pagar</span>
-                        <strong id="gastos-pendientes-monto">S/. 0</strong>
+                    <div class="gastos-group">
+                        <div class="gastos-group-head" style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;background:var(--md-sys-color-surface-container-low);border:1px solid var(--md-sys-color-outline-variant);border-left:3px solid var(--md-sys-color-primary);border-radius:6px;margin-bottom:8px;">
+                            <div><div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.03em">Jardinería recurrente</div><div id="meta-jardineria" class="luz-status">0 ítems · S/ 0.00</div></div>
+                            <button id="btn-add-jardineria-rec" class="btn btn-primary btn-sm">+ Jardinería</button>
+                        </div>
+                        <div id="gastos-jardineria"></div>
                     </div>
                 </div>
-                <div id="lista-gastos" class="list-container">
-                    <p class="empty-state">No hay gastos registrados</p>
+
+                <div id="panel-delmes" class="gastos-panel" style="display:none;">
+                    <div class="gastos-group">
+                        <div class="gastos-group-head" style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;background:var(--md-sys-color-surface-container-low);border:1px solid var(--md-sys-color-outline-variant);border-left:3px solid var(--md-sys-color-primary);border-radius:6px;margin-bottom:8px;">
+                            <div><div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.03em">Gastos puntuales del mes</div><div id="meta-delmes" class="luz-status">0 ítems · S/ 0.00</div></div>
+                        </div>
+                        <div style="border:1px dashed var(--md-sys-color-outline);border-radius:8px;padding:12px;background:var(--md-sys-color-surface-container-low);margin-bottom:10px;">
+                            <div style="font-size:13px;font-weight:600;margin-bottom:8px">+ Registrar gasto del mes (<span id="gastos-form-mes">Junio 2026</span>)</div>
+                            <form id="form-gasto-mes" class="gastos-inline-form" style="grid-template-columns:2fr 1fr 1fr 1fr auto;">
+                                <div class="form-group"><label for="gm-concepto">Concepto</label><input type="text" id="gm-concepto" placeholder="Ej: Compra de focos" required></div>
+                                <div class="form-group"><label for="gm-monto">Monto (S/)</label><input type="number" id="gm-monto" step="0.01" min="0" placeholder="0.00" required></div>
+                                <div class="form-group"><label for="gm-categoria">Categoría</label><select id="gm-categoria"><option value="materiales">Materiales</option><option value="arreglos">Reparación</option><option value="limpieza">Limpieza</option><option value="mantenimiento">Mantenimiento</option><option value="otros">Otros</option></select></div>
+                                <div class="form-group"><label for="gm-estado">Estado</label><select id="gm-estado"><option value="pendiente">Pendiente</option><option value="pagado">Pagado</option></select></div>
+                                <div class="form-group" style="align-self:end;"><button type="submit" class="btn btn-primary">Agregar</button></div>
+                            </form>
+                            <p class="luz-status" style="margin-top:8px">Impacto: se registra para el mes activo y se prorratea en el cálculo (salvo extraordinarios según configuración).</p>
+                        </div>
+                        <div id="gastos-delmes"></div>
+                    </div>
+                </div>
+
+                <div id="panel-consumos" class="gastos-panel" style="display:none;">
+                    <div class="tabs gastos-tabs" role="tablist" aria-label="Tipo de consumo" style="margin-bottom:var(--space-4);">
+                        <button class="tab active" id="consumos-tab-agua" role="tab" aria-selected="true" data-tab="agua">Agua</button>
+                        <button class="tab" id="consumos-tab-gas" role="tab" aria-selected="false" data-tab="gas">Gas</button>
+                        <button class="tab" id="consumos-tab-luz" role="tab" aria-selected="false" data-tab="luz">Luz</button>
+                    </div>
+
+                    <div id="panel-consumos-agua" class="consumos-panel active">
+                        <div class="screen-header" style="margin-bottom:var(--space-3);">
+                            <h3 style="font-size:16px;margin:0;">Agua (consumo por departamento)</h3>
+                            <button id="btn-agua-formula" class="btn btn-outline btn-sm" title="Ingresar factura del agua del mes">Factura</button>
+                        </div>
+                        <div id="agua-periodo" class="list-container" style="margin-bottom:var(--space-3);"></div>
+                        <div id="agua-lista" class="list-container">
+                            <p class="empty-state">Carga los datos de agua este mes</p>
+                        </div>
+                        <div id="agua-resumen" class="calculo-summary" style="margin-top:var(--space-4);"></div>
+                        <span id="agua-month-label" style="display:none"></span>
+                    </div>
+
+                    <div id="panel-consumos-gas" class="consumos-panel" style="display:none;">
+                        <div class="screen-header" style="margin-bottom:var(--space-3);">
+                            <h3 style="font-size:16px;margin:0;">Gas (consumo por departamento)</h3>
+                            <button id="btn-gas-params" class="btn btn-outline btn-sm" type="button" onclick="document.getElementById('gas-params-details')?.toggleAttribute('open')">Parámetros</button>
+                        </div>
+                        <div id="gas-periodo" class="list-container" style="margin-bottom:var(--space-3);"></div>
+                        <details id="gas-params-details" class="accordion" open>
+                            <summary>Parámetros</summary>
+                            <div class="servicio-params" style="margin-bottom:12px;">
+                                <div class="form-group form-inline">
+                                    <label>Precio balón S/</label>
+                                    <input type="number" id="gas-precio-balon" value="245" step="0.01">
+                                </div>
+                                <div class="form-group form-inline">
+                                    <label>Kg por balón</label>
+                                    <input type="number" id="gas-kg-balon" value="45" step="0.01">
+                                </div>
+                                <div class="form-group form-inline">
+                                    <label>kg/m³ (LPG)</label>
+                                    <input type="number" id="gas-kg-m3" value="2.464" step="0.001">
+                                </div>
+                                <div class="form-group form-inline">
+                                    <label>Nº balones/mes</label>
+                                    <input type="number" id="gas-n-balones" value="3" step="1" min="1">
+                                </div>
+                            </div>
+                            <div class="form-hint" id="gas-balones-total" style="margin-bottom:0;">Total balones del mes: S/ 735.00</div>
+                        </details>
+                        <div id="gas-lista" class="list-container">
+                            <p class="empty-state">Carga los datos de gas este mes</p>
+                        </div>
+                        <div id="gas-resumen" class="calculo-summary" style="margin-top:var(--space-4);"></div>
+                        <span id="gas-month-label" style="display:none"></span>
+                    </div>
+
+                    <div id="panel-consumos-luz" class="consumos-panel" style="display:none;">
+                        <div class="screen-header" style="margin-bottom:var(--space-3);">
+                            <h3 style="font-size:16px;margin:0;">Luz (áreas comunes)</h3>
+                        </div>
+                        <div id="luz-periodo" class="list-container" style="margin-bottom:var(--space-3);"></div>
+                        <div id="luz-lista" class="list-container">
+                            <p class="empty-state">Carga los datos de luz este mes</p>
+                        </div>
+                        <div id="luz-resumen" class="calculo-summary" style="margin-top:var(--space-4);"></div>
+                        <span id="luz-mes-label" style="display:none"></span>
+                        <span id="luz-status" style="display:none"></span>
+                    </div>
+                    <!-- compat: consumos month label kept but driven by gastos month selector -->
+                    <span id="consumos-month-label" style="display:none"></span>
                 </div>
             </div>
         </section>
 
-        <!-- Gas -->
-        <section id="screen-gas" class="screen">
-            <div class="screen-content">
-                <div class="screen-header">
-                    <h2>Gas</h2>
-                </div>
-                <div class="month-selector">
-                    <button id="btn-prev-month-gas" class="icon-btn">◀</button>
-                    <span id="gas-month-label">Julio 2026</span>
-                    <button id="btn-next-month-gas" class="icon-btn">▶</button>
-                </div>
-                <details class="accordion" open>
-                    <summary>Parámetros de gas</summary>
-                    <div class="servicio-params">
-                    <div class="form-group form-inline">
-                        <label>Precio balón S/</label>
-                        <input type="number" id="gas-precio-balon" value="245" step="0.01">
-                    </div>
-                    <div class="form-group form-inline">
-                        <label>Kg por balón</label>
-                        <input type="number" id="gas-kg-balon" value="45" step="0.01">
-                    </div>
-                    <div class="form-group form-inline">
-                        <label>kg/m³ (LPG)</label>
-                        <input type="number" id="gas-kg-m3" value="2.464" step="0.001">
-                    </div>
-                    <div class="form-group form-inline">
-                        <label>Nº balones/mes</label>
-                        <input type="number" id="gas-n-balones" value="3" step="1" min="1">
-                    </div>
-                </div>
-                </details>
-                <div class="form-hint" id="gas-balones-total">Total balones del mes: S/ 735.00</div>
-                <div id="gas-lista" class="list-container">
-                    <p class="empty-state">Carga los datos de gas este mes</p>
-                </div>
-            </div>
-        </section>
+        <!-- Consumos integrado en Gastos -->
 
-        <!-- Agua -->
-        <section id="screen-agua" class="screen">
-            <div class="screen-content">
-                <div class="screen-header">
-                    <h2>Agua</h2>
-                    <button id="btn-agua-formula" class="btn btn-outline btn-sm" title="Ingresar factura del agua del mes">Factura</button>
-                </div>
-                <div class="month-selector">
-                    <button id="btn-prev-month-agua" class="icon-btn">◀</button>
-                    <span id="agua-month-label">Julio 2026</span>
-                    <button id="btn-next-month-agua" class="icon-btn">▶</button>
-                </div>
-                <div id="agua-lista" class="list-container">
-                    <p class="empty-state">Carga los datos de agua este mes</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- Gastos Fijos -->
-        <section id="screen-servicios" class="screen">
-            <div class="screen-content">
-                <div class="servicio-seccion">
-                    <div class="screen-header">
-                        <h2>Gastos Fijos</h2>
-                        <button id="btn-add-personal" class="btn btn-primary">+ Nuevo</button>
-                    </div>
-                    <p class="servicio-hint">Personal (porteros, descansero, mantenimiento y administración) y gastos fijos recurrentes (mant. ascensores, portón de cochera, cisterna, etc.). El sueldo o el monto genera el gasto automáticamente según su frecuencia.</p>
-                    <div id="lista-personal" class="list-container"></div>
-                </div>
-
-                <hr>
-
-                <div class="servicio-seccion">
-                    <div class="screen-header">
-                        <h2>Jardinería</h2>
-                        <button id="btn-add-jardineria" class="btn btn-primary">+ Nuevo</button>
-                    </div>
-                    <p class="servicio-hint">Visitas y trabajos a realizar y/o realizados.</p>
-                    <div id="lista-jardineria" class="list-container"></div>
-                </div>
-            </div>
-        </section>
+        <!-- G. Fijos integrado en Gastos -->
 
         <!-- Cálculo Mensual -->
         <section id="screen-calculo" class="screen">
             <div class="screen-content">
-                <div class="month-selector">
-                    <button id="btn-prev-month-calc" class="icon-btn">◀</button>
-                    <span id="calc-month-label">Julio 2026</span>
-                    <button id="btn-next-month-calc" class="icon-btn">▶</button>
+                <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:16px;">
+                    <div>
+                        <div class="month-selector" style="display:inline-flex;align-items:center;gap:10px;margin:0;">
+                            <button id="btn-prev-month-calc" class="icon-btn" aria-label="Mes anterior">◀</button>
+                            <span id="calc-month-label" style="font:var(--md-sys-typescale-title-large);font-weight:600;">Julio 2026</span>
+                            <button id="btn-next-month-calc" class="icon-btn" aria-label="Mes siguiente">▶</button>
+                        </div>
+                        <div class="luz-status" style="margin-top:6px;">Prorrateo por coeficiente (m²) y consumos registrados. Revisa antes de emitir boletas.</div>
+                    </div>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                        <button class="btn btn-outline" onclick="App.navigateTo('gastos')">Ver origen en Gastos</button>
+                        <button id="btn-generar-boletas" class="btn btn-primary" onclick="App.generarBoletas()">Generar boletas</button>
+                    </div>
                 </div>
 
-                <div id="calculo-detalles" class="list-container">
-                    <p class="empty-state">No hay gastos este mes</p>
+                <div id="calculo-resumen" class="calculo-summary" style="margin-bottom:18px;"></div>
+
+                <div id="calculo-prorrateo" class="card" style="margin-bottom:16px;padding:0;overflow:hidden;">
+                    <p class="empty-state" style="padding:16px;">Cargando cálculo...</p>
                 </div>
 
-                <button id="btn-simplificar-deudas" class="btn btn-secondary" style="display:none;">
-                    Simplificar Deudas
-                </button>
+                <div style="display:grid;grid-template-columns:1.6fr 1fr;gap:16px;align-items:start;" class="calculo-bottom">
+                    <div id="calculo-pagos" class="card" style="padding:0;overflow:hidden;">
+                        <div style="padding:14px 16px;border-bottom:1px solid var(--md-sys-color-outline-variant);background:var(--md-sys-color-surface-container-low);">
+                            <h3 style="font-size:15px;font-weight:700;margin:0;">2. Estado de cobros</h3>
+                            <p class="luz-status" style="margin:2px 0 0;">Pagos registrados vs total a pagar por departamento.</p>
+                        </div>
+                        <div id="calculo-matriz-pagos"></div>
+                    </div>
+                    <div class="card" style="padding:0;overflow:hidden;">
+                        <div style="padding:14px 16px;border-bottom:1px solid var(--md-sys-color-outline-variant);background:var(--md-sys-color-surface-container-low);">
+                            <h3 style="font-size:15px;font-weight:700;margin:0;">Acciones del mes</h3>
+                            <p class="luz-status" style="margin:2px 0 0;">Después de revisar el cálculo.</p>
+                        </div>
+                        <div style="padding:14px 16px;display:flex;flex-direction:column;gap:10px;">
+                            
+                            <div class="luz-status" style="background:var(--md-sys-color-surface-container-low);border:1px solid var(--md-sys-color-outline-variant);border-radius:8px;padding:10px 12px;">
+                                <strong>Nota:</strong> “Generar boletas” usa los montos calculados de este mes. Verifica gastos y consumos antes de enviarlas.
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-                <div id="simplificacion" class="list-container" style="display:none;">
+                <div id="simplificacion" class="list-container" style="display:none;margin-top:var(--space-4);">
                     <h3>Pagos a realizar</h3>
                     <div id="lista-pagos-simplificados"></div>
                 </div>
@@ -372,17 +441,19 @@
         <!-- Informes -->
         <section id="screen-informes" class="screen">
             <div class="screen-content">
-                <h2>Informes</h2>
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:var(--space-4);">
+                    <h2 style="margin:0">Informes</h2>
+                    <div class="informes-actions" style="display:flex;gap:8px;">
+                        <button id="btn-export-pdf" class="btn btn-outline">Exportar PDF</button>
+                        <button id="btn-export-excel" class="btn btn-outline">Exportar Excel</button>
+                    </div>
+                </div>
                 <div class="month-selector">
                     <button id="btn-prev-month-inf" class="icon-btn">◀</button>
                     <span id="inf-month-label">Julio 2026</span>
                     <button id="btn-next-month-inf" class="icon-btn">▶</button>
                 </div>
-                <div class="informes-actions">
-                    <button id="btn-export-pdf" class="btn btn-outline">Exportar PDF</button>
-                    <button id="btn-export-excel" class="btn btn-outline">Exportar Excel</button>
-                </div>
-                <div id="preview-informe" class="list-container">
+                <div id="preview-informe">
                     <p class="empty-state">Selecciona un mes para generar el informe</p>
                 </div>
             </div>
@@ -503,18 +574,7 @@
             <span class="nav-icon material-symbols-outlined">payments</span>
             <span class="nav-label">Gastos</span>
         </button>
-        <button class="nav-btn" data-screen="gas">
-            <span class="nav-icon material-symbols-outlined">local_fire_department</span>
-            <span class="nav-label">Gas</span>
-        </button>
-        <button class="nav-btn" data-screen="agua">
-            <span class="nav-icon material-symbols-outlined">water_drop</span>
-            <span class="nav-label">Agua</span>
-        </button>
-        <button class="nav-btn" data-screen="servicios">
-            <span class="nav-icon material-symbols-outlined">push_pin</span>
-            <span class="nav-label">G. Fijos</span>
-        </button>
+        <!-- Consumos y G.Fijos integrados en Gastos -->
         <button class="nav-btn" data-screen="calculo">
             <span class="nav-icon material-symbols-outlined">calculate</span>
             <span class="nav-label">Cálculo</span>
@@ -550,23 +610,39 @@
                         <input type="text" id="propietario-departamento" placeholder="Ej: 101, PB, 2B">
                     </div>
                     <div class="form-group">
-                        <label for="propietario-m2">m²</label>
+                        <label for="propietario-m2">m² <span id="propietario-m2-lock" style="font-size:12px;color:var(--md-sys-color-on-surface-variant);font-weight:400">(protegido)</span></label>
                         <input type="number" id="propietario-m2" step="0.01" min="0" placeholder="Ej: 141.29">
+                        <label id="propietario-m2-unlock-wrap" style="display:none;margin-top:6px;font-size:13px;color:var(--md-sys-color-on-surface-variant);font-weight:400;">
+                            <input type="checkbox" id="propietario-m2-unlock"> Confirmo que deseo editar el área (afecta el prorrateo)
+                        </label>
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="propietario-coeficiente">Coeficiente (%)</label>
-                        <input type="number" id="propietario-coeficiente" step="0.01" min="0" max="100" required placeholder="Ej: 13.89">
+                        <label>Coeficiente (%) — calculado automáticamente</label>
+                        <span id="propietario-coeficiente-display" class="form-display">0.00%</span>
+                        <input type="hidden" id="propietario-coeficiente" value="0">
                     </div>
                     <div class="form-group">
-                        <label for="propietario-cuota">Cuota Mensual</label>
-                        <input type="number" id="propietario-cuota" step="0.01" min="0" placeholder="Ej: 895">
+                        <label>Cuota Mensual — calculada automáticamente</label>
+                        <span id="propietario-cuota-display" class="form-display">Se calcula al cerrar el mes</span>
+                        <input type="hidden" id="propietario-cuota" value="0">
                     </div>
                 </div>
-                <div class="form-group">
-                    <label for="propietario-email">Email (opcional)</label>
-                    <input type="email" id="propietario-email" placeholder="para enviar informes">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="propietario-email">Email (opcional)</label>
+                        <input type="email" id="propietario-email" placeholder="para enviar informes">
+                    </div>
+                    <div class="form-group">
+                        <label for="propietario-ocupacion">Estado de ocupación</label>
+                        <select id="propietario-ocupacion">
+                            <option value="propietario">Ocupado por propietario</option>
+                            <option value="alquilado">Alquilado</option>
+                            <option value="desocupado">Desocupado</option>
+                            <option value="inmobiliaria">Inmobiliaria / Sin asignar</option>
+                        </select>
+                    </div>
                 </div>
                 <button type="submit" class="btn btn-primary btn-block">Guardar</button>
             </form>
@@ -585,6 +661,51 @@
                 <button id="btn-estado-pdf" class="btn btn-primary">Descargar PDF</button>
                 <button id="btn-estado-cerrar" class="btn btn-secondary">Cerrar</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Modal: Transferir Titularidad -->
+    <div id="modal-transferir" class="modal" style="display:none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-transferir-title">Transferir titularidad</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <form id="form-transferir">
+                <input type="hidden" id="transferir-propietario-id">
+                <p class="luz-status" id="transferir-info" style="margin-bottom:var(--space-3);"></p>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="transferir-nombre">Nombre del nuevo titular</label>
+                        <input type="text" id="transferir-nombre" required placeholder="Ej: Inmobiliaria Los Castaños">
+                    </div>
+                    <div class="form-group">
+                        <label for="transferir-apellido">Apellido / referencia</label>
+                        <input type="text" id="transferir-apellido" placeholder="Opcional">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="transferir-email">Email (opcional)</label>
+                        <input type="email" id="transferir-email" placeholder="correo@ejemplo.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="transferir-ocupacion">Estado de ocupación</label>
+                        <select id="transferir-ocupacion">
+                            <option value="propietario">Ocupado por propietario</option>
+                            <option value="alquilado">Alquilado</option>
+                            <option value="desocupado">Desocupado</option>
+                            <option value="inmobiliaria">Inmobiliaria / Sin asignar</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="transferir-nota">Nota (opcional)</label>
+                    <input type="text" id="transferir-nota" placeholder="Ej: Traspaso desde 01/06/2026; deuda previa S/ 0.00">
+                </div>
+                <p class="luz-status" style="margin:0 0 var(--space-3);">Se conserva el departamento, su metraje y el historial financiero. Las nuevas boletas se vinculan al nuevo titular.</p>
+                <button type="submit" class="btn btn-primary btn-block">Confirmar transferencia</button>
+            </form>
         </div>
     </div>
 
@@ -956,6 +1077,7 @@
     <script src="js/engine.js"></script>
     <script src="js/db.js"></script>
     <script src="js/auth.js"></script>
+    <script src="js/calculator.js"></script>
     <script src="js/calculos.js"></script>
     <script src="js/app.js"></script>
     <!-- Error del servidor: el detalle de Postgres solo viaja en el
@@ -967,7 +1089,69 @@
         </div>
         <pre id="error-panel-msg" class="error-panel-msg"></pre>
         <p class="error-panel-foot">Este texto no aparece en la consola del navegador. Copialo si lo vas a reportar.</p>
-    </div>
+
+    <!-- Vista Propietario (mobile-first, responsive en desktop) -->
+    <section id="screen-propietario" class="screen">
+        <div class="screen-content propietario-shell" style="max-width:980px;margin:0 auto;padding:var(--space-4);padding-bottom:96px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:var(--space-3);flex-wrap:wrap;">
+                <div>
+                    <h2 style="font:var(--md-sys-typescale-title-large);margin:0;">Los Castaños 104</h2>
+                    <p id="prop-header-sub" style="margin:2px 0 0;color:var(--md-sys-color-on-surface-variant);font-size:13px;">Vista de propietario</p>
+                </div>
+                <div id="prop-pill" style="font-size:13px;color:var(--md-sys-color-on-surface-variant);border:1px solid var(--md-sys-color-outline);border-radius:999px;padding:4px 10px;background:var(--md-sys-color-surface-container-low);">Depto -</div>
+            </div>
+
+            <div id="prop-view-dashboard">
+                <div class="month-selector" style="justify-content:flex-start;margin-bottom:var(--space-3);">
+                    <button id="btn-prev-month-prop" class="icon-btn">◀</button>
+                    <span id="prop-month-label" style="font-weight:600;">Junio 2026</span>
+                    <button id="btn-next-month-prop" class="icon-btn">▶</button>
+                </div>
+
+                <div id="prop-hero" class="card" style="background:var(--md-sys-color-primary);color:var(--md-sys-color-on-primary);border:none;border-radius:12px;padding:20px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;">
+                    <div>
+                        <div id="prop-hero-label" style="font-size:13px;opacity:.85">Saldo pendiente</div>
+                        <div id="prop-monto" style="font-size:32px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:4px">S/ 0.00</div>
+                        <div id="prop-hero-detail" style="font-size:13px;opacity:.85;margin-top:6px">Cuota total S/ 0.00 · Pagado S/ 0.00</div>
+                    </div>
+                    <div><span id="prop-estado" class="badge badge-pendiente">Pendiente</span></div>
+                </div>
+
+                <div class="prop-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+                    <div class="card" style="padding:14px;">
+                        <h3 style="font:var(--md-sys-typescale-title-medium);margin:0 0 10px;">Tu departamento</h3>
+                        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--md-sys-color-outline-variant);"><span style="color:var(--md-sys-color-on-surface-variant)">Departamento</span><strong id="prop-depto-num">-</strong></div>
+                        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--md-sys-color-outline-variant);"><span style="color:var(--md-sys-color-on-surface-variant)">Área</span><strong id="prop-m2">-</strong></div>
+                        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--md-sys-color-outline-variant);"><span style="color:var(--md-sys-color-on-surface-variant)">Coeficiente</span><strong id="prop-coef">-</strong></div>
+                        <div style="display:flex;justify-content:space-between;padding:6px 0;"><span style="color:var(--md-sys-color-on-surface-variant)">Propietario</span><strong id="prop-nombre">-</strong></div>
+                    </div>
+                    <div class="card" style="padding:14px;">
+                        <h3 style="font:var(--md-sys-typescale-title-medium);margin:0 0 10px;">Desglose de tu cuota</h3>
+                        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--md-sys-color-outline-variant);"><span style="color:var(--md-sys-color-on-surface-variant)">Gastos comunes (coef.)</span><strong id="prop-gasto-comun" class="num-left">S/ 0.00</strong></div>
+                        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--md-sys-color-outline-variant);"><span style="color:var(--md-sys-color-on-surface-variant)">Agua (consumo)</span><strong id="prop-agua" class="num-left">S/ 0.00</strong></div>
+                        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--md-sys-color-outline-variant);"><span style="color:var(--md-sys-color-on-surface-variant)">Gas</span><strong id="prop-gas" class="num-left">S/ 0.00</strong></div>
+                        <div style="display:flex;justify-content:space-between;padding:6px 0;font-weight:700;"><span>Total a pagar</span><strong id="prop-total" class="num-left">S/ 0.00</strong></div>
+                    </div>
+                </div>
+
+                <div class="card" style="padding:14px;margin-bottom:16px;">
+                    <h3 style="font:var(--md-sys-typescale-title-medium);margin:0 0 10px;">Historial de pagos</h3>
+                    <div id="prop-historial-pagos"></div>
+                </div>
+            </div>
+
+            <div id="prop-view-comunicados" style="display:none;"><div class="card" style="padding:20px;"><h3 style="margin:0 0 8px;">Comunicados</h3><p class="empty-state" style="margin:0;">No hay comunicados por ahora.</p></div></div>
+            <div id="prop-view-tickets" style="display:none;"><div class="card" style="padding:20px;"><h3 style="margin:0 0 8px;">Tickets</h3><p class="empty-state" style="margin:0;">No tienes tickets registrados.</p></div></div>
+            <div id="prop-view-configuracion" style="display:none;"><div class="card" style="padding:20px;"><h3 style="margin:0 0 8px;">Configuración</h3><p class="empty-state" style="margin:0;">Configura tus datos y preferencias de notificaciones desde aquí.</p></div></div>
+
+            <nav id="prop-bottom-nav" aria-label="Menú principal" style="position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:980px;background:var(--md-sys-color-surface);border-top:1px solid var(--md-sys-color-outline-variant);display:grid;grid-template-columns:repeat(4,1fr);padding:6px 8px 8px;z-index:20;">
+                <button class="prop-nav-btn active" data-view="dashboard" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 4px;border:none;background:none;color:var(--md-sys-color-on-surface);font:500 12px var(--md-sys-typescale-font);border-radius:8px;cursor:pointer;"><span class="material-symbols-outlined" style="font-size:20px">home</span><span>Dashboard</span></button>
+                <button class="prop-nav-btn" data-view="comunicados" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 4px;border:none;background:none;color:var(--md-sys-color-on-surface-variant);font:500 12px var(--md-sys-typescale-font);border-radius:8px;cursor:pointer;"><span class="material-symbols-outlined" style="font-size:20px">campaign</span><span>Comunicados</span></button>
+                <button class="prop-nav-btn" data-view="tickets" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 4px;border:none;background:none;color:var(--md-sys-color-on-surface-variant);font:500 12px var(--md-sys-typescale-font);border-radius:8px;cursor:pointer;"><span class="material-symbols-outlined" style="font-size:20px">confirmation_number</span><span>Tickets</span></button>
+                <button class="prop-nav-btn" data-view="configuracion" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 4px;border:none;background:none;color:var(--md-sys-color-on-surface-variant);font:500 12px var(--md-sys-typescale-font);border-radius:8px;cursor:pointer;"><span class="material-symbols-outlined" style="font-size:20px">settings</span><span>Configuración</span></button>
+            </nav>
+        </div>
+    </section>
 
 </body>
 </html>

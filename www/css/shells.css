@@ -30,3 +30,14 @@
 /* Confortable density */
 .list-container .list-item { min-height: var(--density-row-height); }
 button, .btn { min-height: var(--density-control-height); }
+/* Vista Propietario responsive */
+.propietario-content { max-width: 600px; }
+.prop-grid { display: flex; flex-direction: column; gap: var(--space-4); }
+@media (min-width: 905px) {
+    .propietario-content { max-width: 100%; }
+    .prop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
+    .prop-grid .card:first-child { grid-column: 1 / -1; }
+}
+
+/* Limpieza: .app-sidebar ya no existe en el HTML; el sidebar de desktop es #bottom-nav */
+.app-shell { display: block; }

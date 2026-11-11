@@ -60,6 +60,19 @@ const Calculos = {
         return gasto.monto / freq.meses;
     },
 
+
+    _sortDeptos(list) {
+        return [...(list||[])].sort((a,b)=>{
+            const da = String(a.departamento || '').trim();
+            const db = String(b.departamento || '').trim();
+            const na = parseInt(da.replace(/\D/g,''),10);
+            const nb = parseInt(db.replace(/\D/g,''),10);
+            if (!isNaN(na) && !isNaN(nb) && na !== nb) return nb - na;
+            if (da !== db) return db.localeCompare(da, 'es', {numeric:true, sensitivity:'base'});
+            return 0;
+        });
+    },
+
     calcTotalGastosMes(mes) {
         const gastos = DB.getGastos({ mes });
         return gastos.reduce((sum, g) => sum + this.getGastoMensualEquivalente(g), 0);
@@ -93,7 +106,7 @@ const Calculos = {
     },
 
     calcTotalCuotasMensuales() {
-        return DB.getPropietarios().reduce((sum, p) => sum + (p.cuotaMensual || 0), 0);
+        return this._sortDeptos(DB.getPropietarios()).reduce((sum, p) => sum + (p.cuotaMensual || 0), 0);
     },
 
     calcBalanceCaja(mes) {
@@ -134,7 +147,7 @@ const Calculos = {
 
     calcCuotaPropietario(propietario, mes) {
         const gastos = DB.getGastos({ mes });
-        const propietarios = DB.getPropietarios();
+        const propietarios = this._sortDeptos(DB.getPropietarios());
         const totalCoeficientes = propietarios.reduce((sum, p) => sum + p.coeficiente, 0);
         return gastos.reduce((sum, g) => {
             return sum + this._calcGastoParaPropietario(g, propietario, totalCoeficientes, propietarios.length);
@@ -142,7 +155,7 @@ const Calculos = {
     },
 
     calcResumenPropietarios(mes) {
-        const propietarios = DB.getPropietarios();
+        const propietarios = this._sortDeptos(DB.getPropietarios());
         const pagos = DB.getPagos(mes);
 
         return propietarios.map(p => {
@@ -164,7 +177,7 @@ const Calculos = {
     },
 
     calcBalance() {
-        const propietarios = DB.getPropietarios();
+        const propietarios = this._sortDeptos(DB.getPropietarios());
         const meses = this.getMesesConDatos();
 
         const balances = {};
@@ -190,43 +203,150 @@ const Calculos = {
         }));
     },
 
-    // === Estado de Cuenta ===
+
+    // === Modelo unificado de cálculo mensual ===
+    calcMes(mes) {
+        const propietarios = this._sortDeptos(DB.getPropietarios());
+        const pagos = (DB.getPagos ? DB.getPagos(mes) : []) || [];
+        const gastos = (DB.getGastos ? DB.getGastos({ mes }) : []) || [];
+        const totalCoef = propietarios.reduce((sum, p) => sum + (Number(p.coeficiente) || 0), 0);
+
+        const comunesPorDepto = {}, comunesNormPorDepto = {}, extrasPorDepto = {};
+        propietarios.forEach(p => { comunesPorDepto[p.id] = 0; comunesNormPorDepto[p.id] = 0; extrasPorDepto[p.id] = 0; });
+        gastos.forEach(g => {
+            propietarios.forEach(p => {
+                const val = this._calcGastoParaPropietario(g, p, totalCoef, propietarios.length);
+                comunesPorDepto[p.id] += val;
+                if (g.frecuencia === 'extraordinario') extrasPorDepto[p.id] += val; else comunesNormPorDepto[p.id] += val;
+            });
+        });
+
+        const rows = propietarios.map(p => {
+            const comunes = comunesPorDepto[p.id] || 0;
+            const comunesNormales = comunesNormPorDepto[p.id] || 0;
+            const extraordinarias = extrasPorDepto[p.id] || 0;
+            const aguaRes = this.calcAguaDepto ? this.calcAguaDepto(mes, p.departamento) : null;
+            const gasRes = this.calcGasDepto ? this.calcGasDepto(mes, p.departamento) : null;
+            const agua = aguaRes ? (Number(aguaRes.total) || 0) : 0;
+            const gas = gasRes ? (Number(gasRes.total) || 0) : 0;
+            const consumos = agua + gas; // individuales por departamento
+            const cargo = comunes + consumos; // total a pagar del mes
+            const pagado = pagos.filter(pg => pg.propietarioId === p.id).reduce((s, pg) => s + (Number(pg.monto) || 0), 0);
+            const saldo = cargo - pagado;
+            let estado = 'Pagado', estadoClass = 'ok';
+            if (saldo > 0.01) {
+                if (pagado > 0.01) { estado = 'Parcial'; estadoClass = 'parcial'; }
+                else { estado = 'Pendiente'; estadoClass = 'debe'; }
+            } else if (saldo < -0.01) {
+                estado = 'A favor'; estadoClass = 'ok';
+            }
+            return {
+                ...p,
+                id: p.id,
+                depto: p.departamento || '-',
+                m2: Number(p.m2) || 0,
+                coef: Number(p.coeficiente) || 0,
+                comunes,
+                comunesNormales,
+                extraordinarias,
+                agua,
+                gas,
+                consumos,
+                cargo,
+                total: cargo,
+                pagado,
+                saldo,
+                estado,
+                estadoClass
+            };
+        });
+
+        const sumComunes = rows.reduce((s,r)=>s+(r.comunes||0),0);
+        const sumConsumosInd = rows.reduce((s,r)=>s+(r.consumos||0),0);
+        const sumAgua = rows.reduce((s,r)=>s+(r.agua||0),0);
+        const sumGas = rows.reduce((s,r)=>s+(r.gas||0),0);
+        const sumCargo = rows.reduce((s,r)=>s+(r.cargo||0),0);
+        const sumPagado = rows.reduce((s,r)=>s+(r.pagado||0),0);
+        const sumPendiente = rows.reduce((s,r)=>s + (r.saldo>0.01 ? r.saldo : 0), 0);
+        const alDia = rows.filter(r => r.saldo <= 0.01).length;
+
+        let totalAgua = 0, totalGas = 0, totalLuz = 0;
+        try { totalAgua = this.calcAguaTotal ? (this.calcAguaTotal(mes) || 0) : 0; } catch(e){}
+        try { totalGas = this.calcGasTotal ? (this.calcGasTotal(mes) || 0) : 0; } catch(e){}
+        try {
+            const gl = DB.getGastoLuz ? DB.getGastoLuz(mes) : null;
+            const lz = DB.getLuz ? DB.getLuz(mes) : null;
+            totalLuz = parseFloat(gl?.monto != null ? gl.monto : (lz?.monto != null ? lz.monto : 0)) || 0;
+        } catch(e){}
+        const totalConsumosMes = totalAgua + totalGas + totalLuz;
+        const totalGastosMes = (this.calcTotalGastosMes ? this.calcTotalGastosMes(mes) : 0) || 0;
+
+        return {
+            mes,
+            rows,
+            totals: {
+                coef: rows.reduce((s,r)=>s+r.coef,0),
+                m2: rows.reduce((s,r)=>s+r.m2,0),
+                comunes: sumComunes,
+                agua: sumAgua,
+                gas: sumGas,
+                consumosInd: sumConsumosInd,
+                consumosMes: totalConsumosMes,
+                luz: totalLuz,
+                cargo: sumCargo,
+                pagado: sumPagado,
+                pendiente: sumPendiente,
+                gastosMes: totalGastosMes,
+                alDia,
+                departamentos: rows.length
+            }
+        };
+    },
+
+    calcCargoPropietarioMes(mes, propietarioId) {
+        const calc = this.calcMes(mes);
+        return calc.rows.find(r => r.id == propietarioId) || null;
+    },
+
+// === Estado de Cuenta ===
+
     calcEstadoCuenta(propietarioId) {
         const propietario = DB.getPropietario(propietarioId);
         if (!propietario) return null;
         const data = DB.getData();
-        const propietarios = DB.getPropietarios();
-        const totalCoef = propietarios.reduce((s, p) => s + p.coeficiente, 0);
         const topeMes = DB.getMesActual() || this.getCurrentMes();
 
         const meses = new Set();
-        data.gastos.forEach(g => { if (g.mes) meses.add(g.mes); });
-        data.pagos.forEach(p => { if (p.mes) meses.add(p.mes); });
+        (data.gastos || []).forEach(g => { if (g.mes) meses.add(g.mes); });
+        (data.pagos || []).forEach(p => { if (p.mes) meses.add(p.mes); });
         Object.keys(data.gas || {}).forEach(m => meses.add(m));
         Object.keys(data.agua || {}).forEach(m => meses.add(m));
         Object.keys(data.aguaFacturas || {}).forEach(m => meses.add(m));
+        Object.keys(data.luz || {}).forEach(m => meses.add(m));
+        Object.keys(data.luzFecha || {}).forEach(m => meses.add(m));
+        Object.keys(data.aguaFecha || {}).forEach(m => meses.add(m));
         Object.keys(data.cajaChica || {}).forEach(m => meses.add(m));
 
         const filas = [...meses]
-            .filter(m => m <= topeMes)
+            .filter(m => m && m <= topeMes)
             .sort()
             .reverse()
             .map(mes => {
-            const gastosExtra = DB.getGastos({ mes }).filter(g => g.frecuencia === 'extraordinario');
-            const extraordinarias = gastosExtra.reduce((sum, g) => {
-                return sum + this._calcGastoParaPropietario(g, propietario, totalCoef, propietarios.length);
-            }, 0);
-            const gas = this.calcGasDepto(mes, propietario.departamento);
-            const gasMonto = gas ? gas.total : 0;
-            const agua = this.calcAguaDepto(mes, propietario.departamento);
-            const aguaMonto = agua ? agua.total : 0;
-            const cuotaFija = propietario.cuotaMensual || 0;
-            const cargo = cuotaFija + extraordinarias + gasMonto + aguaMonto;
-            const pagado = data.pagos
-                .filter(p => p.mes === mes && p.propietarioId === propietarioId)
-                .reduce((s, p) => s + p.monto, 0);
-            return { mes, cuotaFija, extraordinarias, gas: gasMonto, agua: aguaMonto, cargo, pagado, saldo: cargo - pagado, acumulado: 0 };
-        });
+                const calc = this.calcMes ? this.calcMes(mes) : null;
+                const row = calc ? calc.rows.find(r => r.id == propietarioId) : null;
+                if (row) {
+                    const cuotaFija = Number(row.comunesNormales || 0);
+                    const extraordinarias = Number(row.extraordinarias || 0);
+                    const gasMonto = Number(row.gas || 0);
+                    const aguaMonto = Number(row.agua || 0);
+                    const cargo = Number(row.cargo || 0);
+                    const pagado = Number(row.pagado || 0);
+                    return { mes, cuotaFija, cuota: cuotaFija, extraordinarias, gas: gasMonto, agua: aguaMonto, cargo, pagado, saldo: cargo - pagado, acumulado: 0 };
+                }
+                // fallback sin datos de cálculo
+                const pagosMes = (data.pagos || []).filter(p => p.mes === mes && p.propietarioId == propietarioId).reduce((s,p)=>s+(Number(p.monto)||0),0);
+                return { mes, cuotaFija: 0, cuota: 0, extraordinarias: 0, gas: 0, agua: 0, cargo: 0, pagado: pagosMes, saldo: -pagosMes, acumulado: 0 };
+            });
 
         let acum = 0;
         for (let i = filas.length - 1; i >= 0; i--) {
@@ -319,7 +439,7 @@ const Calculos = {
     calcGasMontoFijo(mes) {
         const params = DB.getGasParams();
         const totalBalones = (params.nBalones || 3) * params.precioBalon;
-        const propietarios = DB.getPropietarios();
+        const propietarios = this._sortDeptos(DB.getPropietarios());
         let sumaSubtotales = 0;
         let conLectura = 0;
         propietarios.forEach(p => {
@@ -339,7 +459,7 @@ const Calculos = {
     },
 
     calcGasTotal(mes) {
-        const propietarios = DB.getPropietarios();
+        const propietarios = this._sortDeptos(DB.getPropietarios());
         let total = 0;
         propietarios.forEach(p => {
             const r = this.calcGasDepto(mes, p.departamento);
@@ -376,7 +496,7 @@ const Calculos = {
 
     _sumConsumoAgua(mes) {
         const aguaData = DB.getAgua(mes);
-        const propietarios = DB.getPropietarios();
+        const propietarios = this._sortDeptos(DB.getPropietarios());
         let sum = 0;
         propietarios.forEach(p => {
             const d = aguaData[p.departamento];
@@ -420,7 +540,7 @@ const Calculos = {
     calcAguaTotal(mes) {
         const factura = DB.getFacturaAgua(mes);
         if (!factura) return 0;
-        const propietarios = DB.getPropietarios();
+        const propietarios = this._sortDeptos(DB.getPropietarios());
         let total = 0;
         propietarios.forEach(p => {
             const r = this.calcAguaDepto(mes, p.departamento);

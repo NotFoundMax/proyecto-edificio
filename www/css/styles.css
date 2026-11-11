@@ -222,6 +222,16 @@ h1, h2, h3, h4,
 
 .nav-btn .nav-icon {
     font-size: 1.3rem;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nav-btn .nav-label {
+    font-size: 0.65rem;
+    line-height: 1.2;
+    font-weight: inherit;
 }
 
 .nav-btn.active {
@@ -1684,6 +1694,12 @@ hr {
 
     .nav-btn .nav-icon {
         font-size: 1.15rem;
+        line-height: 1;
+    }
+
+    .nav-btn .nav-label {
+        font-size: 0.78rem;
+        line-height: 1.2;
     }
 
     .nav-btn:hover {
@@ -1742,7 +1758,7 @@ hr {
     }
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 905px) {
     /* Escritorio: sidebar izquierda */
     #bottom-nav {
         top: var(--header-height);
@@ -1772,6 +1788,15 @@ hr {
 
     .nav-btn .nav-icon {
         font-size: 1.2rem;
+        line-height: 1;
+        width: 1.2em;
+        height: 1.2em;
+    }
+
+    .nav-btn .nav-label {
+        font-size: 0.85rem;
+        line-height: 1.2;
+        font-weight: 500;
     }
 
     .nav-btn:hover,
@@ -1787,10 +1812,15 @@ hr {
         top: calc(var(--header-height) + 12px);
     }
 
+    /* Header fijo: empieza a la derecha del sidebar */
+    #app-header {
+        left: 220px;
+    }
+
     /* Contenido: columna pulida a la derecha de la sidebar */
     #app-main {
-        margin: var(--header-height) auto 0 220px;
-        max-width: 1280px;
+        margin: var(--header-height) 0 0 220px;
+        max-width: none;
     }
 
     .screen-content {
@@ -1803,9 +1833,9 @@ hr {
     .month-selector,
     .caja-chica-bar,
     .summary-cards {
-        max-width: 760px;
-        margin-left: auto;
-        margin-right: auto;
+        max-width: none;
+        margin-left: 0;
+        margin-right: 0;
     }
 
     .summary-cards {
@@ -1822,7 +1852,7 @@ hr {
     }
 
     .dashboard-actions .btn {
-        max-width: 480px;
+        max-width: none;
     }
 
     .list-container {

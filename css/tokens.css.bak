@@ -1,0 +1,210 @@
+/* ============================================================
+   Compatibility layer: remap legacy tokens (Navy & Oro) to Material 3
+   so the existing UI adopts the new look without HTML changes.
+   ============================================================ */
+:root {
+    --navy: var(--md-sys-color-primary);
+    --navy-deep: var(--md-sys-color-primary-container);
+    --navy-mid: var(--md-sys-color-primary);
+    --navy-soft: var(--md-sys-color-primary-container);
+    --gold: var(--md-sys-color-tertiary);
+    --gold-light: var(--md-sys-color-tertiary-container);
+    --gold-dark: var(--md-sys-color-on-tertiary-container);
+    --gold-faint: var(--md-sys-color-tertiary-container);
+    --gold-hair: var(--md-sys-color-outline-variant);
+    --bone: var(--md-sys-color-background);
+    --cream: var(--md-sys-color-surface-container-low);
+    --card-bg: var(--md-sys-color-surface);
+    --ink: var(--md-sys-color-on-surface);
+    --ink-soft: var(--md-sys-color-on-surface-variant);
+    --muted: var(--md-sys-color-on-surface-variant);
+    --line: var(--md-sys-color-outline-variant);
+    --nav-bg: var(--md-sys-color-surface-container);
+    --input-bg: var(--md-sys-color-surface);
+    --primary: var(--md-sys-color-primary);
+    --primary-dark: var(--md-sys-color-primary-container);
+    --primary-light: var(--md-sys-color-primary-container);
+    --success: var(--md-sys-color-tertiary);
+    --success-light: var(--md-sys-color-tertiary-container);
+    --warning: var(--md-sys-color-tertiary);
+    --warning-light: var(--md-sys-color-tertiary-container);
+    --danger: var(--md-sys-color-error);
+    --danger-light: var(--md-sys-color-error-container);
+    --balance: var(--md-sys-color-primary);
+    --radius: var(--md-sys-shape-corner-medium);
+    --radius-sm: var(--md-sys-shape-corner-small);
+    --shadow: var(--md-sys-elevation-1);
+    --shadow-md: var(--md-sys-elevation-2);
+    --shadow-lg: var(--md-sys-elevation-3);
+    --text-muted: var(--md-sys-color-on-surface-variant);
+}
+body, h1, h2, h3, h4, h5, h6, button, input, select, textarea {
+    font-family: var(--md-sys-typescale-font);
+}
+h1, h2, h3 { font-weight: 600; }
+
+/* ============================================================
+   Design tokens — Material 3 (proposed starter)
+   Vanilla, liviano. Inter + Material Symbols.
+   Dark mode via [data-theme] y prefers-color-scheme.
+   ============================================================ */
+
+:root {
+    /* ---- Color: GitHub-like (light) ---- */
+    --md-sys-color-primary: #1f2328;
+    --md-sys-color-on-primary: #ffffff;
+    --md-sys-color-primary-container: #eaeef2;
+    --md-sys-color-on-primary-container: #1f2328;
+
+    --md-sys-color-secondary: #57606a;
+    --md-sys-color-on-secondary: #ffffff;
+    --md-sys-color-secondary-container: #eaeef2;
+    --md-sys-color-on-secondary-container: #24292f;
+
+    --md-sys-color-tertiary: #57606a;
+    --md-sys-color-on-tertiary: #ffffff;
+    --md-sys-color-tertiary-container: #eaeef2;
+    --md-sys-color-on-tertiary-container: #1f2328;
+
+    --md-sys-color-error: #cf222e;
+    --md-sys-color-on-error: #ffffff;
+    --md-sys-color-error-container: #ffebe9;
+    --md-sys-color-on-error-container: #82071e;
+
+    --md-sys-color-background: #ffffff;
+    --md-sys-color-on-background: #1f2328;
+    --md-sys-color-surface: #ffffff;
+    --md-sys-color-on-surface: #1f2328;
+    --md-sys-color-surface-variant: #f6f8fa;
+    --md-sys-color-on-surface-variant: #57606a;
+    --md-sys-color-outline: #d0d7de;
+    --md-sys-color-outline-variant: #d8dee4;
+
+    --md-sys-color-surface-container-lowest: #ffffff;
+    --md-sys-color-surface-container-low: #f6f8fa;
+    --md-sys-color-surface-container: #f6f8fa;
+    --md-sys-color-surface-container-high: #eaeef2;
+    --md-sys-color-surface-container-highest: #d0d7de;
+
+    /* ---- Typography ---- */
+    --md-sys-typescale-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+    --md-sys-display-font: 'Inter', system-ui, sans-serif;
+    --md-sys-typescale-display-large: 700 57px/64px var(--md-sys-typescale-font);
+    --md-sys-typescale-headline-medium: 600 28px/36px var(--md-sys-typescale-font);
+    --md-sys-typescale-title-large: 600 22px/28px var(--md-sys-typescale-font);
+    --md-sys-typescale-title-medium: 600 16px/24px var(--md-sys-typescale-font);
+    --md-sys-typescale-body-large: 400 16px/24px var(--md-sys-typescale-font);
+    --md-sys-typescale-body-medium: 400 14px/20px var(--md-sys-typescale-font);
+    --md-sys-typescale-label-large: 500 14px/20px var(--md-sys-typescale-font);
+
+    /* ---- Shape ---- */
+    --md-sys-shape-corner-extra-small: 4px;
+    --md-sys-shape-corner-small: 6px;
+    --md-sys-shape-corner-medium: 6px;
+    --md-sys-shape-corner-large: 8px;
+    --md-sys-shape-corner-full: 9999px;
+
+    /* ---- Elevation (shadows) ---- */
+    --md-sys-elevation-1: 0 1px 2px rgba(0,0,0,.08), 0 1px 3px rgba(0,0,0,.06);
+    --md-sys-elevation-2: 0 2px 6px rgba(0,0,0,.10), 0 1px 3px rgba(0,0,0,.08);
+    --md-sys-elevation-3: 0 4px 12px rgba(0,0,0,.12), 0 2px 4px rgba(0,0,0,.10);
+
+    /* ---- Spacing (4px base) ---- */
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+    --space-8: 32px;
+    --space-10: 40px;
+    --space-12: 48px;
+
+    /* ---- Breakpoints (reference) ---- */
+    --bp-sm: 600px;
+    --bp-md: 905px;
+    --bp-lg: 1240px;
+    --bp-xl: 1440px;
+
+    /* ---- Density: confortable ---- */
+    --density-row-height: 52px;
+    --density-control-height: 40px;
+}
+
+/* Dark mode */
+:root[data-theme="dark"],
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        --md-sys-color-primary: #f0f6fc;
+        --md-sys-color-on-primary: #0d1117;
+        --md-sys-color-primary-container: #30363d;
+        --md-sys-color-on-primary-container: #f0f6fc;
+
+        --md-sys-color-secondary: #8b949e;
+        --md-sys-color-on-secondary: #0d1117;
+        --md-sys-color-secondary-container: #21262d;
+        --md-sys-color-on-secondary-container: #c9d1d9;
+
+        --md-sys-color-tertiary: #8b949e;
+        --md-sys-color-on-tertiary: #0d1117;
+        --md-sys-color-tertiary-container: #30363d;
+        --md-sys-color-on-tertiary-container: #c9d1d9;
+
+        --md-sys-color-error: #f85149;
+        --md-sys-color-on-error: #0d1117;
+        --md-sys-color-error-container: #da3633;
+        --md-sys-color-on-error-container: #ffffff;
+
+        --md-sys-color-background: #0d1117;
+        --md-sys-color-on-background: #c9d1d9;
+        --md-sys-color-surface: #161b22;
+        --md-sys-color-on-surface: #c9d1d9;
+        --md-sys-color-surface-variant: #21262d;
+        --md-sys-color-on-surface-variant: #8b949e;
+        --md-sys-color-outline: #30363d;
+        --md-sys-color-outline-variant: #21262d;
+
+        --md-sys-color-surface-container-lowest: #010409;
+        --md-sys-color-surface-container-low: #0d1117;
+        --md-sys-color-surface-container: #161b22;
+        --md-sys-color-surface-container-high: #21262d;
+        --md-sys-color-surface-container-highest: #30363d;
+    }
+}
+
+:root[data-theme="dark"] {
+    --md-sys-color-primary: #aec6ff;
+    --md-sys-color-on-primary: #002e69;
+    --md-sys-color-primary-container: #004494;
+    --md-sys-color-on-primary-container: #d8e2ff;
+
+    --md-sys-color-secondary: #bbc7db;
+    --md-sys-color-on-secondary: #253140;
+    --md-sys-color-secondary-container: #3b4858;
+    --md-sys-color-on-secondary-container: #d7e3f7;
+
+    --md-sys-color-tertiary: #d6bee4;
+    --md-sys-color-on-tertiary: #3b2948;
+    --md-sys-color-tertiary-container: #523f5f;
+    --md-sys-color-on-tertiary-container: #f2daff;
+
+    --md-sys-color-error: #ffb4ab;
+    --md-sys-color-on-error: #690005;
+    --md-sys-color-error-container: #93000a;
+    --md-sys-color-on-error-container: #ffdad6;
+
+    --md-sys-color-background: #1a1b1f;
+    --md-sys-color-on-background: #e3e2e6;
+    --md-sys-color-surface: #1a1b1f;
+    --md-sys-color-on-surface: #e3e2e6;
+    --md-sys-color-surface-variant: #44474f;
+    --md-sys-color-on-surface-variant: #c4c6d0;
+    --md-sys-color-outline: #8e9099;
+    --md-sys-color-outline-variant: #44474f;
+
+    --md-sys-color-surface-container-lowest: #0f1013;
+    --md-sys-color-surface-container-low: #1e1f23;
+    --md-sys-color-surface-container: #222327;
+    --md-sys-color-surface-container-high: #2d2e32;
+    --md-sys-color-surface-container-highest: #38393d;
+}

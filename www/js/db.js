@@ -131,7 +131,21 @@ const DB = {
 
     // === Propietarios ===
     getPropietarios() {
-        return this._load().propietarios;
+        const data = this._load();
+        const props = data.propietarios || [];
+        // Recalcular coeficientes para que siempre sumen 100%
+        const totalM2 = props.reduce((s, p) => s + (Number(p.m2) || 0), 0);
+        props.forEach(p => {
+            p.coeficiente = totalM2 > 0 ? (Number(p.m2) || 0) / totalM2 * 100 : 0;
+            p.coeficiente = Math.round(p.coeficiente * 100) / 100;
+        });
+        // Ajuste de residual en el último
+        const suma = props.reduce((s, p) => s + p.coeficiente, 0);
+        const residual = Math.round((100 - suma) * 100) / 100;
+        if (residual !== 0 && props.length > 0) {
+            props[props.length - 1].coeficiente = Math.round((props[props.length - 1].coeficiente + residual) * 100) / 100;
+        }
+        return props;
     },
 
     getPropietario(id) {
@@ -147,13 +161,40 @@ const DB = {
             propietario.id = this._nextId(data, 'propietario');
             data.propietarios.push(propietario);
         }
+        // Recalcular coeficientes de TODOS los departamentos para que sumen 100%
+        const totalM2 = data.propietarios.reduce((s, p) => s + (Number(p.m2) || 0), 0);
+        data.propietarios.forEach(p => {
+            p.coeficiente = totalM2 > 0 ? (Number(p.m2) || 0) / totalM2 * 100 : 0;
+            // Redondear a 2 decimales
+            p.coeficiente = Math.round(p.coeficiente * 100) / 100;
+        });
+        // Ajuste de céntimos: el último departamento absorbe el residual
+        const sumaCoef = data.propietarios.reduce((s, p) => s + p.coeficiente, 0);
+        const residual = Math.round((100 - sumaCoef) * 100) / 100;
+        if (residual !== 0 && data.propietarios.length > 0) {
+            const ultimo = data.propietarios[data.propietarios.length - 1];
+            ultimo.coeficiente = Math.round((ultimo.coeficiente + residual) * 100) / 100;
+        }
         this._save(data);
-        return propietario;
+        // Devolver el propietario actualizado con su nuevo coeficiente
+        return data.propietarios.find(p => p.id === propietario.id) || propietario;
     },
 
     deletePropietario(id) {
         const data = this._load();
         data.propietarios = data.propietarios.filter(p => p.id !== id);
+        // Recalcular coeficientes de los restantes
+        const totalM2 = data.propietarios.reduce((s, p) => s + (Number(p.m2) || 0), 0);
+        data.propietarios.forEach(p => {
+            p.coeficiente = totalM2 > 0 ? (Number(p.m2) || 0) / totalM2 * 100 : 0;
+            p.coeficiente = Math.round(p.coeficiente * 100) / 100;
+        });
+        const sumaCoef = data.propietarios.reduce((s, p) => s + p.coeficiente, 0);
+        const residual = Math.round((100 - sumaCoef) * 100) / 100;
+        if (residual !== 0 && data.propietarios.length > 0) {
+            const ultimo = data.propietarios[data.propietarios.length - 1];
+            ultimo.coeficiente = Math.round((ultimo.coeficiente + residual) * 100) / 100;
+        }
         this._save(data);
     },
 
@@ -500,6 +541,19 @@ const DB = {
         this._save(data);
     },
 
+    getAguaFechas(mes) {
+        const data = this._load();
+        if (data.aguaFecha && data.aguaFecha[mes]) return data.aguaFecha[mes];
+        return { inicio: '', fin: '' };
+    },
+
+    saveAguaFechas(mes, inicio, fin) {
+        const data = this._load();
+        if (!data.aguaFecha) data.aguaFecha = {};
+        data.aguaFecha[mes] = { inicio: inicio || '', fin: fin || '' };
+        this._save(data);
+    },
+
     // === Personal (porteros, descansero, mantenimiento) ===
     ROLES_PERSONAL: {
         portero: { label: 'Portero', categoria: 'porteria' },
@@ -681,6 +735,33 @@ const DB = {
     },
 
     // === Luz (recibo mensual) ===
+    getLuz(mes) {
+        const data = this._load();
+        if (!data.luz) data.luz = {};
+        return data.luz[mes] || {};
+    },
+
+    saveLuz(mes, area, lecturaIni, lecturaFin) {
+        const data = this._load();
+        if (!data.luz) data.luz = {};
+        if (!data.luz[mes]) data.luz[mes] = {};
+        data.luz[mes][area] = { lecturaIni, lecturaFin };
+        this._save(data);
+    },
+
+    getLuzFechas(mes) {
+        const data = this._load();
+        if (data.luzFecha && data.luzFecha[mes]) return data.luzFecha[mes];
+        return { inicio: '', fin: '' };
+    },
+
+    saveLuzFechas(mes, inicio, fin) {
+        const data = this._load();
+        if (!data.luzFecha) data.luzFecha = {};
+        data.luzFecha[mes] = { inicio: inicio || '', fin: fin || '' };
+        this._save(data);
+    },
+
     getGastoLuz(mes) {
         return this._load().gastos.find(g => g.origen === 'luz' && g.mes === mes) || null;
     },

@@ -1,7 +1,7 @@
 /* Overrides GitHub-like */
 .material-symbols-outlined { color: inherit; font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24; }
 body { background: var(--md-sys-color-background); color: var(--md-sys-color-on-background); }
-#app-header { background: var(--md-sys-color-surface); border-bottom: 1px solid var(--md-sys-color-outline); }
+#app-header { background: var(--md-sys-color-surface-container); color: var(--md-sys-color-on-surface); border-bottom: 1px solid var(--md-sys-color-outline); }
 #app-header h1 { font-weight: 600; font-size: 16px; }
 .screen-content { color: var(--md-sys-color-on-background); }
 .card, .login-card { background: var(--md-sys-color-surface); border: 1px solid var(--md-sys-color-outline); box-shadow: 0 1px 0 rgba(31,35,40,.04); }
@@ -15,3 +15,57 @@ input::placeholder { color: var(--md-sys-color-on-surface-variant); }
 .list-item-subtitle { color: var(--md-sys-color-on-surface-variant); }
 h1, h2, h3 { font-weight: 600; letter-spacing: -0.01em; }
 .nav-icon.material-symbols-outlined { font-size: 22px; color: inherit; }
+
+/* Header controls: legibles en claro/oscuro */
+#edificio-select.edificio-select{
+  background:var(--md-sys-color-surface);
+  color:var(--md-sys-color-on-surface);
+  border:1px solid var(--md-sys-color-outline);
+  border-radius:8px;
+  padding:6px 10px;
+  font-size:13px;
+  max-width:40vw;
+}
+#edificio-select.edificio-select:focus{outline:2px solid var(--md-sys-color-primary);outline-offset:1px}
+#edificio-select.edificio-select option{color:var(--md-sys-color-on-surface);background:var(--md-sys-color-surface)}
+.user-chip{
+  background:var(--md-sys-color-surface-container-high);
+  color:var(--md-sys-color-on-surface);
+  border:1px solid var(--md-sys-color-outline);
+  padding:4px 10px;border-radius:20px;font-size:12px;font-weight:500;
+}
+
+/* Controles de formulario: etiquetas y campos distinguibles */
+label{color:var(--md-sys-color-on-surface);font-weight:500}
+input,select,textarea{
+  color:var(--md-sys-color-on-surface);
+  background:var(--md-sys-color-surface);
+  border:1px solid var(--md-sys-color-outline);
+}
+input:focus,select:focus,textarea:focus{
+  outline:2px solid var(--md-sys-color-primary);
+  outline-offset:1px;
+  border-color:var(--md-sys-color-primary);
+}
+select{appearance:auto}
+
+/* Alerta de déficit en dashboard */
+.dashboard-alert{border-radius:10px;padding:14px 16px;margin-bottom:16px;border:1px solid var(--md-sys-color-error,#cf222e);background:var(--md-sys-color-error-container,#ffebe9);color:var(--md-sys-color-on-error-container,#82071e)}
+.dashboard-alert .dashboard-alert-title{font-weight:700;font-size:15px;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.dashboard-alert .dashboard-alert-body{font-size:14px;line-height:1.4}
+.dashboard-alert .dashboard-alert-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.dashboard-alert .btn{background:var(--md-sys-color-surface);color:var(--md-sys-color-on-surface);border:1px solid var(--md-sys-color-outline)}
+.dashboard-alert .btn:hover{background:var(--md-sys-color-surface-container-high)}
+
+/* Estado de cuenta: modal ancho para evitar scroll horizontal */
+#modal-estado-cuenta .modal-content{
+  max-width:min(1120px,96vw);
+  width:min(1120px,96vw);
+}
+#modal-estado-cuenta .ec-table-wrap{overflow-x:visible}
+#modal-estado-cuenta .ec-table{font-size:13px}
+#modal-estado-cuenta .ec-table th,#modal-estado-cuenta .ec-table td{padding:8px 10px;white-space:nowrap}
+@media(max-width:900px){
+  #modal-estado-cuenta .ec-table-wrap{overflow-x:auto}
+  #modal-estado-cuenta .ec-table th,#modal-estado-cuenta .ec-table td{white-space:normal}
+}

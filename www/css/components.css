@@ -99,3 +99,135 @@
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+/* Display de valores calculados (no editables) */
+.form-display {
+    display: block;
+    padding: var(--space-2) var(--space-3);
+    background: var(--md-sys-color-surface-container-low);
+    border: 1px solid var(--md-sys-color-outline-variant);
+    border-radius: var(--md-sys-shape-corner-small);
+    font-variant-numeric: tabular-nums;
+    color: var(--md-sys-color-on-surface-variant);
+    font-weight: 600;
+}
+
+/* Dashboard (admin reorg) */
+.dashboard-kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-4); margin-bottom: var(--space-4); }
+@media (max-width: 900px) { .dashboard-kpis { grid-template-columns: repeat(2, 1fr); } }
+.kpi-card { padding: var(--space-4); }
+.kpi-label { font-size: 12px; color: var(--md-sys-color-on-surface-variant); text-transform: uppercase; letter-spacing: .04em; }
+.kpi-value { font: var(--md-sys-typescale-title-large); font-weight: 700; margin-top: var(--space-1); font-variant-numeric: tabular-nums; }
+.kpi-value-row { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); margin-top: var(--space-1); }
+.kpi-value-row .kpi-value { margin-top: 0; }
+
+.semaforo-card { margin-bottom: var(--space-4); padding: var(--space-4); transition: background .15s, border-color .15s; }
+.semaforo-title { font: var(--md-sys-typescale-title-medium); margin: 0 0 var(--space-3); }
+.semaforo-alert-msg { display: none; align-items: center; justify-content: center; gap: var(--space-2); font-weight: 700; text-align: center; margin-bottom: var(--space-3); padding: var(--space-2); border-radius: var(--md-sys-shape-corner-small); }
+.semaforo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-3); text-align: center; }
+.semaforo-col { background: var(--md-sys-color-surface-container-low); border: 1px solid var(--md-sys-color-outline-variant); border-radius: var(--md-sys-shape-corner-medium); padding: var(--space-3); }
+.semaforo-lbl { font-size: 12px; color: var(--md-sys-color-on-surface-variant); margin-bottom: var(--space-1); }
+.semaforo-val { font: var(--md-sys-typescale-title-large); font-weight: 700; font-variant-numeric: tabular-nums; }
+.semaforo-card.is-ok { background: #ecfdf5; border-color: #10B981; }
+.semaforo-card.is-ok .semaforo-title, .semaforo-card.is-ok .semaforo-lbl, .semaforo-card.is-ok .semaforo-val { color: #065f46; }
+.semaforo-card.is-ok .semaforo-alert-msg { display: flex; color: #065f46; }
+.semaforo-card.is-warn { background: #fef3c7; border-color: #F59E0B; }
+.semaforo-card.is-warn .semaforo-title, .semaforo-card.is-warn .semaforo-lbl, .semaforo-card.is-warn .semaforo-val { color: #92400e; }
+.semaforo-card.is-warn .semaforo-alert-msg { display: flex; color: #92400e; }
+.semaforo-card.is-error { background: #fee2e2; border-color: #EF4444; }
+.semaforo-card.is-error .semaforo-title, .semaforo-card.is-error .semaforo-lbl, .semaforo-card.is-error .semaforo-val { color: #991b1b; }
+.semaforo-card.is-error .semaforo-alert-msg { display: flex; color: #991b1b; }
+
+.deptos-table { width: 100%; border-collapse: collapse; }
+.deptos-table th, .deptos-table td { padding: var(--space-3) var(--space-2); border-bottom: 1px solid var(--md-sys-color-outline-variant); text-align: left; font: var(--md-sys-typescale-body-medium); }
+.deptos-table th { background: var(--md-sys-color-surface-container-low); font-weight: 600; font-size: 13px; color: var(--md-sys-color-on-surface-variant); }
+.deptos-table .num { text-align: left; font-variant-numeric: tabular-nums; }
+.badge-status { display: inline-block; padding: 2px 10px; border-radius: 9999px; font-size: 12px; font-weight: 600; }
+.badge-status.ok { background: #d1fae5; color: #065f46; }
+.badge-status.debe { background: #fee2e2; color: #991b1b; }
+.badge-status.parcial { background: #fef3c7; color: #92400e; }
+
+/* Calculo */
+.calc-table tfoot td { font-weight: 700; background: var(--md-sys-color-surface-container-low); }
+.matrix-table th:first-child, .matrix-table td:first-child { text-align: center; }
+.matrix-table th:nth-child(2), .matrix-table td:nth-child(2) { text-align: center; }
+
+/* Gastos (reorg) */
+.gastos-tabs { margin-bottom: var(--space-4); }
+.gastos-panel { display: none; }
+.gastos-panel.active { display: block; }
+.gastos-group { margin-bottom: var(--space-5); }
+.gastos-group-title { font-size: 13px; color: var(--md-sys-color-on-surface); text-transform: uppercase; letter-spacing: .04em; margin: 0 0 var(--space-2); padding: var(--space-2) var(--space-3); background: var(--md-sys-color-surface-container-high); border-left: 3px solid var(--md-sys-color-primary); border-radius: 4px; font-weight: 700; }
+.gasto-row { display: grid; grid-template-columns: 1fr 160px 80px; align-items: center; padding: var(--space-3) 0; border-bottom: 1px solid var(--md-sys-color-outline-variant); gap: var(--space-3); }
+.gasto-row .name { font-weight: 500; }
+.gasto-row .freq { font-size: 12px; color: var(--md-sys-color-on-surface-variant); }
+.gasto-row .amt { font-variant-numeric: tabular-nums; font-weight: 600; text-align: left; }
+.gasto-row .acts { text-align: right; }
+.gasto-row .acts button { background: none; border: none; cursor: pointer; padding: 4px; font-size: 14px; color: var(--md-sys-color-on-surface-variant); }
+.gastos-inline-form { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr auto; gap: var(--space-3); align-items: end; margin-bottom: var(--space-4); }
+.gastos-inline-form .form-group { margin: 0; }
+.gastos-inline-form label { font-size: 12px; color: var(--md-sys-color-on-surface-variant); display: block; margin-bottom: 4px; }
+.gastos-inline-form input, .gastos-inline-form select { width: 100%; }
+@media (max-width: 900px) { .gastos-inline-form { grid-template-columns: 1fr 1fr; } .gasto-row { grid-template-columns: 1fr 120px 70px; } }
+
+/* Departamentos (reorg) */
+.deptos-table-wrap { border: 1px solid var(--md-sys-color-outline-variant); border-radius: 8px; overflow: auto; background: var(--md-sys-color-surface); }
+.deptos-table { width: 100%; border-collapse: collapse; }
+.deptos-table th, .deptos-table td { padding: 10px 12px; border-bottom: 1px solid var(--md-sys-color-outline-variant); text-align: left; font-size: 14px; vertical-align: middle; }
+.deptos-table th { font-size: 12px; color: var(--md-sys-color-on-surface-variant); text-transform: uppercase; letter-spacing: .03em; font-weight: 600; background: var(--md-sys-color-surface-container-low); }
+.deptos-table tr:last-child td { border-bottom: none; }
+.deptos-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+.deptos-table .num-left { text-align: left; font-variant-numeric: tabular-nums; }
+.deptos-table tfoot td { font-weight: 600; background: var(--md-sys-color-surface-container-low); }
+.deptos-actions { display: inline-flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.deptos-actions button, .deptos-actions .btn-icon-action { background: none; border: 1px solid transparent; border-radius: 6px; cursor: pointer; color: var(--md-sys-color-on-surface-variant); padding: 4px; width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center; line-height: 1; }
+.deptos-actions button:hover { background: var(--md-sys-color-surface-container-high); color: var(--md-sys-color-on-surface); }
+.deptos-actions button.primary { background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); border-color: var(--md-sys-color-primary); }
+.deptos-actions button svg { display: block; }
+.legend-icon { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border: 1px solid var(--md-sys-color-outline-variant); border-radius: 6px; color: var(--md-sys-color-on-surface-variant); flex: 0 0 30px; }
+.legend-icon-primary { background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); border-color: var(--md-sys-color-primary); }
+
+/* Gastos — mejora UI/UX (recurrentes/del mes/consumos) */
+.gasto-chip{display:inline-flex;align-items:center;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600;background:var(--md-sys-color-surface-container-high);color:var(--md-sys-color-on-surface-variant);margin-right:4px;white-space:nowrap}
+.gasto-chip-ok{background:var(--md-sys-color-success-container,var(--success-bg,#dafbe1));color:var(--md-sys-color-on-success-container,var(--success,#1a7f37))}
+.gasto-chip-warn{background:var(--md-sys-color-warning-container,var(--warn-bg,#fff8c5));color:var(--md-sys-color-on-warning-container,var(--warn,#9a6700))}
+#screen-gastos .gasto-row{grid-template-columns:minmax(180px,1.4fr) minmax(160px,1fr) auto auto}
+@media(max-width:720px){#screen-gastos .gasto-row{grid-template-columns:1fr auto;row-gap:6px}#screen-gastos .gasto-row .luz-status{grid-column:1 / -1}}
+
+/* Resúmenes/KPIs en fila (Consumos, Gastos, etc.) */
+.calculo-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;align-items:stretch}
+.calculo-summary .kpi-card,.calculo-summary .summary-item{border:1px solid var(--md-sys-color-outline-variant);border-radius:8px;padding:10px 12px;background:var(--md-sys-color-surface);min-width:0}
+.calculo-summary .kpi-label,.calculo-summary .label{font-size:12px;color:var(--md-sys-color-on-surface-variant)}
+.calculo-summary .kpi-value,.calculo-summary .value{font-size:18px;font-weight:700;font-variant-numeric:tabular-nums}
+
+/* Gastos: resumen en 4 recuadros con énfasis en Total del mes */
+#gastos-resumen.calculo-summary{grid-template-columns:repeat(4,minmax(0,1fr))}
+#gastos-resumen .summary-item{display:flex;flex-direction:column;justify-content:center;min-height:72px}
+#gastos-resumen .summary-item .label{font-size:13px;margin-bottom:4px}
+#gastos-resumen .summary-item .value{font-size:22px;line-height:1.2}
+#gastos-resumen .summary-item.summary-diff{background:var(--md-sys-color-primary-container,var(--info-bg,#ddf4ff));border-color:var(--md-sys-color-primary,var(--info,#0969da));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--md-sys-color-primary,#0969da) 20%,transparent)}
+#gastos-resumen .summary-item.summary-diff .label{color:var(--md-sys-color-on-primary-container,var(--on-bg,#1f2328));font-weight:600}
+#gastos-resumen .summary-item.summary-diff .value{font-size:28px;color:var(--md-sys-color-on-primary-container,var(--on-bg,#1f2328))}
+@media(max-width:900px){#gastos-resumen.calculo-summary{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){#gastos-resumen.calculo-summary{grid-template-columns:1fr}}
+
+/* Período de lectura (Agua/Gas/Luz) - en una sola línea, sin scroll */
+.consumo-periodo{display:flex;align-items:center;gap:10px;flex-wrap:nowrap;padding:12px 14px;background:var(--md-sys-color-surface-container-low);border:1px solid var(--md-sys-color-outline-variant);border-radius:8px;width:100%;min-width:100%;max-width:none;box-sizing:border-box;overflow:visible;align-self:stretch}
+.consumo-periodo-title{font-size:13px;font-weight:600;margin-right:8px;white-space:nowrap}
+.consumo-periodo-sep{color:var(--md-sys-color-on-surface-variant);margin:0 2px}
+.consumo-periodo .luz-status{white-space:nowrap}
+.consumo-periodo select{padding:7px 10px;border:1px solid var(--md-sys-color-outline);border-radius:6px;font:13px var(--md-sys-typescale-font,inherit);background:var(--md-sys-color-surface);min-width:0}
+.consumo-periodo select.periodo-dini,.consumo-periodo select.periodo-dfin{width:110px !important;min-width:110px;flex:0 0 110px}
+.consumo-periodo select.periodo-mini,.consumo-periodo select.periodo-mfin{width:140px !important;min-width:140px;flex:0 0 140px}
+@media(max-width:640px){.consumo-periodo{flex-wrap:wrap}.consumo-periodo select.periodo-dini,.consumo-periodo select.periodo-dfin,.consumo-periodo select.periodo-mini,.consumo-periodo select.periodo-mfin{flex:1 1 120px;width:auto !important;min-width:120px}}
+
+
+/* Cálculo mensual - mejora */
+#calculo-resumen{grid-template-columns:repeat(4,minmax(0,1fr))}
+#calculo-resumen .summary-item{display:flex;flex-direction:column;justify-content:center;min-height:78px}
+#calculo-resumen .summary-item .label{font-size:13px;margin-bottom:4px}
+#calculo-resumen .summary-item .value{font-size:22px;line-height:1.2}
+#calculo-resumen .summary-item.emph{background:var(--md-sys-color-primary-container,var(--info-bg,#ddf4ff));border-color:var(--md-sys-color-primary,var(--info,#0969da))}
+#calculo-resumen .summary-item.emph .label{font-weight:600}
+#calculo-resumen .summary-item.emph .value{font-size:24px}
+@media(max-width:980px){#calculo-resumen{grid-template-columns:repeat(2,minmax(0,1fr))}.calculo-bottom{grid-template-columns:1fr !important}}
+@media(max-width:520px){#calculo-resumen{grid-template-columns:1fr}}
