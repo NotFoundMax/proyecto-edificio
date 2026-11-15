@@ -5,23 +5,27 @@ const DB = {
                 nombre: 'Edificio Residencial',
                 direccion: '',
                 moneda: 'S/.',
-                mesInicio: 1
+                mesInicio: 1,
+                aguaModalidad: 'medidor', // medidor | coeficiente | ocupantes
+                luzModalidad: 'medidor' // medidor | coeficiente | ocupantes
             },
             propietarios: [
-                { id: 1, nombre: '101', apellido: '', departamento: '101', coeficiente: 13.89, m2: 141.29, cuotaMensual: 0, email: '' },
-                { id: 2, nombre: '201', apellido: '', departamento: '201', coeficiente: 19.07, m2: 202.72, cuotaMensual: 0, email: '' },
-                { id: 3, nombre: '301', apellido: '', departamento: '301', coeficiente: 19.38, m2: 200.56, cuotaMensual: 0, email: '' },
-                { id: 4, nombre: '401', apellido: '', departamento: '401', coeficiente: 15.72, m2: 150.51, cuotaMensual: 0, email: '' },
-                { id: 5, nombre: '501', apellido: '', departamento: '501', coeficiente: 31.31, m2: 345.90, cuotaMensual: 0, email: '' }
+                { id: 1, nombre: '101', apellido: '', departamento: '101', coeficiente: 13.57, m2: 141.29, cuotaMensual: 0, email: '', ocupacion: 'propietario', residentes: 1 },
+                { id: 2, nombre: '201', apellido: '', departamento: '201', coeficiente: 19.47, m2: 202.72, cuotaMensual: 0, email: '', ocupacion: 'propietario', residentes: 1 },
+                { id: 3, nombre: '301', apellido: '', departamento: '301', coeficiente: 19.27, m2: 200.56, cuotaMensual: 0, email: '', ocupacion: 'propietario', residentes: 1 },
+                { id: 4, nombre: '401', apellido: '', departamento: '401', coeficiente: 14.46, m2: 150.51, cuotaMensual: 0, email: '', ocupacion: 'propietario', residentes: 1 },
+                { id: 5, nombre: '501', apellido: '', departamento: '501', coeficiente: 33.23, m2: 345.90, cuotaMensual: 0, email: '', ocupacion: 'propietario', residentes: 1 }
             ],
             gastos: [],
             pagos: [],
             personal: [],
             jardineria: [],
             aguaFacturas: {},
+            luzFacturas: {},
             cajaChica: {},
             cajaMes: {},
-            nextId: { propietario: 6, gasto: 1, pago: 1, personal: 1, jardineria: 1 }
+            boletas: [],
+            nextId: { propietario: 6, gasto: 1, pago: 1, personal: 1, jardineria: 1, boleta: 1 }
         };
     },
 
@@ -36,6 +40,8 @@ const DB = {
             });
             if (!data.edificio) data.edificio = this._default().edificio;
             if (!data.edificio.moneda) data.edificio.moneda = 'S/.';
+            if (!data.edificio.aguaModalidad) data.edificio.aguaModalidad = 'medidor';
+            if (!data.edificio.luzModalidad) data.edificio.luzModalidad = data.edificio.aguaModalidad || 'medidor';
             if (!data.cajaChica) data.cajaChica = {};
             if (!data.cajaMes) data.cajaMes = {};
             if (!data.propietarios) data.propietarios = [];
@@ -44,7 +50,10 @@ const DB = {
             if (!data.personal) data.personal = [];
             if (!data.jardineria) data.jardineria = [];
             if (!data.aguaFacturas) data.aguaFacturas = {};
+            if (!data.luzFacturas) data.luzFacturas = {};
             if (!data.gasFecha) data.gasFecha = {};
+            if (!data.boletas) data.boletas = [];
+            if (!data.nextId.boleta) data.nextId.boleta = 1;
 
             data.gastos.forEach(g => {
                 if (!g.mes) {
@@ -56,6 +65,7 @@ const DB = {
                         g.mes = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
                     }
                 }
+                if (!g.origenPago) g.origenPago = 'cuenta_general';
             });
 
             // Un edificio creado desde la app arranca vacio: no se le
@@ -72,6 +82,9 @@ const DB = {
             data.propietarios.forEach(p => {
                 if (p.cuotaMensual === undefined) p.cuotaMensual = 0;
                 if (p.apellido === undefined) p.apellido = '';
+                if (p.ocupacion === undefined) p.ocupacion = 'propietario';
+                if (p.residentes === undefined || p.residentes === null || p.residentes === '') p.residentes = 1;
+                p.residentes = Math.max(0, parseInt(p.residentes, 10) || 0);
             });
 
             data.personal.forEach(p => {
@@ -138,6 +151,8 @@ const DB = {
         props.forEach(p => {
             p.coeficiente = totalM2 > 0 ? (Number(p.m2) || 0) / totalM2 * 100 : 0;
             p.coeficiente = Math.round(p.coeficiente * 100) / 100;
+            if (p.residentes == null) p.residentes = 1;
+            if (!p.ocupacion) p.ocupacion = 'propietario';
         });
         // Ajuste de residual en el último
         const suma = props.reduce((s, p) => s + p.coeficiente, 0);
@@ -326,6 +341,15 @@ const DB = {
     },
 
     // === Cierre de Mes ===
+    _shiftMes(mes, delta) {
+        const [y, m] = (mes || '').split('-').map(Number);
+        if (!y || !m) return mes;
+        const d = new Date(y, m - 1 + (delta || 0), 1);
+        const ny = d.getFullYear();
+        const nm = String(d.getMonth() + 1).padStart(2, '0');
+        return `${ny}-${nm}`;
+    },
+
     cerrarMes(mes) {
         const data = this._load();
         if (!data.cajaChica) data.cajaChica = {};
@@ -335,11 +359,91 @@ const DB = {
         const cajaChicaActual = data.cajaChica[mes] || 0;
         const nuevoSaldo = cajaChicaActual + cajaMes;
 
+        // saldo del periodo cerrado
         data.cajaChica[mes] = nuevoSaldo;
         data.cajaMes[mes] = 0;
 
+        // arrastrar saldo/excedente a caja chica del periodo siguiente
+        const mesSiguiente = this._shiftMes(mes, 1);
+        if (mesSiguiente) {
+            const baseSiguiente = Number(data.cajaChica[mesSiguiente] || 0);
+            // si el siguiente no tenía saldo inicial, hereda el saldo cerrado; si ya tenía, se mantiene coherente con el arrastre
+            data.cajaChica[mesSiguiente] = baseSiguiente === 0 ? nuevoSaldo : (baseSiguiente);
+            // asegurar arrastre explícito cuando se cierra: el saldo resultante pasa al siguiente periodo
+            data.cajaChica[mesSiguiente] = nuevoSaldo;
+        }
+
         this._save(data);
+        this.registrarCierreMes(mes, { saldoCajaChica: nuevoSaldo });
         return nuevoSaldo;
+    },
+
+
+    getCierreMes(mes) {
+        const data = this._load();
+        const boletas = (data.boletas || []).filter(b => b.mes === mes);
+        if (boletas.length) return { mes, boletas: boletas.length };
+        const cierres = data.cierres || {};
+        return cierres[mes] || null;
+    },
+
+    isMesCerrado(mes) {
+        return !!this.getCierreMes(mes);
+    },
+
+    registrarCierreMes(mes, info = {}) {
+        const data = this._load();
+        if (!data.cierres) data.cierres = {};
+        data.cierres[mes] = { ...(data.cierres[mes] || {}), mes, cerradoAt: new Date().toISOString(), ...info };
+        this._save(data);
+        return data.cierres[mes];
+    },
+
+    // === Boletas (emitidas al cerrar periodo) ===
+    getBoletas(mes) {
+        const data = this._load();
+        const all = data.boletas || [];
+        if (!mes) return all;
+        return all.filter(b => b.mes === mes);
+    },
+
+    saveBoletasMes(mes, boletas) {
+        const data = this._load();
+        if (!data.boletas) data.boletas = [];
+        // reemplazar boletas del periodo (idempotente)
+        data.boletas = data.boletas.filter(b => b.mes !== mes);
+        boletas.forEach(b => {
+            if (!b.id) b.id = this._nextId(data, 'boleta');
+            b.mes = mes;
+            data.boletas.push(b);
+        });
+        this._save(data);
+        return data.boletas.filter(b => b.mes === mes);
+    },
+
+    emitirBoletasPeriodo(mes, calc) {
+        if (!calc || !calc.rows) return [];
+        const emitidaAt = new Date().toISOString();
+        const boletas = calc.rows.map(r => ({
+            mes,
+            propietarioId: r.id,
+            departamento: r.depto || r.departamento || '',
+            nombre: [r.nombre, r.apellido].filter(Boolean).join(' ').trim(),
+            coeficiente: Number(r.coef || r.coeficiente || 0),
+            m2: Number(r.m2 || 0),
+            comunes: Number(r.comunes || 0),
+            comunesNormales: Number(r.comunesNormales || 0),
+            extraordinarias: Number(r.extraordinarias || 0),
+            agua: Number(r.agua || 0),
+            gas: Number(r.gas || 0),
+            consumos: Number(r.consumos || 0),
+            cargo: Number(r.cargo || r.total || 0),
+            pagado: Number(r.pagado || 0),
+            saldo: Number(r.saldo || 0),
+            estado: r.estado || (Number(r.saldo||0) <= 0.01 ? 'Pagado' : 'Pendiente'),
+            emitidaAt
+        }));
+        return this.saveBoletasMes(mes, boletas);
     },
 
     // === Mes Actual (persistido para no saltar de mes sin cerrar) ===
@@ -407,6 +511,22 @@ const DB = {
         if (data.aguaFacturas && data.aguaFacturas[from]) {
             data.aguaFacturas[to] = data.aguaFacturas[from];
             delete data.aguaFacturas[from];
+            moved = true;
+        }
+        if (data.luz && data.luz[from]) {
+            if (!data.luz[to]) data.luz[to] = {};
+            Object.assign(data.luz[to], data.luz[from]);
+            delete data.luz[from];
+            moved = true;
+        }
+        if (data.luzFecha && data.luzFecha[from]) {
+            data.luzFecha[to] = data.luzFecha[from];
+            delete data.luzFecha[from];
+            moved = true;
+        }
+        if (data.luzFacturas && data.luzFacturas[from]) {
+            data.luzFacturas[to] = data.luzFacturas[from];
+            delete data.luzFacturas[from];
             moved = true;
         }
         if (data.cajaChica && data.cajaChica[from]) {
@@ -564,8 +684,21 @@ const DB = {
         otros: { label: 'Otros', categoria: 'otros' }
     },
 
-    getPersonal() {
-        return this._load().personal;
+    getPersonal(mes) {
+        const list = this._load().personal || [];
+        if (!mes) return list;
+        return list.filter(p => {
+            const tipo = p.tipo || 'personal';
+            if (tipo === 'personal') {
+                const start = p.mesDesde || p.mes || null;
+                if (!start) return true; // legacy: visible
+                // aplica desde mesDesde en adelante (mensual)
+                return this._gastoAplicaEnMes({ mes: start, frecuencia: 'mensual' }, mes);
+            }
+            const start = p.mesDesde || p.mes || null;
+            if (!start) return true;
+            return this._gastoAplicaEnMes({ mes: start, frecuencia: p.frecuencia || 'mensual' }, mes);
+        });
     },
 
     getPersonalId(id) {
@@ -585,7 +718,7 @@ const DB = {
 
         const now = new Date();
         const currentMes = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-        const mes = item.mesDesde || currentMes;
+        const mes = item.mesDesde || item.mes || currentMes;
         const rol = this.ROLES_PERSONAL[item.rol] || this.ROLES_PERSONAL.otros;
 
         const base = isPersonal
@@ -595,7 +728,19 @@ const DB = {
         if (idx !== -1) {
             const existing = data.gastos[idx];
             if (isPersonal) {
-                data.gastos[idx] = { ...existing, ...base, monto };
+                data.gastos[idx] = {
+                    ...existing,
+                    ...base,
+                    monto,
+                    mes,
+                    fecha: `${mes}-01`,
+                    frecuencia: 'mensual',
+                    division: 'proporcional',
+                    pagado: true,
+                    notas: item.notas || '',
+                    origen: 'sueldo',
+                    personalId: item.id
+                };
             } else {
                 data.gastos[idx] = {
                     ...existing,
@@ -619,9 +764,7 @@ const DB = {
             monto,
             id: this._nextId(data, 'gasto'),
             mes,
-            fecha: isPersonal
-                ? `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
-                : `${mes}-01`,
+            fecha: `${mes}-01`,
             frecuencia: isPersonal ? 'mensual' : (item.frecuencia || 'mensual'),
             division: 'proporcional',
             pagado: true,
@@ -633,6 +776,11 @@ const DB = {
 
     savePersonal(personal) {
         const data = this._load();
+        if (!personal.mesDesde && !personal.id) {
+            // nomina/servicios: por defecto inician en el mes actual del sistema
+            const now = new Date();
+            personal.mesDesde = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+        }
         if (personal.id) {
             const idx = data.personal.findIndex(p => p.id === personal.id);
             if (idx !== -1) data.personal[idx] = { ...data.personal[idx], ...personal };
@@ -653,8 +801,14 @@ const DB = {
     },
 
     // === Jardinería ===
-    getJardineria() {
-        return this._load().jardineria;
+    getJardineria(mes) {
+        const list = this._load().jardineria || [];
+        if (!mes) return list;
+        return list.filter(j => {
+            const f = j.fecha || '';
+            if (!f) return true;
+            return f.slice(0,7) === mes;
+        });
     },
 
     getJardineriaId(id) {
@@ -734,18 +888,38 @@ const DB = {
         this._save(data);
     },
 
-    // === Luz (recibo mensual) ===
+    // === Factura de luz (recibo del mes) ===
+    getFacturaLuz(mes) {
+        const data = this._load();
+        return (data.luzFacturas && data.luzFacturas[mes]) || null;
+    },
+
+    saveFacturaLuz(mes, factura) {
+        const data = this._load();
+        if (!data.luzFacturas) data.luzFacturas = {};
+        data.luzFacturas[mes] = {
+            consumo: factura.consumo,
+            energia: factura.energia,
+            alumbradoPublico: factura.alumbradoPublico,
+            cargoFijo: factura.cargoFijo,
+            igv: factura.igv,
+            igvPct: factura.igvPct
+        };
+        this._save(data);
+    },
+
+    // === Luz (consumo por departamento, similar a agua) ===
     getLuz(mes) {
         const data = this._load();
         if (!data.luz) data.luz = {};
         return data.luz[mes] || {};
     },
 
-    saveLuz(mes, area, lecturaIni, lecturaFin) {
+    saveLuz(mes, depto, lecturaIni, lecturaFin) {
         const data = this._load();
         if (!data.luz) data.luz = {};
         if (!data.luz[mes]) data.luz[mes] = {};
-        data.luz[mes][area] = { lecturaIni, lecturaFin };
+        data.luz[mes][depto] = { lecturaIni, lecturaFin };
         this._save(data);
     },
 
