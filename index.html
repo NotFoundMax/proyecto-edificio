@@ -6,6 +6,7 @@
     <script>
       (function(){try{var t=localStorage.getItem('theme');if(t==='dark'||t==='light'){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();
     </script>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23238636'/%3E%3Ctext x='32' y='42' font-size='34' text-anchor='middle' fill='white' font-family='Arial,sans-serif'%3ELC%3C/text%3E%3C/svg%3E">
     <title>Los Castaños</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/shells.css">
@@ -151,71 +152,94 @@
         <!-- Dashboard -->
         <section id="screen-dashboard" class="screen active">
             <div class="screen-content" style="padding:var(--space-4);">
-                <div class="month-selector" style="display:flex;align-items:center;justify-content:center;gap:var(--space-4);margin-bottom:var(--space-4);">
-                    <button id="btn-prev-month" class="btn btn-text" aria-label="Mes anterior">◀</button>
-                    <span id="current-month-label" style="font:var(--md-sys-typescale-title-large);">Julio 2026</span>
-                    <button id="btn-next-month" class="btn btn-text" aria-label="Mes siguiente">▶</button>
+                <div class="month-selector month-selector-dashboard" data-periodo-header style="display:grid;grid-template-columns:auto auto auto;align-items:center;justify-content:center;column-gap:var(--space-4);row-gap:4px;margin-bottom:var(--space-3);">
+                    <div style="grid-column:2;font-size:12px;color:var(--md-sys-color-on-surface-variant);text-align:center;">Periodo de liquidación <span title="Mes de gastos y mantenimiento que se liquida. Se recomienda usar: Abierto (en edición/cálculo) y Cerrado (liquidado y emitido). Los pagos suelen recibirse durante el mes siguiente al periodo cerrado." aria-label="Ayuda sobre periodo de liquidación" style="cursor:help">ⓘ</span></div>
+                    <button id="btn-prev-month" class="btn btn-text js-periodo-prev" data-periodo-nav="-1" aria-label="Periodo anterior" style="grid-column:1;grid-row:2;align-self:center;">◀</button>
+                    <div style="grid-column:2;grid-row:2;display:inline-flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;text-align:center;">
+                        <span id="current-month-label" class="js-periodo-month-label" style="font:var(--md-sys-typescale-title-large);line-height:1.2;">Julio 2026</span>
+                        <span id="periodo-estado-badge" class="js-periodo-badge period-status-badge abierto" style="font:var(--md-sys-typescale-label-large);line-height:1;" title="Abierto: en edición y cálculo. Cerrado: periodo liquidado/emitido.">Abierto</span>
+                    </div>
+                    <button id="btn-next-month" class="btn btn-text js-periodo-next" data-periodo-nav="1" aria-label="Periodo siguiente" style="grid-column:3;grid-row:2;align-self:center;">▶</button>
                 </div>
+                <details class="card howto-periodo" style="margin-bottom:var(--space-4);padding:12px 14px;text-align:left;">
+                    <summary>Cómo usar este periodo (flujo mensual)</summary>
+                    <ol style="color:var(--md-sys-color-on-surface-variant);font-size:13px;line-height:1.5;display:grid;gap:4px;padding-left:18px;">
+                        <li><strong>Registrar gastos y consumos:</strong> ingresa gastos (Cuenta General o Caja Chica), nómina/servicios y consumos de agua, gas y luz del periodo.</li>
+                        <li><strong>Revisar cálculo y cuadre:</strong> verifica que <em>Total de gastos</em> y <em>Total de cuotas generadas</em> coincidan (100%).</li>
+                        <li><strong>Registrar pagos:</strong> asienta los abonos recibidos. Habitualmente los pagos del mantenimiento de un mes se cobran durante el mes siguiente.</li>
+                        <li><strong>Cerrar y emitir:</strong> cuando el periodo esté cuadrado y cobrado, ciérralo para emitir boletas y trasladar saldos.</li>
+                    </ol>
+                </details>
 
                 <div class="dashboard-kpis">
                     <div class="card kpi-card">
-                        <div class="kpi-label">Gastos comunes (mes)</div>
+                        <div class="kpi-label">Total del periodo <span title="Total de gastos/mantenimiento del periodo seleccionado (lo que se prorratea en cuotas)." style="cursor:help">ⓘ</span></div>
                         <div id="kpi-gastos" class="kpi-value">S/. 0.00</div>
+                        <div id="kpi-mantenimiento-var" class="luz-status" style="margin-top:4px;font-size:12px;">— vs periodo anterior</div>
                     </div>
                     <div class="card kpi-card">
-                        <div class="kpi-label">% Recaudado (del total)</div>
+                        <div class="kpi-label">Recaudación del periodo</div>
                         <div id="kpi-recaudado" class="kpi-value">0%</div>
+                        <div id="kpi-recaudado-detalle" class="luz-status" style="margin-top:4px;font-size:12px;">S/. 0.00 cobrados</div>
                     </div>
                     <div class="card kpi-card">
                         <div class="kpi-label">Caja chica</div>
-                        <div class="kpi-value-row">
+                        <div class="kpi-value-row kpi-value-row-caja">
                             <span id="kpi-caja" class="kpi-value">S/. 0.00</span>
                             <button id="btn-edit-caja" class="btn btn-sm btn-outline" title="Editar caja chica">Editar</button>
                         </div>
-                    </div>
-                    <div class="card kpi-card">
-                        <div class="kpi-label">Estado del mes</div>
-                        <div id="kpi-estado-mes" class="kpi-value">Abierto</div>
+                        <div class="luz-status" style="margin-top:4px;font-size:12px;">Saldo disponible del edificio</div>
                     </div>
                 </div>
 
                 <div id="extra-info" style="margin-bottom:var(--space-4);"></div>
 
                 <div id="semaforo-cuadre" class="card semaforo-card">
-                    <h3 class="semaforo-title">Semáforo de cuadre</h3>
+                    <h3 class="semaforo-title">Cuadre del periodo <span id="sc-periodo-label"></span> <span title="Compara los gastos del periodo con las cuotas generadas. Si el periodo está cerrado, la recaudación suele registrarse durante el mes siguiente (cobranza del mantenimiento ya liquidado)." aria-label="Ayuda sobre cuadre del periodo" style="cursor:help;font-size:14px">ⓘ</span></h3>
+                    <div id="sc-context" class="luz-status" style="margin:4px 0 8px;"></div>
                     <div id="sc-alert" class="semaforo-alert-msg" role="status" aria-live="polite"></div>
                     <div class="semaforo-grid">
                         <div class="semaforo-col">
-                            <div class="semaforo-lbl">Total a cobrar</div>
+                            <div class="semaforo-lbl">Gastos del periodo</div>
                             <div id="sc-gastos" class="semaforo-val">S/. 0.00</div>
                         </div>
                         <div class="semaforo-col">
-                            <div class="semaforo-lbl">Cargos calculados</div>
+                            <div class="semaforo-lbl">Cuotas generadas</div>
                             <div id="sc-cuotas" class="semaforo-val">S/. 0.00</div>
                         </div>
                         <div class="semaforo-col">
-                            <div class="semaforo-lbl">Pagos recibidos</div>
+                            <div class="semaforo-lbl">Cobranza registrada</div>
                             <div id="sc-pagos" class="semaforo-val">S/. 0.00</div>
                         </div>
                     </div>
                 </div>
 
                 <div class="card" style="margin-top:var(--space-4);">
-                    <h2 style="font:var(--md-sys-typescale-title-large);margin:0 0 var(--space-3);">Departamentos</h2>
+                    <div style="margin-bottom:var(--space-3);">
+                        <h2 style="font:var(--md-sys-typescale-title-large);margin:0;text-align:center;">Departamentos</h2>
+                        <div id="dashboard-deptos-sub" class="luz-status" style="margin-top:4px;text-align:center;display:none;"></div>
+                    </div>
                     <div id="dashboard-propietarios">
                         <p class="empty-state">Cargando...</p>
                     </div>
                 </div>
 
-                <button id="btn-cerrar-mes" class="btn btn-primary btn-block" style="margin-top:var(--space-4);" onclick="App.cerrarMes()">Cerrar Mes</button>
 
-                <button id="btn-add-gasto-dashboard" class="fab" aria-label="Agregar gasto">+</button>
             </div>
         </section>
 
         <!-- Departamentos -->
         <section id="screen-propietarios" class="screen">
             <div class="screen-content">
+                <div class="month-selector month-selector-dashboard" data-periodo-header style="display:grid;grid-template-columns:auto auto auto;align-items:center;justify-content:center;column-gap:var(--space-4);row-gap:4px;margin-bottom:var(--space-3);">
+                    <div style="grid-column:2;font-size:12px;color:var(--md-sys-color-on-surface-variant);text-align:center;">Periodo de liquidación <span title="Mes de gastos y mantenimiento que se liquida. Se recomienda usar: Abierto (en edición/cálculo) y Cerrado (liquidado y emitido). Los pagos suelen recibirse durante el mes siguiente al periodo cerrado." aria-label="Ayuda sobre periodo de liquidación" style="cursor:help">ⓘ</span></div>
+                    <button class="btn btn-text js-periodo-prev" data-periodo-nav="-1" aria-label="Periodo anterior" style="grid-column:1;grid-row:2;align-self:center;">◀</button>
+                    <div style="grid-column:2;grid-row:2;display:inline-flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;text-align:center;">
+                        <span class="js-periodo-month-label" style="font:var(--md-sys-typescale-title-large);line-height:1.2;">—</span>
+                        <span class="js-periodo-badge period-status-badge abierto" style="font:var(--md-sys-typescale-label-large);line-height:1;">—</span>
+                    </div>
+                    <button class="btn btn-text js-periodo-next" data-periodo-nav="1" aria-label="Periodo siguiente" style="grid-column:3;grid-row:2;align-self:center;">▶</button>
+                </div>
                 <div class="screen-header">
                     <div>
                         <h2>Departamentos</h2>
@@ -226,30 +250,22 @@
                 <div id="departamentos-info" class="luz-status" style="margin-bottom:var(--space-3);"></div>
                 <div id="coeficientes-info" style="display:none;"></div>
                 <div id="lista-propietarios"></div>
-                <div id="departamentos-leyenda" class="card" style="margin-top:var(--space-4);">
-                    <div style="font-weight:600;margin-bottom:8px">Acciones por departamento (leyenda)</div>
-                    <ul style="margin:0;padding:0;list-style:none;color:var(--md-sys-color-on-surface-variant);font-size:13px;display:grid;gap:10px">
-                        <li style="display:flex;gap:10px;align-items:flex-start"><span class="legend-icon" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293z"/></svg></span><span><strong>Editar datos:</strong> corrige contacto y estado de ocupación. El <strong>Área (m²)</strong> aparece bloqueada por defecto o requiere confirmación especial para proteger el total y el prorrateo.</span></li>
-                        <li style="display:flex;gap:10px;align-items:flex-start"><span class="legend-icon" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6M5.216 14A2.24 2.24 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.3 6.3 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1zM4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5"/><path d="M13.5 5.5a.5.5 0 0 1 .5.5v1h1a.5.5 0 0 1 0 1h-1v1a.5.5 0 0 1-1 0v-1h-1a.5.5 0 0 1 0-1h1V6a.5.5 0 0 1 .5-.5"/></svg></span><span><strong>Transferir titularidad:</strong> asigna nuevo dueño o marca “Inmobiliaria / Sin asignar” sin borrar el departamento; conserva metraje e historial financiero.</span></li>
-                        <li style="display:flex;gap:10px;align-items:flex-start"><span class="legend-icon" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71z"/><path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0"/></svg></span><span><strong>Estado de cuenta / Historial:</strong> abre el registro cronológico de boletas, consumos y pagos del departamento.</span></li>
-                        <li style="display:flex;gap:10px;align-items:flex-start"><span style="display:inline-flex;gap:6px;align-items:center"><span class="legend-icon legend-icon-primary" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M4 10.781c.148 1.667 1.513 2.85 3.591 3.003V15h1.043v-1.216c2.27-.179 3.678-1.438 3.678-3.3 0-1.59-.947-2.51-2.956-3.028l-.722-.187V3.467c1.122.11 1.879.714 2.07 1.616h1.47c-.166-1.6-1.54-2.748-3.54-2.875V1H7.591v1.233c-1.939.23-3.27 1.472-3.27 3.156 0 1.454.966 2.483 2.661 2.917l.61.162v4.031c-1.149-.17-1.94-.8-2.131-1.718zm3.391-3.836c-1.043-.263-1.6-.825-1.6-1.616 0-.944.704-1.641 1.8-1.828v3.495l-.2-.05zm1.591 1.872c1.287.323 1.852.859 1.852 1.769 0 1.097-.826 1.828-2.2 1.939V8.73z"/></svg></span><span class="legend-icon" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M5 4a.5.5 0 0 0 0 1h6a.5.5 0 0 0 0-1zm-.5 2.5A.5.5 0 0 1 5 6h6a.5.5 0 0 1 0 1H5a.5.5 0 0 1-.5-.5M5 8a.5.5 0 0 0 0 1h6a.5.5 0 0 0 0-1z"/><path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2zm10-1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1"/></svg></span></span><span><strong>Registrar pago / Abono:</strong> acceso directo para asentar pagos. Si está <em>Pendiente</em> se destaca; si está <em>Al día</em> permite ver el último comprobante del mes.</span></li>
-                    </ul>
-                </div>
             </div>
         </section>
 
         <!-- Gastos -->
         <section id="screen-gastos" class="screen">
             <div class="screen-content">
-                <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px;">
-                    <div class="month-selector" style="margin:0;">
-                        <button id="btn-prev-month-gastos" class="icon-btn">◀</button>
-                        <span id="gastos-month-label">Junio 2026</span>
-                        <button id="btn-next-month-gastos" class="icon-btn">▶</button>
-                        <span class="badge" style="margin-left:4px;background:var(--md-sys-color-surface-container-high);color:var(--md-sys-color-on-surface-variant)">Mes activo</span>
+                <div class="month-selector month-selector-dashboard" data-periodo-header style="display:grid;grid-template-columns:auto auto auto;align-items:center;justify-content:center;column-gap:var(--space-4);row-gap:4px;margin-bottom:var(--space-3);">
+                    <div style="grid-column:2;font-size:12px;color:var(--md-sys-color-on-surface-variant);text-align:center;">Periodo de liquidación <span title="Mes de gastos y mantenimiento que se liquida. Se recomienda usar: Abierto (en edición/cálculo) y Cerrado (liquidado y emitido). Los pagos suelen recibirse durante el mes siguiente al periodo cerrado." aria-label="Ayuda sobre periodo de liquidación" style="cursor:help">ⓘ</span></div>
+                    <button class="btn btn-text js-periodo-prev" data-periodo-nav="-1" aria-label="Periodo anterior" style="grid-column:1;grid-row:2;align-self:center;">◀</button>
+                    <div style="grid-column:2;grid-row:2;display:inline-flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;text-align:center;">
+                        <span class="js-periodo-month-label" style="font:var(--md-sys-typescale-title-large);line-height:1.2;">—</span>
+                        <span class="js-periodo-badge period-status-badge abierto" style="font:var(--md-sys-typescale-label-large);line-height:1;">—</span>
                     </div>
-                    <p id="gastos-impacto" class="luz-status" style="margin:0;">Todo lo que registres impacta el cálculo del mes.</p>
+                    <button class="btn btn-text js-periodo-next" data-periodo-nav="1" aria-label="Periodo siguiente" style="grid-column:3;grid-row:2;align-self:center;">▶</button>
                 </div>
+                <p id="gastos-impacto" class="luz-status" style="margin:0 0 12px;text-align:center;">Mostrando solo los gastos del mes seleccionado. Todo lo que registres impacta el cálculo del periodo.</p>
 
                 <div id="gastos-resumen" class="calculo-summary" style="margin-bottom:16px;"></div>
 
@@ -259,7 +275,7 @@
 
                 <div class="tabs gastos-tabs" role="tablist" aria-label="Tipo de gastos">
                     <button class="tab active" id="gastos-tab-recurrentes" role="tab" aria-selected="true" data-tab="recurrentes">Recurrentes</button>
-                    <button class="tab" id="gastos-tab-delmes" role="tab" aria-selected="false" data-tab="delmes">Del mes</button>
+                    <button class="tab" id="gastos-tab-delmes" role="tab" aria-selected="false" data-tab="delmes">Puntuales</button>
                     <button class="tab" id="gastos-tab-consumos" role="tab" aria-selected="false" data-tab="consumos">Consumos</button>
                 </div>
 
@@ -277,14 +293,7 @@
                             <button id="btn-add-servicio-rec" class="btn btn-primary btn-sm">+ Servicio recurrente</button>
                         </div>
                         <div id="gastos-servicios"></div>
-                        <p class="luz-status" style="margin-top:6px">Ejemplos: ascensor, portón, cisterna, internet de áreas comunes, vigilancia contratada.</p>
-                    </div>
-                    <div class="gastos-group">
-                        <div class="gastos-group-head" style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;background:var(--md-sys-color-surface-container-low);border:1px solid var(--md-sys-color-outline-variant);border-left:3px solid var(--md-sys-color-primary);border-radius:6px;margin-bottom:8px;">
-                            <div><div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.03em">Jardinería recurrente</div><div id="meta-jardineria" class="luz-status">0 ítems · S/ 0.00</div></div>
-                            <button id="btn-add-jardineria-rec" class="btn btn-primary btn-sm">+ Jardinería</button>
-                        </div>
-                        <div id="gastos-jardineria"></div>
+                        <p class="luz-status" style="margin-top:6px">Ejemplos: ascensor, portón, cisterna, internet de areas comunes,etc.</p>
                     </div>
                 </div>
 
@@ -293,16 +302,17 @@
                         <div class="gastos-group-head" style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;background:var(--md-sys-color-surface-container-low);border:1px solid var(--md-sys-color-outline-variant);border-left:3px solid var(--md-sys-color-primary);border-radius:6px;margin-bottom:8px;">
                             <div><div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.03em">Gastos puntuales del mes</div><div id="meta-delmes" class="luz-status">0 ítems · S/ 0.00</div></div>
                         </div>
-                        <div style="border:1px dashed var(--md-sys-color-outline);border-radius:8px;padding:12px;background:var(--md-sys-color-surface-container-low);margin-bottom:10px;">
-                            <div style="font-size:13px;font-weight:600;margin-bottom:8px">+ Registrar gasto del mes (<span id="gastos-form-mes">Junio 2026</span>)</div>
-                            <form id="form-gasto-mes" class="gastos-inline-form" style="grid-template-columns:2fr 1fr 1fr 1fr auto;">
+                        <div id="gasto-mes-form-wrap" style="border:1px dashed var(--md-sys-color-outline);border-radius:8px;padding:12px;background:var(--md-sys-color-surface-container-low);margin-bottom:10px;">
+                            <div style="font-size:13px;font-weight:600;margin-bottom:8px">+ Registrar gasto del periodo (<span id="gastos-form-mes">Junio 2026</span>)</div>
+                            <form id="form-gasto-mes" class="gastos-inline-form" style="grid-template-columns:2fr 1fr 1fr 1fr 1fr auto;">
                                 <div class="form-group"><label for="gm-concepto">Concepto</label><input type="text" id="gm-concepto" placeholder="Ej: Compra de focos" required></div>
-                                <div class="form-group"><label for="gm-monto">Monto (S/)</label><input type="number" id="gm-monto" step="0.01" min="0" placeholder="0.00" required></div>
+                                <div class="form-group"><label for="gm-monto">Monto (S/)</label><input type="number" id="gm-monto" step="0.01" min="0.01" placeholder="0.00" required></div>
                                 <div class="form-group"><label for="gm-categoria">Categoría</label><select id="gm-categoria"><option value="materiales">Materiales</option><option value="arreglos">Reparación</option><option value="limpieza">Limpieza</option><option value="mantenimiento">Mantenimiento</option><option value="otros">Otros</option></select></div>
-                                <div class="form-group"><label for="gm-estado">Estado</label><select id="gm-estado"><option value="pendiente">Pendiente</option><option value="pagado">Pagado</option></select></div>
+                                <div class="form-group"><label for="gm-entidad">Entidad</label><input type="text" id="gm-entidad" maxlength="60" placeholder="Nombre de la entidad"></div>
+                                <div class="form-group"><label for="gm-origen-pago">Origen de pago</label><select id="gm-origen-pago"><option value="cuenta_general">Cuenta General</option><option value="caja_chica">Caja Chica</option></select></div>
                                 <div class="form-group" style="align-self:end;"><button type="submit" class="btn btn-primary">Agregar</button></div>
                             </form>
-                            <p class="luz-status" style="margin-top:8px">Impacto: se registra para el mes activo y se prorratea en el cálculo (salvo extraordinarios según configuración).</p>
+                            <p class="luz-status" style="margin-top:8px">Si el origen es <strong>Caja Chica</strong>, el monto se descuenta de inmediato del saldo de Caja Chica y se incluye en el prorrateo del periodo para su reposición. Todos los gastos del periodo se consolidan para emitir las boletas conjuntas entre el 1 y 5 del mes siguiente.</p>
                         </div>
                         <div id="gastos-delmes"></div>
                     </div>
@@ -365,7 +375,8 @@
 
                     <div id="panel-consumos-luz" class="consumos-panel" style="display:none;">
                         <div class="screen-header" style="margin-bottom:var(--space-3);">
-                            <h3 style="font-size:16px;margin:0;">Luz (áreas comunes)</h3>
+                            <h3 style="font-size:16px;margin:0;">Luz (consumo por departamento)</h3>
+                            <button id="btn-luz-formula" class="btn btn-outline btn-sm" title="Ingresar factura de luz del mes">Factura</button>
                         </div>
                         <div id="luz-periodo" class="list-container" style="margin-bottom:var(--space-3);"></div>
                         <div id="luz-lista" class="list-container">
@@ -388,18 +399,23 @@
         <!-- Cálculo Mensual -->
         <section id="screen-calculo" class="screen">
             <div class="screen-content">
+                <div class="month-selector month-selector-dashboard" data-periodo-header style="display:grid;grid-template-columns:auto auto auto;align-items:center;justify-content:center;column-gap:var(--space-4);row-gap:4px;margin-bottom:var(--space-3);">
+                    <div style="grid-column:2;font-size:12px;color:var(--md-sys-color-on-surface-variant);text-align:center;">Periodo de liquidación <span title="Mes de gastos y mantenimiento que se liquida. Se recomienda usar: Abierto (en edición/cálculo) y Cerrado (liquidado y emitido). Los pagos suelen recibirse durante el mes siguiente al periodo cerrado." aria-label="Ayuda sobre periodo de liquidación" style="cursor:help">ⓘ</span></div>
+                    <button class="btn btn-text js-periodo-prev" data-periodo-nav="-1" aria-label="Periodo anterior" style="grid-column:1;grid-row:2;align-self:center;">◀</button>
+                    <div style="grid-column:2;grid-row:2;display:inline-flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;text-align:center;">
+                        <span class="js-periodo-month-label" style="font:var(--md-sys-typescale-title-large);line-height:1.2;">—</span>
+                        <span class="js-periodo-badge period-status-badge abierto" style="font:var(--md-sys-typescale-label-large);line-height:1;">—</span>
+                    </div>
+                    <button class="btn btn-text js-periodo-next" data-periodo-nav="1" aria-label="Periodo siguiente" style="grid-column:3;grid-row:2;align-self:center;">▶</button>
+                </div>
                 <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:16px;">
                     <div>
-                        <div class="month-selector" style="display:inline-flex;align-items:center;gap:10px;margin:0;">
-                            <button id="btn-prev-month-calc" class="icon-btn" aria-label="Mes anterior">◀</button>
-                            <span id="calc-month-label" style="font:var(--md-sys-typescale-title-large);font-weight:600;">Julio 2026</span>
-                            <button id="btn-next-month-calc" class="icon-btn" aria-label="Mes siguiente">▶</button>
-                        </div>
                         <div class="luz-status" style="margin-top:6px;">Prorrateo por coeficiente (m²) y consumos registrados. Revisa antes de emitir boletas.</div>
                     </div>
-                    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
                         <button class="btn btn-outline" onclick="App.navigateTo('gastos')">Ver origen en Gastos</button>
-                        <button id="btn-generar-boletas" class="btn btn-primary" onclick="App.generarBoletas()">Generar boletas</button>
+                        <button id="btn-generar-boletas" class="btn btn-outline" onclick="App.generarBoletas()">Generar boletas</button>
+                        <button id="btn-cerrar-mes" class="btn btn-primary">Cerrar mes</button>
                     </div>
                 </div>
 
@@ -441,6 +457,15 @@
         <!-- Informes -->
         <section id="screen-informes" class="screen">
             <div class="screen-content">
+                <div class="month-selector month-selector-dashboard" data-periodo-header style="display:grid;grid-template-columns:auto auto auto;align-items:center;justify-content:center;column-gap:var(--space-4);row-gap:4px;margin-bottom:var(--space-3);">
+                    <div style="grid-column:2;font-size:12px;color:var(--md-sys-color-on-surface-variant);text-align:center;">Periodo de liquidación <span title="Mes de gastos y mantenimiento que se liquida. Se recomienda usar: Abierto (en edición/cálculo) y Cerrado (liquidado y emitido). Los pagos suelen recibirse durante el mes siguiente al periodo cerrado." aria-label="Ayuda sobre periodo de liquidación" style="cursor:help">ⓘ</span></div>
+                    <button class="btn btn-text js-periodo-prev" data-periodo-nav="-1" aria-label="Periodo anterior" style="grid-column:1;grid-row:2;align-self:center;">◀</button>
+                    <div style="grid-column:2;grid-row:2;display:inline-flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;text-align:center;">
+                        <span class="js-periodo-month-label" style="font:var(--md-sys-typescale-title-large);line-height:1.2;">—</span>
+                        <span class="js-periodo-badge period-status-badge abierto" style="font:var(--md-sys-typescale-label-large);line-height:1;">—</span>
+                    </div>
+                    <button class="btn btn-text js-periodo-next" data-periodo-nav="1" aria-label="Periodo siguiente" style="grid-column:3;grid-row:2;align-self:center;">▶</button>
+                </div>
                 <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:var(--space-4);">
                     <h2 style="margin:0">Informes</h2>
                     <div class="informes-actions" style="display:flex;gap:8px;">
@@ -448,13 +473,8 @@
                         <button id="btn-export-excel" class="btn btn-outline">Exportar Excel</button>
                     </div>
                 </div>
-                <div class="month-selector">
-                    <button id="btn-prev-month-inf" class="icon-btn">◀</button>
-                    <span id="inf-month-label">Julio 2026</span>
-                    <button id="btn-next-month-inf" class="icon-btn">▶</button>
-                </div>
                 <div id="preview-informe">
-                    <p class="empty-state">Selecciona un mes para generar el informe</p>
+                    <p class="empty-state">Selecciona un mes y registra gastos/pagos para ver y exportar el informe.</p>
                 </div>
             </div>
         </section>
@@ -462,6 +482,15 @@
         <!-- Configuración -->
         <section id="screen-config" class="screen">
             <div class="screen-content">
+                <div class="month-selector month-selector-dashboard" data-periodo-header style="display:grid;grid-template-columns:auto auto auto;align-items:center;justify-content:center;column-gap:var(--space-4);row-gap:4px;margin-bottom:var(--space-3);">
+                    <div style="grid-column:2;font-size:12px;color:var(--md-sys-color-on-surface-variant);text-align:center;">Periodo de liquidación <span title="Mes de gastos y mantenimiento que se liquida. Se recomienda usar: Abierto (en edición/cálculo) y Cerrado (liquidado y emitido). Los pagos suelen recibirse durante el mes siguiente al periodo cerrado." aria-label="Ayuda sobre periodo de liquidación" style="cursor:help">ⓘ</span></div>
+                    <button class="btn btn-text js-periodo-prev" data-periodo-nav="-1" aria-label="Periodo anterior" style="grid-column:1;grid-row:2;align-self:center;">◀</button>
+                    <div style="grid-column:2;grid-row:2;display:inline-flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;text-align:center;">
+                        <span class="js-periodo-month-label" style="font:var(--md-sys-typescale-title-large);line-height:1.2;">—</span>
+                        <span class="js-periodo-badge period-status-badge abierto" style="font:var(--md-sys-typescale-label-large);line-height:1;">—</span>
+                    </div>
+                    <button class="btn btn-text js-periodo-next" data-periodo-nav="1" aria-label="Periodo siguiente" style="grid-column:3;grid-row:2;align-self:center;">▶</button>
+                </div>
                 <h2>Configuración</h2>
                 <form id="form-config">
                     <div class="form-group">
@@ -502,6 +531,22 @@
                     </div>
                     <button type="submit" class="btn btn-primary btn-block">Guardar</button>
                 </form>
+
+                <hr>
+
+                <div class="card" style="margin-top:12px;padding:12px;">
+                    <h3 style="margin:0 0 8px;font-size:16px;">Agua: modalidad de reparto</h3>
+                    <p class="luz-status" style="margin:0 0 10px">Configura cómo se reparte el agua del periodo entre los departamentos.</p>
+                    <div class="form-group">
+                        <label for="config-agua-modalidad">Modalidad de reparto</label>
+                        <select id="config-agua-modalidad">
+                            <option value="medidor">Por Medidor Interno (m³) — por defecto (consumo individual, sin prorratear)</option>
+                            <option value="coeficiente">Por Coeficiente (m²)</option>
+                            <option value="ocupantes">Por Número de Ocupantes (Cápita)</option>
+                        </select>
+                    </div>
+                    <p id="config-agua-ayuda" class="luz-status" style="margin:6px 0 0"></p>
+                </div>
 
                 <hr>
 
@@ -586,86 +631,114 @@
     </nav>
 
     <!-- Modal: Agregar/Editar Propietario -->
-    <div id="modal-propietario" class="modal" style="display:none;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="modal-propietario-title">Nuevo Departamento</h3>
-                <button class="modal-close">&times;</button>
+    <div id="modal-propietario" class="modal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="modal-propietario-title">
+        <div class="modal-content modal-propietario-content" style="max-width:720px;padding:0;overflow:hidden;">
+            <div class="modal-header modal-propietario-header">
+                <div>
+                    <h3 id="modal-propietario-title">Nuevo Departamento</h3>
+                    <p class="luz-status" style="margin:4px 0 0;">Actualiza los datos del departamento, titular y ocupación. El coeficiente se calcula automáticamente según el área.</p>
+                </div>
+                <button class="modal-close" aria-label="Cerrar">&times;</button>
             </div>
-            <form id="form-propietario">
+            <form id="form-propietario" class="modal-propietario-form">
                 <input type="hidden" id="propietario-id">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="propietario-nombre">Nombre</label>
-                        <input type="text" id="propietario-nombre" required placeholder="Ej: Juan">
+
+                <section class="modal-form-section">
+                    <div class="modal-form-section-head">
+                        <h4>Datos del departamento</h4>
+                        <p>Identificación, área y participación en el prorrateo.</p>
                     </div>
-                    <div class="form-group">
-                        <label for="propietario-apellido">Apellido</label>
-                        <input type="text" id="propietario-apellido" placeholder="Ej: Pérez">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="propietario-departamento">Departamento</label>
+                            <input type="text" id="propietario-departamento" placeholder="Ej: 101, 201, PB" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="propietario-m2">Área (m²) <span id="propietario-m2-lock" style="font-size:12px;color:var(--md-sys-color-on-surface-variant);font-weight:400">(protegida)</span></label>
+                            <input type="number" id="propietario-m2" step="0.01" min="0.01" placeholder="Ej: 141.29" readonly>
+                            <div id="propietario-m2-unlock-wrap" style="display:none;margin-top:10px;">
+                                <label class="toggle-row" for="propietario-m2-unlock">
+                                    <span class="toggle-text">Editar área (afecta coeficientes y prorrateo)</span>
+                                    <span class="toggle-switch">
+                                        <input type="checkbox" id="propietario-m2-unlock" role="switch" aria-label="Habilitar edición del área">
+                                        <span class="toggle-slider" aria-hidden="true"></span>
+                                    </span>
+                                </label>
+                                <small class="luz-status" style="display:block;margin-top:6px;">Activa el interruptor para modificar el área del departamento.</small>
+                            </div>
+                        </div>
                     </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Coeficiente de participación</label>
+                            <div class="form-display-card">
+                                <span id="propietario-coeficiente-display" class="form-display">0.00%</span>
+                                <small>Calculado automáticamente según el área del departamento.</small>
+                            </div>
+                            <input type="hidden" id="propietario-coeficiente" value="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="propietario-residentes">Nº de ocupantes</label>
+                            <input type="number" id="propietario-residentes" min="0" step="1" value="1" placeholder="Ej: 3">
+                            <small class="luz-status">Se usa para el reparto de agua por cápita, si esa modalidad está activa.</small>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="modal-form-section">
+                    <div class="modal-form-section-head">
+                        <h4>Titular y contacto</h4>
+                        <p>Información del responsable o titular asociado al departamento.</p>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="propietario-nombre">Nombre</label>
+                            <input type="text" id="propietario-nombre" required placeholder="Ej: Juan">
+                        </div>
+                        <div class="form-group">
+                            <label for="propietario-apellido">Apellido / referencia</label>
+                            <input type="text" id="propietario-apellido" placeholder="Ej: Pérez">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="propietario-email">Email (opcional)</label>
+                            <input type="email" id="propietario-email" placeholder="correo@ejemplo.com">
+                            <small class="luz-status">Útil para envío o referencia de informes.</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="propietario-ocupacion">Estado de ocupación</label>
+                            <select id="propietario-ocupacion">
+                                <option value="propietario">Ocupado por propietario</option>
+                                <option value="alquilado">Alquilado</option>
+                                <option value="desocupado">Desocupado</option>
+                                <option value="inmobiliaria">Inmobiliaria / Sin asignar</option>
+                            </select>
+                        </div>
+                    </div>
+                </section>
+
+                <div class="modal-actions modal-propietario-actions">
+                    <button type="button" class="btn btn-outline modal-cancel-btn">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar cambios</button>
                 </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="propietario-departamento">Departamento</label>
-                        <input type="text" id="propietario-departamento" placeholder="Ej: 101, PB, 2B">
-                    </div>
-                    <div class="form-group">
-                        <label for="propietario-m2">m² <span id="propietario-m2-lock" style="font-size:12px;color:var(--md-sys-color-on-surface-variant);font-weight:400">(protegido)</span></label>
-                        <input type="number" id="propietario-m2" step="0.01" min="0" placeholder="Ej: 141.29">
-                        <label id="propietario-m2-unlock-wrap" style="display:none;margin-top:6px;font-size:13px;color:var(--md-sys-color-on-surface-variant);font-weight:400;">
-                            <input type="checkbox" id="propietario-m2-unlock"> Confirmo que deseo editar el área (afecta el prorrateo)
-                        </label>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Coeficiente (%) — calculado automáticamente</label>
-                        <span id="propietario-coeficiente-display" class="form-display">0.00%</span>
-                        <input type="hidden" id="propietario-coeficiente" value="0">
-                    </div>
-                    <div class="form-group">
-                        <label>Cuota Mensual — calculada automáticamente</label>
-                        <span id="propietario-cuota-display" class="form-display">Se calcula al cerrar el mes</span>
-                        <input type="hidden" id="propietario-cuota" value="0">
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="propietario-email">Email (opcional)</label>
-                        <input type="email" id="propietario-email" placeholder="para enviar informes">
-                    </div>
-                    <div class="form-group">
-                        <label for="propietario-ocupacion">Estado de ocupación</label>
-                        <select id="propietario-ocupacion">
-                            <option value="propietario">Ocupado por propietario</option>
-                            <option value="alquilado">Alquilado</option>
-                            <option value="desocupado">Desocupado</option>
-                            <option value="inmobiliaria">Inmobiliaria / Sin asignar</option>
-                        </select>
-                    </div>
-                </div>
-                <button type="submit" class="btn btn-primary btn-block">Guardar</button>
             </form>
         </div>
     </div>
 
     <!-- Modal: Estado de Cuenta -->
-    <div id="modal-estado-cuenta" class="modal" style="display:none;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="estado-cuenta-title">Estado de Cuenta</h3>
-                <button class="modal-close">&times;</button>
-            </div>
+    <div id="modal-estado-cuenta" class="modal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="estado-cuenta-title">
+        <div class="modal-content" style="max-width:900px;width:min(900px,96vw);padding:0;overflow:hidden;">
             <div id="estado-cuenta-cuerpo"></div>
-            <div class="modal-actions">
-                <button id="btn-estado-pdf" class="btn btn-primary">Descargar PDF</button>
-                <button id="btn-estado-cerrar" class="btn btn-secondary">Cerrar</button>
+            <div class="modal-actions" style="padding:16px 24px 20px;border-top:1px solid var(--md-sys-color-outline-variant);background:var(--md-sys-color-surface);">
+                <button id="btn-estado-pdf" class="btn btn-outline">Descargar PDF</button>
+                <button id="btn-estado-cerrar" class="btn btn-primary">Cerrar</button>
             </div>
         </div>
     </div>
 
     <!-- Modal: Transferir Titularidad -->
-    <div id="modal-transferir" class="modal" style="display:none;">
+    <div id="modal-transferir" class="modal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="modal-transferir-title">
         <div class="modal-content">
             <div class="modal-header">
                 <h3 id="modal-transferir-title">Transferir titularidad</h3>
@@ -710,7 +783,18 @@
     </div>
 
     <!-- Modal: Registrar/Editar Pago -->
-    <div id="modal-pago" class="modal" style="display:none;">
+    <!-- Modal Comprobante -->
+    <div id="modal-comprobante" class="modal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="comprobante-title">
+        <div class="modal-content comprobante-modal-content" style="max-width:640px;padding:0;overflow:hidden;">
+            <div id="comprobante-cuerpo" class="modal-body" style="padding:0;"></div>
+            <div class="modal-actions" style="padding:16px 24px 20px;border-top:1px solid var(--md-sys-color-outline-variant);background:var(--md-sys-color-surface);">
+                <button type="button" id="btn-comprobante-editar" class="btn btn-outline">Editar pago</button>
+                <button type="button" id="btn-comprobante-cerrar" class="btn btn-primary">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-pago" class="modal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="modal-pago-title">
         <div class="modal-content">
             <div class="modal-header">
                 <h3 id="modal-pago-title">Registrar Pago</h3>
@@ -729,14 +813,38 @@
                     <select id="pago-concepto" required></select>
                     <div id="pago-concepto-fijo" class="pago-propietario" style="display:none;"></div>
                 </div>
+                <div class="form-group">
+                    <label for="pago-monto">Monto</label>
+                    <input type="number" id="pago-monto" step="0.01" min="0" required>
+                    <small class="luz-status" id="pago-monto-ayuda">Sugerido: saldo pendiente del periodo considerando saldo anterior (a favor o en contra).</small>
+                </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="pago-monto">Monto</label>
-                        <input type="number" id="pago-monto" step="0.01" min="0" required>
+                        <label for="pago-fecha">Fecha de pago</label>
+                        <input type="date" id="pago-fecha" required>
                     </div>
                     <div class="form-group">
-                        <label for="pago-fecha">Fecha</label>
-                        <input type="date" id="pago-fecha" required>
+                        <label for="pago-hora">Hora de registro</label>
+                        <input type="time" id="pago-hora" step="60">
+                        <small class="luz-status">Se registra la hora del pago (puedes ajustarla si corresponde).</small>
+                    </div>
+                </div>
+                <div class="form-group pago-mora-card" id="pago-mora-group" style="display:none;">
+                    <div class="pago-mora-head">
+                        <div>
+                            <label for="pago-mora-pct" style="margin-bottom:2px;">Recargo por mora</label>
+                            <small class="luz-status">Porcentaje predeterminado: 5%. Se aplica sobre el saldo pendiente del mes liquidado cuando corresponde mora (desde el día 15 del mes siguiente al liquidado).</small>
+                        </div>
+                        <div class="pago-mora-pct-wrap">
+                            <input type="number" id="pago-mora-pct" step="0.1" min="0" value="5" aria-label="Porcentaje de recargo por mora">
+                            <span>%</span>
+                        </div>
+                    </div>
+                    <div id="pago-mora-info" class="pago-mora-info luz-status"></div>
+                    <div class="pago-mora-breakdown" id="pago-mora-breakdown">
+                        <div class="row"><span>Saldo base a pagar</span><strong id="pago-mora-base">S/. 0.00</strong></div>
+                        <div class="row"><span>Recargo por mora (<span id="pago-mora-pct-label">5</span>%)</span><strong id="pago-mora-recargo">S/. 0.00</strong></div>
+                        <div class="row total"><span>Monto final (con aumento incluido)</span><strong id="pago-mora-total">S/. 0.00</strong></div>
                     </div>
                 </div>
                 <div class="form-group">
@@ -755,7 +863,7 @@
     </div>
 
     <!-- Modal: Agregar/Editar Gasto -->
-    <div id="modal-gasto" class="modal" style="display:none;">
+    <div id="modal-gasto" class="modal" style="display:none;" role="dialog" aria-modal="true">
         <div class="modal-content">
             <div class="modal-header">
                 <h3 id="modal-gasto-title">Nuevo Gasto</h3>
@@ -821,8 +929,8 @@
         </div>
     </div>
 
-    <!-- Modal: Agregar/Editar Personal -->
-    <div id="modal-personal" class="modal" style="display:none;">
+    <!-- Modal: Nómina / Servicio recurrente -->
+    <div id="modal-personal" class="modal" style="display:none;" role="dialog" aria-modal="true">
         <div class="modal-content">
             <div class="modal-header">
                 <h3 id="modal-personal-title">Nuevo Empleado</h3>
@@ -830,18 +938,12 @@
             </div>
             <form id="form-personal">
                 <input type="hidden" id="personal-id">
-                <div class="form-group">
-                    <label>Tipo de gasto</label>
-                    <div style="display:flex;gap:12px;margin-top:4px;flex-wrap:wrap;">
-                        <label style="display:flex;align-items:center;gap:5px;font-size:0.85rem;"><input type="radio" name="gasto-tipo" value="personal" checked> Personal</label>
-                        <label style="display:flex;align-items:center;gap:5px;font-size:0.85rem;"><input type="radio" name="gasto-tipo" value="fijo"> Gasto fijo</label>
+                <input type="hidden" id="personal-modo" value="nomina">
+                <div id="grupo-nomina">
+                    <div class="form-group">
+                        <label for="personal-nombre">Nombre</label>
+                        <input type="text" id="personal-nombre" placeholder="Ej: Juan">
                     </div>
-                </div>
-                <div class="form-group">
-                    <label for="personal-nombre" id="label-nombre">Nombre</label>
-                    <input type="text" id="personal-nombre" required placeholder="Ej: Juan">
-                </div>
-                <div id="grupo-personal">
                     <div class="form-group">
                         <label for="personal-rol">Rol</label>
                         <select id="personal-rol">
@@ -857,72 +959,46 @@
                         <label for="personal-sueldo">Sueldo mensual (S/)</label>
                         <input type="number" id="personal-sueldo" step="0.01" min="0" placeholder="Ej: 1200">
                     </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="personal-horario">Turno de trabajo</label>
-                            <select id="personal-horario">
-                                <option value="">Selecciona un turno</option>
-                                <option value="Turno mañana">Turno mañana</option>
-                                <option value="Turno tarde">Turno tarde</option>
-                                <option value="Turno noche">Turno noche</option>
-                                <option value="Dominguero">Dominguero</option>
-                                <option value="Tiempo completo">Tiempo completo</option>
-                                <option value="otro">Otro...</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="personal-dias">Días de trabajo</label>
-                            <input type="text" id="personal-dias" placeholder="Ej: Lun a Sáb">
-                        </div>
-                    </div>
-                    <div class="form-group" id="personal-horario-otro-group" style="display:none;">
-                        <label for="personal-horario-otro">Especifica el horario</label>
-                        <input type="text" id="personal-horario-otro" placeholder="Ej: 6am - 2pm">
+                </div>
+                <div id="grupo-servicio" style="display:none;">
+                    <div class="form-group">
+                        <label for="servicio-concepto">Concepto</label>
+                        <input type="text" id="servicio-concepto" placeholder="Ej: Mantenimiento de ascensor">
                     </div>
                     <div class="form-group">
-                        <label for="personal-vacaciones">Vacaciones</label>
-                        <input type="text" id="personal-vacaciones" placeholder="Ej: 1-15 Ene">
+                        <label for="fijo-categoria">Categoría</label>
+                        <select id="fijo-categoria">
+                            <option value="ascensores">Mant. Ascensores</option>
+                            <option value="puerta">Mant. Puerta Garaje</option>
+                            <option value="tanque">Mant. Tanque Agua</option>
+                            <option value="tuberia">Tubería y Válvulas</option>
+                            <option value="intercomunicador">Intercomunicador</option>
+                            <option value="limpieza">Limpieza</option>
+                            <option value="fumigacion">Fumigación</option>
+                            <option value="arreglos">Arreglos Varios</option>
+                            <option value="materiales">Materiales</option>
+                            <option value="otros">Otros</option>
+                        </select>
                     </div>
-                </div>
-                <div id="grupo-fijo" style="display:none;">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="fijo-categoria">Categoría</label>
-                            <select id="fijo-categoria">
-                                <option value="ascensores">Mant. Ascensores</option>
-                                <option value="puerta">Mant. Puerta Garaje</option>
-                                <option value="tanque">Mant. Tanque Agua</option>
-                                <option value="tuberia">Tubería y Válvulas</option>
-                                <option value="intercomunicador">Intercomunicador</option>
-                                <option value="limpieza">Limpieza</option>
-                                <option value="fumigacion">Fumigación</option>
-                                <option value="arreglos">Arreglos Varios</option>
-                                <option value="materiales">Materiales</option>
-                                <option value="otros">Otros</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="fijo-monto">Monto (S/)</label>
-                            <input type="number" id="fijo-monto" step="0.01" min="0" placeholder="Ej: 300">
-                        </div>
+                    <div class="form-group">
+                        <label for="fijo-monto">Monto (S/)</label>
+                        <input type="number" id="fijo-monto" step="0.01" min="0" placeholder="Ej: 300">
                     </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="fijo-frecuencia">Cada cuánto se hace</label>
-                            <select id="fijo-frecuencia">
-                                <option value="mensual">Mensual</option>
-                                <option value="trimestral">Cada 3 meses</option>
-                                <option value="semestral">Cada 6 meses</option>
-                                <option value="anual">Cada 12 meses</option>
-                                <option value="unico">Único</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Desde el mes</label>
-                            <div style="display:flex;gap:6px;">
-                                <select id="fijo-mes-desde-mes" style="flex:1;"></select>
-                                <select id="fijo-mes-desde-anio" style="flex:1;"></select>
-                            </div>
+                    <div class="form-group">
+                        <label for="fijo-frecuencia">Periodo</label>
+                        <select id="fijo-frecuencia">
+                            <option value="mensual">mensual</option>
+                            <option value="trimestral">trimestral</option>
+                            <option value="semestral">semestral</option>
+                            <option value="anual">anual</option>
+                            <option value="unico">único</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Inicio servicio</label>
+                        <div style="display:flex;gap:6px;">
+                            <select id="fijo-mes-desde-mes" style="flex:1;"></select>
+                            <select id="fijo-mes-desde-anio" style="flex:1;"></select>
                         </div>
                     </div>
                 </div>
@@ -936,7 +1012,7 @@
     </div>
 
     <!-- Modal: Agregar/Editar Trabajo de Jardinería -->
-    <div id="modal-jardineria" class="modal" style="display:none;">
+    <div id="modal-jardineria" class="modal" style="display:none;" role="dialog" aria-modal="true">
         <div class="modal-content">
             <div class="modal-header">
                 <h3 id="modal-jardineria-title">Nuevo Trabajo</h3>
@@ -978,37 +1054,40 @@
                 <button class="modal-close">&times;</button>
             </div>
             <form id="form-agua-formula">
-                <p class="form-hint">Escribe el consumo del recibo y ajusta los montos si la factura real difiere del cálculo.</p>
+                <p class="form-hint">Ingresa los datos tal como aparecen en el recibo/factura de agua. El consumo del recibo se usa para controlar el tope de consumos por departamento y calcular el consumo de áreas comunes.</p>
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="agua-consumo">Consumo del recibo (m³)</label>
-                        <input type="number" id="agua-consumo" step="0.001" min="0">
+                        <label for="agua-consumo">Consumo total del recibo (m³)</label>
+                        <input type="number" id="agua-consumo" step="0.001" min="0" placeholder="Ej: 45.000">
                     </div>
                     <div class="form-group">
                         <label for="agua-cargo-fijo">Cargo fijo (S/)</label>
-                        <input type="number" id="agua-cargo-fijo" step="0.01" min="0">
+                        <input type="number" id="agua-cargo-fijo" step="0.01" min="0" placeholder="0.00">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="agua-potable">Agua potable (S/)</label>
+                        <input type="number" id="agua-potable" step="0.01" min="0" placeholder="0.00">
+                    </div>
+                    <div class="form-group">
+                        <label for="agua-alcantarillado">Alcantarillado (S/)</label>
+                        <input type="number" id="agua-alcantarillado" step="0.01" min="0" placeholder="0.00">
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
                         <label for="agua-igv">IGV (%)</label>
-                        <input type="number" id="agua-igv" step="0.01" min="0">
+                        <input type="number" id="agua-igv" step="0.01" min="0" placeholder="18">
                     </div>
                     <div class="form-group">
                         <label for="agua-igv-monto">IGV (S/)</label>
-                        <input type="number" id="agua-igv-monto" step="0.01" min="0">
+                        <input type="number" id="agua-igv-monto" step="0.01" min="0" placeholder="0.00">
                     </div>
                 </div>
-                <h4 class="tramo-heading">Detalle de facturación</h4>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="agua-potable">Concepto de agua potable (S/)</label>
-                        <input type="number" id="agua-potable" step="0.01" min="0">
-                    </div>
-                    <div class="form-group">
-                        <label for="agua-alcantarillado">Servicio de alcantarillado (S/)</label>
-                        <input type="number" id="agua-alcantarillado" step="0.01" min="0">
-                    </div>
+                <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:4px 0 8px;">
+                    <button type="button" id="btn-agua-calcular-tarifa" class="btn btn-outline btn-sm">Calcular desde tarifa (opcional)</button>
+                    <span class="luz-status">Usa los tramos configurados para estimar agua potable/alcantarillado según el consumo.</span>
                 </div>
                 <div id="agua-factura-total" class="factura-total">Total: S/. 0.00</div>
 
@@ -1053,8 +1132,53 @@
         </div>
     </div>
 
+    <!-- Modal: Factura de Luz -->
+    <div id="modal-luz-formula" class="modal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="luz-factura-title">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="luz-factura-title">Factura de Luz</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <form id="form-luz-formula">
+                <p class="form-hint">Ingresa los datos tal como aparecen en el recibo/factura de luz. El consumo del recibo se usa para controlar el tope de consumos por departamento y calcular el consumo de áreas comunes.</p>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="luz-consumo">Consumo total del recibo (kWh)</label>
+                        <input type="number" id="luz-consumo" step="0.001" min="0" placeholder="Ej: 120.000">
+                    </div>
+                    <div class="form-group">
+                        <label for="luz-cargo-fijo">Cargo fijo (S/)</label>
+                        <input type="number" id="luz-cargo-fijo" step="0.01" min="0" placeholder="0.00">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="luz-energia">Energía / consumo eléctrico (S/)</label>
+                        <input type="number" id="luz-energia" step="0.01" min="0" placeholder="0.00">
+                    </div>
+                    <div class="form-group">
+                        <label for="luz-alumbrado">Alumbrado público (S/)</label>
+                        <input type="number" id="luz-alumbrado" step="0.01" min="0" placeholder="0.00">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="luz-igv">IGV (%)</label>
+                        <input type="number" id="luz-igv" step="0.01" min="0" placeholder="18">
+                    </div>
+                    <div class="form-group">
+                        <label for="luz-igv-monto">IGV (S/)</label>
+                        <input type="number" id="luz-igv-monto" step="0.01" min="0" placeholder="0.00">
+                    </div>
+                </div>
+                <div id="luz-factura-total" class="factura-total">Total: S/. 0.00</div>
+                <button type="submit" class="btn btn-primary btn-block">Guardar factura</button>
+            </form>
+        </div>
+    </div>
+
     <!-- Modal: Confirmación -->
-    <div id="modal-confirm" class="modal" style="display:none;">
+    <div id="modal-confirm" class="modal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
         <div class="modal-content modal-small">
             <h3 id="confirm-title">Confirmar</h3>
             <p id="confirm-message"></p>
@@ -1102,10 +1226,14 @@
             </div>
 
             <div id="prop-view-dashboard">
-                <div class="month-selector" style="justify-content:flex-start;margin-bottom:var(--space-3);">
-                    <button id="btn-prev-month-prop" class="icon-btn">◀</button>
-                    <span id="prop-month-label" style="font-weight:600;">Junio 2026</span>
-                    <button id="btn-next-month-prop" class="icon-btn">▶</button>
+                <div class="month-selector month-selector-dashboard" data-periodo-header style="display:grid;grid-template-columns:auto auto auto;align-items:center;justify-content:center;column-gap:var(--space-4);row-gap:4px;margin-bottom:var(--space-3);">
+                    <div style="grid-column:2;font-size:12px;color:var(--md-sys-color-on-surface-variant);text-align:center;">Periodo de liquidación <span title="Mes de gastos y mantenimiento que se liquida. Se recomienda usar: Abierto (en edición/cálculo) y Cerrado (liquidado y emitido). Los pagos suelen recibirse durante el mes siguiente al periodo cerrado." aria-label="Ayuda sobre periodo de liquidación" style="cursor:help">ⓘ</span></div>
+                    <button class="btn btn-text js-periodo-prev" data-periodo-nav="-1" aria-label="Periodo anterior" style="grid-column:1;grid-row:2;align-self:center;">◀</button>
+                    <div style="grid-column:2;grid-row:2;display:inline-flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;text-align:center;">
+                        <span class="js-periodo-month-label" style="font:var(--md-sys-typescale-title-large);line-height:1.2;">—</span>
+                        <span class="js-periodo-badge period-status-badge abierto" style="font:var(--md-sys-typescale-label-large);line-height:1;">—</span>
+                    </div>
+                    <button class="btn btn-text js-periodo-next" data-periodo-nav="1" aria-label="Periodo siguiente" style="grid-column:3;grid-row:2;align-self:center;">▶</button>
                 </div>
 
                 <div id="prop-hero" class="card" style="background:var(--md-sys-color-primary);color:var(--md-sys-color-on-primary);border:none;border-radius:12px;padding:20px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;">
