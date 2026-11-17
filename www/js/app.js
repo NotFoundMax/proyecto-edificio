@@ -3112,6 +3112,7 @@ Recomendación: ejecutarlo desde Cálculo cuando hayas revisado el detalle. ¿Co
                 e.preventDefault();
                 try {
                     const concepto = (document.getElementById('gm-concepto')?.value || '').trim();
+                    const cantidad = parseFloat(document.getElementById('gm-cantidad')?.value) || 1;
                     const monto = parseFloat(document.getElementById('gm-monto')?.value);
                     const categoria = document.getElementById('gm-categoria')?.value || 'otros';
                     const entidad = (document.getElementById('gm-entidad')?.value || '').trim();
@@ -3132,7 +3133,7 @@ Recomendación: ejecutarlo desde Cálculo cuando hayas revisado el detalle. ¿Co
                         DB.saveCajaChica(mes, nuevoSaldo);
                     }
                     DB.saveGasto({
-                        concepto, monto, fecha, categoria,
+                        concepto, monto, cantidad, fecha, categoria,
                         entidad,
                         frecuencia, division: 'proporcional',
                         pagado: true,
@@ -3435,7 +3436,7 @@ Recomendación: ejecutarlo desde Cálculo cuando hayas revisado el detalle. ¿Co
             mesEl.innerHTML = rowsG.length ? `
                 <div class="deptos-table-wrap">
                 <table class="deptos-table" style="width:100%;">
-                    <thead><tr><th>Fecha</th><th>Nombre</th><th>Entidad</th><th>Estado</th><th class="num-left">Monto</th>${canEditMes ? '<th style="text-align:right;">Acciones</th>' : ''}</tr></thead>
+                    <thead><tr><th>Fecha</th><th>Nombre</th><th>Entidad</th><th>Estado</th><th class="num">Cantidad</th><th class="num-left">Monto</th>${canEditMes ? '<th style="text-align:right;">Acciones</th>' : ''}</tr></thead>
                     <tbody>
                         ${rowsG.map(g => {
                             const entidad = g.entidad || (Calculos.categoriaLabel && Calculos.categoriaLabel(g.categoria)) || g.categoria || '—';
@@ -3446,6 +3447,7 @@ Recomendación: ejecutarlo desde Cálculo cuando hayas revisado el detalle. ¿Co
                                 <td><strong>${g.concepto || 'Gasto'}</strong></td>
                                 <td>${entidad}</td>
                                 <td>${estado}</td>
+                                <td class="num">${(Number(g.cantidad) || 1)}</td>
                                 <td class="num-left">${Calculos.formatMoney(parseFloat(g.monto)||0)}</td>
                                 ${canEditMes ? `<td style="text-align:right;white-space:nowrap;">
                                     <button class="btn btn-sm btn-outline btn-edit-gasto-g" data-id="${g.id}" aria-label="Editar">Editar</button>

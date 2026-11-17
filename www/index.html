@@ -304,8 +304,9 @@
                         </div>
                         <div id="gasto-mes-form-wrap" style="border:1px dashed var(--md-sys-color-outline);border-radius:8px;padding:12px;background:var(--md-sys-color-surface-container-low);margin-bottom:10px;">
                             <div style="font-size:13px;font-weight:600;margin-bottom:8px">+ Registrar gasto del periodo (<span id="gastos-form-mes">Junio 2026</span>)</div>
-                            <form id="form-gasto-mes" class="gastos-inline-form" style="grid-template-columns:2fr 1fr 1fr 1fr 1fr auto;">
+                            <form id="form-gasto-mes" class="gastos-inline-form" style="grid-template-columns:2fr 0.7fr 1fr 1fr 1fr 1fr auto;">
                                 <div class="form-group"><label for="gm-concepto">Concepto</label><input type="text" id="gm-concepto" placeholder="Ej: Compra de focos" required></div>
+                                <div class="form-group"><label for="gm-cantidad">Cantidad</label><input type="number" id="gm-cantidad" step="0.01" min="0" placeholder="1" value="1"></div>
                                 <div class="form-group"><label for="gm-monto">Monto (S/)</label><input type="number" id="gm-monto" step="0.01" min="0.01" placeholder="0.00" required></div>
                                 <div class="form-group"><label for="gm-categoria">Categoría</label><select id="gm-categoria"><option value="materiales">Materiales</option><option value="arreglos">Reparación</option><option value="limpieza">Limpieza</option><option value="mantenimiento">Mantenimiento</option><option value="otros">Otros</option></select></div>
                                 <div class="form-group"><label for="gm-entidad">Entidad</label><input type="text" id="gm-entidad" maxlength="60" placeholder="Nombre de la entidad"></div>
