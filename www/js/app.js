@@ -4097,7 +4097,7 @@ Recomendación: ejecutarlo desde Cálculo cuando hayas revisado el detalle. ¿Co
         const resumenEl = document.getElementById('calculo-resumen');
         if (resumenEl) {
             resumenEl.innerHTML = `
-                <div class="summary-item"><span class="label">Gastos comunes a distribuir</span><span class="value">${Calculos.formatMoney(totals.comunes)}</span><span class="luz-status">Gastos del mes (incl. luz) prorrateados</span></div>
+                <div class="summary-item"><span class="label">Gastos recurrentes</span><span class="value">${Calculos.formatMoney(totals.comunes)}</span><span class="luz-status">Gastos recurrentes del mes prorrateados</span></div>
                 <div class="summary-item"><span class="label">Consumos del mes</span><span class="value">${Calculos.formatMoney(totals.consumosMes)}</span><span class="luz-status">Agua, gas y luz (medidos/recibos)</span></div>
                 <div class="summary-item"><span class="label">Total a cobrar</span><span class="value">${Calculos.formatMoney(totals.cargo)}</span><span class="luz-status">${totals.departamentos} departamento${totals.departamentos===1?'':'s'}</span></div>
                 <div class="summary-item emph"><span class="label">Recaudado / Pendiente</span><span class="value">${Calculos.formatMoney(totals.pagado)}</span><span class="luz-status">Pendiente: ${Calculos.formatMoney(totals.pendiente)} · ${totals.alDia} de ${totals.departamentos} al día</span></div>
