@@ -4127,7 +4127,6 @@ Recomendación: ejecutarlo desde Cálculo cuando hayas revisado el detalle. ¿Co
                                     <th>m²</th>
                                     <th>Coeficiente</th>
                                     <th class="num-left">Gastos comunes</th>
-                                    <th class="num-left">Consumos (agua/gas)</th>
                                     <th class="num-left">Total a pagar</th>
                                 </tr>
                             </thead>
@@ -4141,7 +4140,6 @@ Recomendación: ejecutarlo desde Cálculo cuando hayas revisado el detalle. ¿Co
                                         <td>${r.m2.toFixed(2)}</td>
                                         <td>${r.coef.toFixed(2)}%</td>
                                         <td class="num-left">${Calculos.formatMoney(r.comunes)}</td>
-                                        <td class="num-left">${Calculos.formatMoney(r.consumos)}</td>
                                         <td class="num-left"><strong>${Calculos.formatMoney(r.cargo)}</strong></td>
                                     </tr>
                                 `;}).join('')}
@@ -4153,7 +4151,6 @@ Recomendación: ejecutarlo desde Cálculo cuando hayas revisado el detalle. ¿Co
                                     <td><strong>${(totals.m2||0).toFixed(2)}</strong></td>
                                     <td><strong>${(totals.coef||0).toFixed(2)}%</strong></td>
                                     <td class="num-left"><strong>${Calculos.formatMoney(totals.comunes)}</strong></td>
-                                    <td class="num-left"><strong>${Calculos.formatMoney(totals.consumosInd)}</strong></td>
                                     <td class="num-left"><strong>${Calculos.formatMoney(totals.cargo)}</strong></td>
                                 </tr>
                             </tfoot>
