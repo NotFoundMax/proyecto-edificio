@@ -3253,7 +3253,10 @@ Recomendación: ejecutarlo desde Cálculo cuando hayas revisado el detalle. ¿Co
         // "Del mes": gastos puntuales/registrados para este periodo (no recurrentes que solo aplican)
         const gastos = gastosMesAplican.filter(g => {
             const f = g.frecuencia || 'unico';
-            return f === 'unico' || f === 'extraordinario' || g.mes === mesSel;
+            // Solo gastos puntuales/extraordinarios del mes; los recurrentes
+            // (mensual/trimestral/semestral/anual) se gestionan en "Recurrentes"
+            // y no deben duplicarse en "Puntuales".
+            return f === 'unico' || f === 'extraordinario' || f === 'puntual';
         });
 
         const sumNom = nomina.reduce((a,p)=>a+(parseFloat(p.sueldoMensual)||0),0);
