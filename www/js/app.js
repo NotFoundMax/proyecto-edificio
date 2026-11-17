@@ -3879,12 +3879,15 @@ Recomendación: ejecutarlo desde Cálculo cuando hayas revisado el detalle. ¿Co
         }).join('');
 
         container.innerHTML = `
-            <div class="deptos-table-wrap">
-                <table class="deptos-table">
-                    <thead><tr><th>Dpto</th><th>Propietario</th><th class="num">Lect. anterior (kWh)</th><th class="num">Lect. actual (kWh)</th><th class="num">Consumo</th><th class="num-left">Monto S/</th></tr></thead>
-                    <tbody>${rows || '<tr><td colspan="6"><p class="empty-state">Sin departamentos registrados. Ve a Dptos para agregarlos.</p></td></tr>'}</tbody>
-                </table>
-            </div>
+            <details class="consumo-lecturas-details" style="border:1px solid var(--md-sys-color-outline-variant);border-radius:8px;background:var(--md-sys-color-surface);overflow:hidden;">
+                <summary style="padding:10px 12px;cursor:pointer;font-weight:600;font-size:13px;background:var(--md-sys-color-surface-container-low);">Lecturas por departamento (opcional, para modalidad por medidor)</summary>
+                <div class="deptos-table-wrap" style="border:0;border-radius:0;">
+                    <table class="deptos-table">
+                        <thead><tr><th>Dpto</th><th>Propietario</th><th class="num">Lect. anterior (kWh)</th><th class="num">Lect. actual (kWh)</th><th class="num">Consumo</th><th class="num-left">Monto S/</th></tr></thead>
+                        <tbody>${rows || '<tr><td colspan="6"><p class="empty-state">Sin departamentos registrados. Ve a Dptos para agregarlos.</p></td></tr>'}</tbody>
+                    </table>
+                </div>
+            </details>
         `;
 
         if (resumenEl) {
