@@ -3295,9 +3295,10 @@ Recomendación: ejecutarlo desde Cálculo cuando hayas revisado el detalle. ¿Co
         if (resumen) {
             const recMes = sumRec;
             const puntMes = sumDel;
-            const consMes = sumCons;
             const comunesConsumo = sumConsComun;
-            const totalMes = (Calculos.round2 ? Calculos.round2(recMes + puntMes + consMes + comunesConsumo) : (recMes + puntMes + consMes + comunesConsumo));
+            // El total del mes NO incluye consumos individuales (agua/gas/luz por departamento),
+            // solo recurrentes + puntuales + consumos comunes (áreas comunes prorrateados).
+            const totalMes = (Calculos.round2 ? Calculos.round2(recMes + puntMes + comunesConsumo) : (recMes + puntMes + comunesConsumo));
             const comunesDetalle = [];
             if (sumAguaComun > 0.005) comunesDetalle.push(`Agua ${Calculos.formatMoney(sumAguaComun)}`);
             if (sumLuzComun > 0.005) comunesDetalle.push(`Luz ${Calculos.formatMoney(sumLuzComun)}`);
@@ -3308,7 +3309,7 @@ Recomendación: ejecutarlo desde Cálculo cuando hayas revisado el detalle. ¿Co
                 <div class="summary-item"><span class="label">Recurrentes (mes)</span><span class="value">${Calculos.formatMoney(recMes)}</span><span class="luz-status">Nómina, servicios y jardinería del periodo</span></div>
                 <div class="summary-item"><span class="label">Puntuales (mes)</span><span class="value">${Calculos.formatMoney(puntMes)}</span><span class="luz-status">Gastos del mes seleccionado</span></div>
                 <div class="summary-item"><span class="label">Consumos comunes (mes)</span><span class="value">${Calculos.formatMoney(comunesConsumo)}</span><span class="luz-status">${consComunesLabel}</span></div>
-                <div class="summary-item summary-diff"><span class="label">Total del mes</span><span class="value">${Calculos.formatMoney(totalMes)}</span><span class="luz-status">${Calculos.getMesLabel ? Calculos.getMesLabel(mesSel) : mesSel} · incluye consumos individuales y consumos comunes prorrateados</span></div>
+                <div class="summary-item summary-diff"><span class="label">Total del mes</span><span class="value">${Calculos.formatMoney(totalMes)}</span><span class="luz-status">${Calculos.getMesLabel ? Calculos.getMesLabel(mesSel) : mesSel} · incluye consumos comunes prorrateados</span></div>
             `;
         }
 
