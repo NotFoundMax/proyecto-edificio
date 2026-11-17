@@ -1081,6 +1081,41 @@ const App = {
         return propietario;
     },
 
+    // Validación de departamento duplicado (nuevo o edición)
+    _validarDepartamentoPropietario() {
+        const input = document.getElementById('propietario-departamento');
+        const id = document.getElementById('propietario-id').value;
+        const valor = input ? String(input.value || '').trim() : '';
+        const norm = (s) => String(s == null ? '' : s).trim().toLowerCase();
+        if (!valor) {
+            this._mostrarErrorDepartamento('Ingresa el número/código del departamento.');
+            return false;
+        }
+        const duplicado = (DB.getPropietarios() || []).some(p =>
+            String(p.id) !== String(id || '') && norm(p.departamento) === norm(valor)
+        );
+        if (duplicado) {
+            this._mostrarErrorDepartamento(`El departamento “${valor}” ya está en uso. Elige otro código.`);
+            return false;
+        }
+        this._limpiarErrorDepartamento();
+        return true;
+    },
+
+    _mostrarErrorDepartamento(msg) {
+        const input = document.getElementById('propietario-departamento');
+        const errEl = document.getElementById('propietario-departamento-error');
+        if (errEl) { errEl.textContent = msg; errEl.style.display = 'block'; }
+        if (input) input.setAttribute('aria-invalid', 'true');
+    },
+
+    _limpiarErrorDepartamento() {
+        const input = document.getElementById('propietario-departamento');
+        const errEl = document.getElementById('propietario-departamento-error');
+        if (errEl) { errEl.textContent = ''; errEl.style.display = 'none'; }
+        if (input) input.removeAttribute('aria-invalid');
+    },
+
     _actualizarCoeficientePropietario() {
         const m2Input = document.getElementById('propietario-m2');
         const m2 = parseFloat(m2Input.value) || 0;
@@ -1215,6 +1250,7 @@ const App = {
             document.getElementById('propietario-nombre').value = propietario.nombre || '';
             document.getElementById('propietario-apellido').value = propietario.apellido || '';
             document.getElementById('propietario-departamento').value = propietario.departamento || '';
+            this._limpiarErrorDepartamento();
             if (m2Input) { m2Input.value = propietario.m2 || ''; m2Input.readOnly = true; m2Input.disabled = true; }
             if (m2UnlockWrap) m2UnlockWrap.style.display = 'block';
             if (m2Unlock) {
@@ -1246,6 +1282,7 @@ const App = {
             if (ocup) ocup.value = 'propietario';
             if (residentes) residentes.value = 1;
             this._actualizarCoeficientePropietario();
+            this._limpiarErrorDepartamento();
         }
 
         this._saveModalFocus();
@@ -1835,6 +1872,10 @@ const App = {
         if (m2Input) {
             m2Input.addEventListener('input', () => this._actualizarCoeficientePropietario());
         }
+        const deptoInput = document.getElementById('propietario-departamento');
+        if (deptoInput) {
+            deptoInput.addEventListener('input', () => this._validarDepartamentoPropietario());
+        }
     },
 
     // === Gasto Frecuencia Preview ===
@@ -1921,12 +1962,24 @@ const App = {
             const id = document.getElementById('propietario-id').value;
             const propietario = this._leerFormPropietario();
 
+            if (!this._validarDepartamentoPropietario()) return;
+
             if (!propietario.m2 || propietario.m2 <= 0) {
                 this.toast('El m² del departamento debe ser mayor a 0', 'error');
                 return;
             }
 
-            DB.savePropietario(propietario);
+            try {
+                DB.savePropietario(propietario);
+            } catch (err) {
+                if (err && err.message === 'DEPARTAMENTO_DUPLICADO') {
+                    this._mostrarErrorDepartamento(`El departamento “${propietario.departamento}” ya está en uso. Elige otro código.`);
+                    this.toast('Ese departamento ya está registrado. Usa otro código.', 'error');
+                    return;
+                }
+                this.toast('No se pudo guardar el departamento. Inténtalo de nuevo.', 'error');
+                return;
+            }
             this.closeAllModals();
             this.toast(id ? 'Departamento actualizado' : 'Departamento agregado', 'success');
             this.render();
@@ -2940,6 +2993,7 @@ Recomendación: ejecutarlo desde Cálculo cuando hayas revisado el detalle. ¿Co
         const iconTransfer = '<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6M5.216 14A2.24 2.24 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.3 6.3 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1zM4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5"/><path d="M13.5 5.5a.5.5 0 0 1 .5.5v1h1a.5.5 0 0 1 0 1h-1v1a.5.5 0 0 1-1 0v-1h-1a.5.5 0 0 1 0-1h1V6a.5.5 0 0 1 .5-.5"/></svg>';
         const iconHist = '<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71z"/><path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0"/></svg>';
         const iconPay = '<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M4 10.781c.148 1.667 1.513 2.85 3.591 3.003V15h1.043v-1.216c2.27-.179 3.678-1.438 3.678-3.3 0-1.59-.947-2.51-2.956-3.028l-.722-.187V3.467c1.122.11 1.879.714 2.07 1.616h1.47c-.166-1.6-1.54-2.748-3.54-2.875V1H7.591v1.233c-1.939.23-3.27 1.472-3.27 3.156 0 1.454.966 2.483 2.661 2.917l.61.162v4.031c-1.149-.17-1.94-.8-2.131-1.718zm3.391-3.836c-1.043-.263-1.6-.825-1.6-1.616 0-.944.704-1.641 1.8-1.828v3.495l-.2-.05zm1.591 1.872c1.287.323 1.852.859 1.852 1.769 0 1.097-.826 1.828-2.2 1.939V8.73z"/></svg>';
+        const iconTrash = '<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/><path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/></svg>';
         const iconReceipt = '<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M5 4a.5.5 0 0 0 0 1h6a.5.5 0 0 0 0-1zm-.5 2.5A.5.5 0 0 1 5 6h6a.5.5 0 0 1 0 1H5a.5.5 0 0 1-.5-.5M5 8a.5.5 0 0 0 0 1h6a.5.5 0 0 0 0-1z"/><path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2zm10-1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1"/></svg>';
 
         const calcMes = Calculos.calcMes ? Calculos.calcMes(this.currentMes) : null;
@@ -2968,6 +3022,7 @@ Recomendación: ejecutarlo desde Cálculo cuando hayas revisado el detalle. ¿Co
                         <div class="deptos-actions">
                             <button class="btn-depto-editar" data-id="${p.id}" title="Editar datos" aria-label="Editar datos">${iconEdit}</button>
                             <button class="btn-depto-transferir" data-id="${p.id}" title="Transferir titularidad" aria-label="Transferir titularidad">${iconTransfer}</button>
+                            <button class="btn-depto-eliminar" data-id="${p.id}" title="Eliminar departamento" aria-label="Eliminar departamento" style="color:#9f2e22;">${iconTrash}</button>
                             ${payBtn}
                         </div>
                     </td>
@@ -2996,6 +3051,29 @@ Recomendación: ejecutarlo desde Cálculo cuando hayas revisado el detalle. ¿Co
         container.querySelectorAll('.btn-depto-pago').forEach(btn => btn.addEventListener('click', () => {
             const id = parseInt(btn.dataset.id);
             this.openPagoModal(id, 'fija');
+        }));
+        container.querySelectorAll('.btn-depto-eliminar').forEach(btn => btn.addEventListener('click', () => {
+            const id = parseInt(btn.dataset.id);
+            const p = DB.getPropietario(id);
+            if (!p) return;
+            const nombre = [p.nombre, p.apellido].filter(Boolean).join(' ').trim() || '-';
+            const depto = p.departamento || '-';
+            const msg = `¿Eliminar el departamento ${depto} (${nombre})?\n\nEsto borrará el departamento y sus datos (pagos, consumos, historial). Los coeficientes de los demás se recalcularán. Esta acción no se puede deshacer.`;
+            if (!confirm(msg)) return;
+            // Confirmación fuerte: pedir que escriba el código del departamento
+            const typed = prompt(`Escribe el código del departamento para confirmar: ${depto}`);
+            if (typed === null) return;
+            if (String(typed).trim().toLowerCase() !== String(depto).trim().toLowerCase()) {
+                this.toast('Confirmación incorrecta. No se eliminó.', 'error');
+                return;
+            }
+            try {
+                DB.deletePropietario(id);
+                this.toast('Departamento eliminado', 'success');
+                this.render();
+            } catch (err) {
+                this.toast('No se pudo eliminar el departamento.', 'error');
+            }
         }));
     },
 

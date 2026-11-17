@@ -169,6 +169,16 @@ const DB = {
 
     savePropietario(propietario) {
         const data = this._load();
+        const norm = (s) => String(s == null ? '' : s).trim().toLowerCase();
+        const depto = norm(propietario.departamento);
+        if (depto) {
+            const duplicado = (data.propietarios || []).some(p =>
+                String(p.id) !== String(propietario.id || '') && norm(p.departamento) === depto
+            );
+            if (duplicado) {
+                throw new Error('DEPARTAMENTO_DUPLICADO');
+            }
+        }
         if (propietario.id) {
             const idx = data.propietarios.findIndex(p => p.id === propietario.id);
             if (idx !== -1) data.propietarios[idx] = { ...data.propietarios[idx], ...propietario };
@@ -197,7 +207,25 @@ const DB = {
 
     deletePropietario(id) {
         const data = this._load();
-        data.propietarios = data.propietarios.filter(p => p.id !== id);
+        const prop = (data.propietarios || []).find(p => p.id === id);
+        const depto = prop ? prop.departamento : null;
+        data.propietarios = (data.propietarios || []).filter(p => p.id !== id);
+        // Limpiar pagos del departamento
+        if (Array.isArray(data.pagos)) {
+            data.pagos = data.pagos.filter(pg => pg.propietarioId !== id);
+        }
+        // Limpiar consumos (agua/gas/luz) por departamento
+        if (depto) {
+            ['agua', 'gas', 'luz'].forEach(tipo => {
+                if (data[tipo] && typeof data[tipo] === 'object') {
+                    Object.keys(data[tipo]).forEach(mes => {
+                        if (data[tipo][mes] && data[tipo][mes][depto]) {
+                            delete data[tipo][mes][depto];
+                        }
+                    });
+                }
+            });
+        }
         // Recalcular coeficientes de los restantes
         const totalM2 = data.propietarios.reduce((s, p) => s + (Number(p.m2) || 0), 0);
         data.propietarios.forEach(p => {
