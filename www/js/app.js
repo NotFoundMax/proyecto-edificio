@@ -563,6 +563,13 @@ const App = {
             .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     },
 
+    // Formatea nombres propios con inicial en mayúscula (presentación).
+    formatearNombrePropio(valor) {
+        const s = String(valor == null ? '' : valor).trim().replace(/\s+/g, ' ');
+        if (!s) return '';
+        return s.split(' ').map(w => w.charAt(0).toLocaleUpperCase('es-PE') + w.slice(1).toLocaleLowerCase('es-PE')).join(' ');
+    },
+
     applyRole() {
         const isAdmin = Auth.canWrite();
         document.body.classList.toggle('readonly', !isAdmin);
@@ -1297,7 +1304,7 @@ const App = {
             return;
         }
         const p = ec.propietario;
-        const fullName = [p.nombre, p.apellido].filter(Boolean).join(' ').trim() || p.departamento || '—';
+        const fullName = this.formatearNombrePropio([p.nombre, p.apellido].filter(Boolean).join(' ').trim()) || p.departamento || '—';
         const depto = p.departamento || '—';
         const cfg = (DB.getConfig ? DB.getConfig() : {}) || {};
         const edificio = cfg.nombre || 'Edificio';
@@ -1383,7 +1390,7 @@ const App = {
         const ec = Calculos.calcEstadoCuenta(propietarioId);
         if (!ec) { this.toast('No se encontró el departamento', 'error'); return; }
         const p = ec.propietario || DB.getPropietario(propietarioId) || {};
-        const titular = [p.nombre, p.apellido].filter(Boolean).join(' ').trim() || p.departamento || '—';
+        const titular = this.formatearNombrePropio([p.nombre, p.apellido].filter(Boolean).join(' ').trim()) || p.departamento || '—';
         const coef = Number(p.coeficiente || 0).toFixed(2) + '%';
         const cfg = (DB.getConfig ? DB.getConfig() : {}) || {};
         const edificio = cfg.nombre || 'Edificio';
@@ -1478,7 +1485,7 @@ const App = {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF({ unit: 'pt', format: 'a4' });
         const cfg = (DB.getConfig ? DB.getConfig() : {}) || {};
-        const titular = [p.nombre, p.apellido].filter(Boolean).join(' ').trim() || p.departamento || '—';
+        const titular = this.formatearNombrePropio([p.nombre, p.apellido].filter(Boolean).join(' ').trim()) || p.departamento || '—';
         const coef = Number(p.coeficiente || 0).toFixed(2) + '%';
         const hoy = new Date();
         let y = 42, margin = 40, pageW = doc.internal.pageSize.getWidth();
@@ -1554,7 +1561,7 @@ const App = {
         const doc = new jsPDF({ unit: 'pt', format: 'a4' });
         const config = DB.getConfig();
         const p = ec.propietario;
-        const fullName = [p.nombre, p.apellido].filter(Boolean).join(' ') || p.departamento;
+        const fullName = this.formatearNombrePropio([p.nombre, p.apellido].filter(Boolean).join(' ')) || p.departamento;
         const pageW = doc.internal.pageSize.getWidth();
         const margin = 40;
         let y = 42;
@@ -2869,7 +2876,7 @@ Recomendación: ejecutarlo desde Cálculo cuando hayas revisado el detalle. ¿Co
         const mesLabel = Calculos.getMesLabel(mes);
         set('prop-month-label', mesLabel);
 
-        const nombreFull = [prop.nombre, prop.apellido].filter(Boolean).join(' ') || 'Propietario';
+        const nombreFull = this.formatearNombrePropio([prop.nombre, prop.apellido].filter(Boolean).join(' ')) || 'Propietario';
         set('prop-pill', `Depto ${prop.departamento || '-'} · ${nombreFull}`);
         set('prop-depto-num', prop.departamento || '-');
         set('prop-m2', (prop.m2 ? Number(prop.m2).toFixed(2) : '-') + ' m²');
@@ -2998,7 +3005,7 @@ Recomendación: ejecutarlo desde Cálculo cuando hayas revisado el detalle. ¿Co
 
         const calcMes = Calculos.calcMes ? Calculos.calcMes(this.currentMes) : null;
         const rows = propietarios.map(p => {
-            const titular = [p.nombre, p.apellido].filter(Boolean).join(' ').trim() || '-';
+            const titular = this.formatearNombrePropio([p.nombre, p.apellido].filter(Boolean).join(' ').trim()) || '-';
             let cargo = 0, saldo = 0, pagado = 0;
             try {
                 const row = calcMes && calcMes.rows ? calcMes.rows.find(r => r.id == p.id) : null;
@@ -3056,7 +3063,7 @@ Recomendación: ejecutarlo desde Cálculo cuando hayas revisado el detalle. ¿Co
             const id = parseInt(btn.dataset.id);
             const p = DB.getPropietario(id);
             if (!p) return;
-            const nombre = [p.nombre, p.apellido].filter(Boolean).join(' ').trim() || '-';
+            const nombre = this.formatearNombrePropio([p.nombre, p.apellido].filter(Boolean).join(' ').trim()) || '-';
             const depto = p.departamento || '-';
             const msg = `¿Eliminar el departamento ${depto} (${nombre})?\n\nEsto borrará el departamento y sus datos (pagos, consumos, historial). Los coeficientes de los demás se recalcularán. Esta acción no se puede deshacer.`;
             if (!confirm(msg)) return;
@@ -3653,7 +3660,7 @@ Recomendación: ejecutarlo desde Cálculo cuando hayas revisado el detalle. ¿Co
             const monto = resultado ? (resultado.total || 0) : 0;
             if (resultado) { totalConsumo += consumo; totalMonto += monto; }
             else if (consumo) { totalConsumo += consumo; }
-            const nombre = [p.nombre, p.apellido].filter(Boolean).join(' ') || '-';
+            const nombre = this.formatearNombrePropio([p.nombre, p.apellido].filter(Boolean).join(' ')) || '-';
             return `
                 <tr>
                     <td><strong>${p.departamento || '-'}</strong></td>
@@ -3758,7 +3765,7 @@ Recomendación: ejecutarlo desde Cálculo cuando hayas revisado el detalle. ¿Co
             const monto = resultado ? (resultado.total || 0) : 0;
             if (resultado) { totalConsumo += consumo; totalMonto += monto; }
             else if (consumo) { totalConsumo += consumo; }
-            const nombre = [p.nombre, p.apellido].filter(Boolean).join(' ') || '-';
+            const nombre = this.formatearNombrePropio([p.nombre, p.apellido].filter(Boolean).join(' ')) || '-';
             return `
                 <tr>
                     <td><strong>${p.departamento || '-'}</strong></td>
@@ -3866,7 +3873,7 @@ Recomendación: ejecutarlo desde Cálculo cuando hayas revisado el detalle. ¿Co
             const monto = resultado ? (resultado.total || 0) : 0;
             if (resultado) { totalConsumo += consumo; totalMonto += monto; }
             else if (consumo) { totalConsumo += consumo; }
-            const nombre = [p.nombre, p.apellido].filter(Boolean).join(' ') || '-';
+            const nombre = this.formatearNombrePropio([p.nombre, p.apellido].filter(Boolean).join(' ')) || '-';
             return `
                 <tr>
                     <td><strong>${p.departamento || '-'}</strong></td>
@@ -4139,50 +4146,112 @@ Recomendación: ejecutarlo desde Cálculo cuando hayas revisado el detalle. ¿Co
                 const prorrateadoPorId = {};
                 distProrrateado.forEach(d => { prorrateadoPorId[d.id] = d.valor; });
                 const totalProrrateado = Calculos.round2(distProrrateado.reduce((s, d) => s + (Number(d.valor) || 0), 0));
+
+                const rowsAsc = [...rows].sort((a, b) => {
+                    const na = parseInt(String(a.depto || a.departamento || '').replace(/\D/g, ''), 10);
+                    const nb = parseInt(String(b.depto || b.departamento || '').replace(/\D/g, ''), 10);
+                    if (!isNaN(na) && !isNaN(nb) && na !== nb) return na - nb;
+                    return String(a.depto || a.departamento || '').localeCompare(String(b.depto || b.departamento || ''), 'es', { numeric: true, sensitivity: 'base' });
+                });
+
+                const fmtMonto = (n) => {
+                    const v = Math.abs(Number(n) || 0);
+                    return `S/. ${v.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                };
+
+                let sumGasto = 0, sumSaldoNeto = 0, sumTotalCobrar = 0;
+                const filasHtml = rowsAsc.map(r => {
+                    const titular = this.formatearNombrePropio([r.nombre, r.apellido].filter(Boolean).join(' ').trim()) || r.departamento || '—';
+                    const gastoProrrateado = Calculos.round2((prorrateadoPorId[r.id] != null) ? prorrateadoPorId[r.id] : 0);
+
+                    // Saldo anterior: acumulado antes del mes actual (positivo = deuda, negativo = a favor)
+                    let saldoAnterior = 0;
+                    try {
+                        const ec = Calculos.calcEstadoCuenta ? Calculos.calcEstadoCuenta(r.id) : null;
+                        if (ec && Array.isArray(ec.filas)) {
+                            const idx = ec.filas.findIndex(f => f.mes === mes);
+                            if (idx >= 0) {
+                                saldoAnterior = (idx + 1 < ec.filas.length) ? (Number(ec.filas[idx + 1].acumulado) || 0) : 0;
+                            } else {
+                                const prev = ec.filas.find(f => f.mes < mes);
+                                saldoAnterior = prev ? (Number(prev.acumulado) || 0) : 0;
+                            }
+                        }
+                    } catch (e) { saldoAnterior = 0; }
+                    saldoAnterior = Calculos.round2(saldoAnterior);
+
+                    const aFavor = saldoAnterior < -0.005 ? Calculos.round2(Math.abs(saldoAnterior)) : 0;
+                    const deuda = saldoAnterior > 0.005 ? Calculos.round2(saldoAnterior) : 0;
+                    const netoSaldo = Calculos.round2(deuda - aFavor);
+                    const totalCobrar = Math.max(0, Calculos.round2(gastoProrrateado - aFavor + deuda));
+
+                    sumGasto = Calculos.round2(sumGasto + gastoProrrateado);
+                    sumSaldoNeto = Calculos.round2(sumSaldoNeto + netoSaldo);
+                    sumTotalCobrar = Calculos.round2(sumTotalCobrar + totalCobrar);
+
+                    let saldoHtml = `<div style="color:#6B7280;text-align:right;">${fmtMonto(0)}</div>`;
+                    if (aFavor > 0.005) {
+                        saldoHtml = `<div style="text-align:right;line-height:1.3;"><div style="color:#16A34A;font-weight:600;">+ ${fmtMonto(aFavor)}</div><span style="display:inline-block;margin-top:2px;padding:1px 8px;border-radius:999px;background:#ECFDF3;color:#16A34A;font-size:11px;font-weight:600;">A favor</span></div>`;
+                    } else if (deuda > 0.005) {
+                        saldoHtml = `<div style="text-align:right;line-height:1.3;"><div style="color:#DC2626;font-weight:600;">- ${fmtMonto(deuda)}</div><span style="display:inline-block;margin-top:2px;padding:1px 8px;border-radius:999px;background:#FEF2F2;color:#DC2626;font-size:11px;font-weight:600;">Deuda</span></div>`;
+                    }
+
+                    const td = 'padding:12px 14px;border-bottom:1px solid #F3F4F6;';
+                    return `
+                        <tr>
+                            <td style="${td}text-align:left;font-weight:700;">${this.esc ? this.esc(String(r.depto || '—')) : (r.depto || '—')}</td>
+                            <td style="${td}text-align:left;">${this.esc ? this.esc(titular) : titular}</td>
+                            <td style="${td}text-align:right;">${(Number(r.m2) || 0).toFixed(2)}</td>
+                            <td style="${td}text-align:right;">${(Number(r.coef) || 0).toFixed(2)}%</td>
+                            <td style="${td}text-align:right;">${fmtMonto(gastoProrrateado)}</td>
+                            <td style="${td}text-align:right;">${saldoHtml}</td>
+                            <td style="${td}text-align:right;font-weight:700;">${fmtMonto(totalCobrar)}</td>
+                        </tr>
+                    `;
+                }).join('');
+
+                const saldoNetoAbs = Math.abs(sumSaldoNeto);
+                let saldoNetoTotalHtml = `<span style="color:#6B7280;">${fmtMonto(0)}</span>`;
+                if (sumSaldoNeto > 0.005) {
+                    saldoNetoTotalHtml = `<span style="color:#DC2626;font-weight:600;">- ${fmtMonto(saldoNetoAbs)}</span>`;
+                } else if (sumSaldoNeto < -0.005) {
+                    saldoNetoTotalHtml = `<span style="color:#16A34A;font-weight:600;">+ ${fmtMonto(saldoNetoAbs)}</span>`;
+                }
+
                 prorrateoEl.innerHTML = `
-                    <div style="padding:14px 16px;border-bottom:1px solid var(--md-sys-color-outline-variant);background:var(--md-sys-color-surface-container-low);">
-                        <h3 style="font-size:15px;font-weight:700;margin:0;">1. Detalle de prorrateo por departamento</h3>
-                        <p class="luz-status" style="margin:2px 0 0;">Distribución según coeficiente (m²). Los montos cuadran con el total del mes.</p>
+                    <div style="padding:14px 16px;border-bottom:1px solid #E5E7EB;background:#fff;border:1px solid #E5E7EB;border-bottom:0;border-radius:8px 8px 0 0;">
+                        <h3 style="font-size:15px;font-weight:700;margin:0;color:#111827;">1. Detalle de prorrateo por departamento</h3>
+                        <p class="luz-status" style="margin:2px 0 0;color:#6B7280;">Distribución según coeficiente (m²). Los montos cuadran con el total del mes.</p>
                     </div>
-                    <div style="padding:14px 16px;">
-                        <div class="luz-status" style="background:var(--md-sys-color-surface-container-low);border:1px solid var(--md-sys-color-outline-variant);border-radius:8px;padding:10px 12px;margin-bottom:12px;">
-                            <strong>Cómo se calcula:</strong> Gastos recurrentes + puntuales + servicios comunes del mes, prorrateados por coeficiente (m²). Los coeficientes suman 100%.
+                    <div style="padding:14px 16px;background:#fff;border:1px solid #E5E7EB;border-top:0;border-radius:0 0 8px 8px;">
+                        <div class="luz-status" style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:8px;padding:10px 12px;margin-bottom:12px;color:#374151;">
+                            <strong>Cómo se calcula:</strong> Total a cobrar = Gasto prorrateado − Saldo a favor + Deuda anterior. Si el resultado es menor a cero, se muestra S/. 0.00 y el remanente queda como saldo a favor.
                         </div>
-                        <div class="deptos-table-wrap">
-                        <table class="deptos-table calc-table">
+                        <div class="deptos-table-wrap" style="background:#fff;border:1px solid #E5E7EB;border-radius:8px;overflow:auto;">
+                        <table class="deptos-table calc-table" style="width:100%;border-collapse:collapse;background:#fff;">
                             <thead>
                                 <tr>
-                                    <th>Dpto</th>
-                                    <th>Titular</th>
-                                    <th>m²</th>
-                                    <th>Coeficiente</th>
-                                    <th class="num-left">Gasto prorrateado</th>
-                                    <th class="num-left">Total a cobrar</th>
+                                    <th style="text-align:left;border-bottom:1px solid #E5E7EB;padding:12px 14px;font-size:12px;letter-spacing:.02em;color:#374151;background:#fff;">DPTO</th>
+                                    <th style="text-align:left;border-bottom:1px solid #E5E7EB;padding:12px 14px;font-size:12px;letter-spacing:.02em;color:#374151;background:#fff;">TITULAR</th>
+                                    <th style="text-align:right;border-bottom:1px solid #E5E7EB;padding:12px 14px;font-size:12px;letter-spacing:.02em;color:#374151;background:#fff;">M²</th>
+                                    <th style="text-align:right;border-bottom:1px solid #E5E7EB;padding:12px 14px;font-size:12px;letter-spacing:.02em;color:#374151;background:#fff;">COEFICIENTE</th>
+                                    <th style="text-align:right;border-bottom:1px solid #E5E7EB;padding:12px 14px;font-size:12px;letter-spacing:.02em;color:#374151;background:#fff;">GASTO PRORRATEADO</th>
+                                    <th style="text-align:right;border-bottom:1px solid #E5E7EB;padding:12px 14px;font-size:12px;letter-spacing:.02em;color:#374151;background:#fff;">SALDO ANTERIOR</th>
+                                    <th style="text-align:right;border-bottom:1px solid #E5E7EB;padding:12px 14px;font-size:12px;letter-spacing:.02em;color:#374151;background:#fff;">TOTAL A COBRAR</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                ${rows.map(r => {
-                                    const titular = [r.nombre, r.apellido].filter(Boolean).join(' ').trim() || r.departamento || '—';
-                                    const gastoProrrateado = (prorrateadoPorId[r.id] != null) ? prorrateadoPorId[r.id] : 0;
-                                    return `
-                                    <tr>
-                                        <td><strong>${r.depto}</strong></td>
-                                        <td>${this.esc ? this.esc(titular) : titular}</td>
-                                        <td>${r.m2.toFixed(2)}</td>
-                                        <td>${r.coef.toFixed(2)}%</td>
-                                        <td class="num-left">${Calculos.formatMoney(gastoProrrateado)}</td>
-                                        <td class="num-left"><strong>${Calculos.formatMoney(gastoProrrateado)}</strong></td>
-                                    </tr>
-                                `;}).join('')}
+                                ${filasHtml}
                             </tbody>
                             <tfoot>
-                                <tr>
-                                    <td><strong>Total</strong></td>
-                                    <td></td>
-                                    <td><strong>${(totals.m2||0).toFixed(2)}</strong></td>
-                                    <td><strong>${(totals.coef||0).toFixed(2)}%</strong></td>
-                                    <td class="num-left"><strong>${Calculos.formatMoney(totalProrrateado)}</strong></td>
-                                    <td class="num-left"><strong>${Calculos.formatMoney(totalProrrateado)}</strong></td>
+                                <tr style="background:#F9FAFB;font-weight:700;color:#111827;">
+                                    <td style="text-align:left;padding:12px 14px;border-top:1px solid #E5E7EB;">Total</td>
+                                    <td style="padding:12px 14px;border-top:1px solid #E5E7EB;"></td>
+                                    <td style="text-align:right;padding:12px 14px;border-top:1px solid #E5E7EB;">${(Number(totals.m2) || 0).toFixed(2)}</td>
+                                    <td style="text-align:right;padding:12px 14px;border-top:1px solid #E5E7EB;">${(Number(totals.coef) || 0).toFixed(2)}%</td>
+                                    <td style="text-align:right;padding:12px 14px;border-top:1px solid #E5E7EB;">${fmtMonto(sumGasto)}</td>
+                                    <td style="text-align:right;padding:12px 14px;border-top:1px solid #E5E7EB;">${saldoNetoTotalHtml}</td>
+                                    <td style="text-align:right;padding:12px 14px;border-top:1px solid #E5E7EB;">${fmtMonto(sumTotalCobrar)}</td>
                                 </tr>
                             </tfoot>
                         </table>
@@ -4297,7 +4366,7 @@ Recomendación: ejecutarlo desde Cálculo cuando hayas revisado el detalle. ¿Co
 
     openTransferirTitularidadModal(propietario) {
         if (!propietario) return;
-        const fullName = [propietario.nombre, propietario.apellido].filter(Boolean).join(' ') || propietario.departamento || '';
+        const fullName = this.formatearNombrePropio([propietario.nombre, propietario.apellido].filter(Boolean).join(' ')) || propietario.departamento || '';
         const title = document.getElementById('modal-transferir-title');
         const info = document.getElementById('transferir-info');
         const idEl = document.getElementById('transferir-propietario-id');
@@ -4342,7 +4411,7 @@ Recomendación: ejecutarlo desde Cálculo cuando hayas revisado el detalle. ¿Co
         }
         const mes = pago.mes || this.currentMes;
         const depto = propietario.departamento || '—';
-        const titular = [propietario.nombre, propietario.apellido].filter(Boolean).join(' ').trim() || '—';
+        const titular = this.formatearNombrePropio([propietario.nombre, propietario.apellido].filter(Boolean).join(' ').trim()) || '—';
         const row = Calculos.calcCargoPropietarioMes ? Calculos.calcCargoPropietarioMes(mes, propietarioId) : null;
         const cargo = row ? Number(row.cargo || 0) : 0;
         const pagadoMes = row ? Number(row.pagado || 0) : 0;
@@ -4440,7 +4509,7 @@ Recomendación: ejecutarlo desde Cálculo cuando hayas revisado el detalle. ¿Co
         document.getElementById('modal-pago-title').textContent = editando ? 'Editar Pago' : 'Registrar Pago';
         document.getElementById('pago-id').value = editando ? pago.id : '';
         document.getElementById('pago-propietario-id').value = propietario.id;
-        const fullName = [propietario.departamento, propietario.nombre, propietario.apellido].filter(Boolean).join(' ');
+        const fullName = [propietario.departamento, this.formatearNombrePropio([propietario.nombre, propietario.apellido].filter(Boolean).join(' '))].filter(Boolean).join(' ');
         document.getElementById('pago-propietario-nombre').textContent = fullName;
         const mes = editando ? pago.mes : this.currentMes;
         document.getElementById('pago-mes').value = mes;
@@ -4718,7 +4787,7 @@ Recomendación: ejecutarlo desde Cálculo cuando hayas revisado el detalle. ¿Co
 
         let totalCuotas = totals.cargo || 0, totalCobrado = totals.pagado || 0, totalPendiente = totals.pendiente || 0;
         const filasDeptos = rows.map(r => {
-            const nombre = [r.nombre, r.apellido].filter(Boolean).join(' ') || r.depto || '-';
+            const nombre = this.formatearNombrePropio([r.nombre, r.apellido].filter(Boolean).join(' ')) || r.depto || '-';
             const saldo = Math.max(0, r.saldo || 0);
             const alDia = saldo <= 0.01;
             return `<tr>
