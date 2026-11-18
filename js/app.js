@@ -4097,16 +4097,34 @@ Recomendación: ejecutarlo desde Cálculo cuando hayas revisado el detalle. ¿Co
         const resumenEl = document.getElementById('calculo-resumen');
         if (resumenEl) {
             const consumosComunes = Calculos.round2((Number(totals.aguaComun) || 0) + (Number(totals.luzComun) || 0));
-            const gastosRecurrentesCompletos = Calculos.round2((Number(totals.comunes) || 0) - consumosComunes);
-            const totalACobrar = Calculos.round2(gastosRecurrentesCompletos + consumosComunes);
+            // Gastos recurrentes + puntuales (mismo criterio que el resumen de Gastos)
+            let recMes = 0, puntMes = 0;
+            try {
+                const personal = (DB.getPersonal ? DB.getPersonal(mes) : []) || [];
+                const nomina = personal.filter(p => (p.tipo || 'personal') === 'personal');
+                const servicios = personal.filter(p => p.tipo === 'fijo');
+                const jardineria = (DB.getJardineria ? DB.getJardineria(mes) : []) || [];
+                const sumNom = nomina.reduce((a, p) => a + (parseFloat(p.sueldoMensual) || 0), 0);
+                const sumServ = servicios.reduce((a, p) => a + (parseFloat(p.monto ?? p.sueldoMensual) || 0), 0);
+                const sumJard = jardineria.reduce((a, j) => a + (parseFloat(j.montoTotal != null ? j.montoTotal : j.monto) || 0), 0);
+                recMes = sumNom + sumServ + sumJard;
+                const gastosMesAplican = (DB.getGastos ? DB.getGastos(mes) : []) || [];
+                const gastosPuntuales = gastosMesAplican.filter(g => {
+                    const f = g.frecuencia || 'unico';
+                    return f === 'unico' || f === 'extraordinario' || f === 'puntual';
+                });
+                puntMes = gastosPuntuales.reduce((a, g) => a + (parseFloat(g.monto) || 0), 0);
+            } catch (e) { recMes = 0; puntMes = 0; }
+            const gastosRecPunt = Calculos.round2(recMes + puntMes);
+            const totalACobrar = Calculos.round2(gastosRecPunt + consumosComunes);
             const detalleConsComunes = [
                 (Number(totals.aguaComun) || 0) > 0.005 ? `Agua ${Calculos.formatMoney(totals.aguaComun)}` : null,
                 (Number(totals.luzComun) || 0) > 0.005 ? `Luz ${Calculos.formatMoney(totals.luzComun)}` : null
             ].filter(Boolean).join(' · ') || 'Sin consumos de áreas comunes';
             resumenEl.innerHTML = `
-                <div class="summary-item"><span class="label">Gastos recurrentes</span><span class="value">${Calculos.formatMoney(gastosRecurrentesCompletos)}</span><span class="luz-status">Gastos recurrentes del mes (completos)</span></div>
+                <div class="summary-item"><span class="label">Gastos recurrentes + puntuales</span><span class="value">${Calculos.formatMoney(gastosRecPunt)}</span><span class="luz-status">Recurrentes y puntuales del mes (completos)</span></div>
                 <div class="summary-item"><span class="label">Consumos del mes</span><span class="value">${Calculos.formatMoney(consumosComunes)}</span><span class="luz-status">${detalleConsComunes} · áreas comunes</span></div>
-                <div class="summary-item"><span class="label">Total a cobrar</span><span class="value">${Calculos.formatMoney(totalACobrar)}</span><span class="luz-status">${totals.departamentos} departamento${totals.departamentos===1?'':'s'} · recurrentes + áreas comunes</span></div>
+                <div class="summary-item"><span class="label">Total a cobrar</span><span class="value">${Calculos.formatMoney(totalACobrar)}</span><span class="luz-status">${totals.departamentos} departamento${totals.departamentos===1?'':'s'} · recurrentes + puntuales + áreas comunes</span></div>
                 <div class="summary-item emph"><span class="label">Recaudado / Pendiente</span><span class="value">${Calculos.formatMoney(totals.pagado)}</span><span class="luz-status">Pendiente: ${Calculos.formatMoney(totals.pendiente)} · ${totals.alDia} de ${totals.departamentos} al día</span></div>
             `;
         }
