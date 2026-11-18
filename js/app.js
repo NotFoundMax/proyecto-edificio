@@ -4096,10 +4096,17 @@ Recomendación: ejecutarlo desde Cálculo cuando hayas revisado el detalle. ¿Co
 
         const resumenEl = document.getElementById('calculo-resumen');
         if (resumenEl) {
+            const consumosComunes = Calculos.round2((Number(totals.aguaComun) || 0) + (Number(totals.luzComun) || 0));
+            const gastosRecurrentesCompletos = Calculos.round2((Number(totals.comunes) || 0) - consumosComunes);
+            const totalACobrar = Calculos.round2(gastosRecurrentesCompletos + consumosComunes);
+            const detalleConsComunes = [
+                (Number(totals.aguaComun) || 0) > 0.005 ? `Agua ${Calculos.formatMoney(totals.aguaComun)}` : null,
+                (Number(totals.luzComun) || 0) > 0.005 ? `Luz ${Calculos.formatMoney(totals.luzComun)}` : null
+            ].filter(Boolean).join(' · ') || 'Sin consumos de áreas comunes';
             resumenEl.innerHTML = `
-                <div class="summary-item"><span class="label">Gastos recurrentes</span><span class="value">${Calculos.formatMoney(totals.comunes)}</span><span class="luz-status">Gastos recurrentes del mes prorrateados</span></div>
-                <div class="summary-item"><span class="label">Consumos del mes</span><span class="value">${Calculos.formatMoney(totals.consumosMes)}</span><span class="luz-status">Agua, gas y luz (medidos/recibos)</span></div>
-                <div class="summary-item"><span class="label">Total a cobrar</span><span class="value">${Calculos.formatMoney(totals.cargo)}</span><span class="luz-status">${totals.departamentos} departamento${totals.departamentos===1?'':'s'}</span></div>
+                <div class="summary-item"><span class="label">Gastos recurrentes</span><span class="value">${Calculos.formatMoney(gastosRecurrentesCompletos)}</span><span class="luz-status">Gastos recurrentes del mes (completos)</span></div>
+                <div class="summary-item"><span class="label">Consumos del mes</span><span class="value">${Calculos.formatMoney(consumosComunes)}</span><span class="luz-status">${detalleConsComunes} · áreas comunes</span></div>
+                <div class="summary-item"><span class="label">Total a cobrar</span><span class="value">${Calculos.formatMoney(totalACobrar)}</span><span class="luz-status">${totals.departamentos} departamento${totals.departamentos===1?'':'s'} · recurrentes + áreas comunes</span></div>
                 <div class="summary-item emph"><span class="label">Recaudado / Pendiente</span><span class="value">${Calculos.formatMoney(totals.pagado)}</span><span class="luz-status">Pendiente: ${Calculos.formatMoney(totals.pendiente)} · ${totals.alDia} de ${totals.departamentos} al día</span></div>
             `;
         }
