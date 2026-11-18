@@ -4127,13 +4127,79 @@ Recomendación: ejecutarlo desde Cálculo cuando hayas revisado el detalle. ¿Co
             (Number(totals.luzComun) || 0) > 0.005 ? `Luz ${Calculos.formatMoney(totals.luzComun)}` : null
         ].filter(Boolean).join(' · ') || 'Sin consumos de áreas comunes';
 
+        // Base inicial por depto (tabla prorrateo "Total"): usada en resumen, prorrateo, cobros y modal de pago/mora
+        let prorrateoBaseTotalPorId = {};
+        if (rows.length > 0) {
+            const distProrrateado = Calculos.distribuirGastoExacto(totalACobrar, rows, { division: 'proporcional' });
+            const prorrateadoPorIdTmp = {};
+            distProrrateado.forEach(d => { prorrateadoPorIdTmp[d.id] = d.valor; });
+            rows.forEach(r => {
+                const gastoProrrateado = Calculos.round2((prorrateadoPorIdTmp[r.id] != null) ? prorrateadoPorIdTmp[r.id] : 0);
+                let saldoAnterior = 0;
+                try {
+                    const ec = Calculos.calcEstadoCuenta ? Calculos.calcEstadoCuenta(r.id) : null;
+                    if (ec && Array.isArray(ec.filas)) {
+                        const idx = ec.filas.findIndex(f => f.mes === mes);
+                        if (idx >= 0) {
+                            saldoAnterior = (idx + 1 < ec.filas.length) ? (Number(ec.filas[idx + 1].acumulado) || 0) : 0;
+                        } else {
+                            const prev = ec.filas.find(f => f.mes < mes);
+                            saldoAnterior = prev ? (Number(prev.acumulado) || 0) : 0;
+                        }
+                    }
+                } catch (e) { saldoAnterior = 0; }
+                saldoAnterior = Calculos.round2(saldoAnterior);
+                const aFavor = saldoAnterior < -0.005 ? Calculos.round2(Math.abs(saldoAnterior)) : 0;
+                const deuda = saldoAnterior > 0.005 ? Calculos.round2(saldoAnterior) : 0;
+                prorrateoBaseTotalPorId[r.id] = Math.max(0, Calculos.round2(gastoProrrateado - aFavor + deuda));
+            });
+        }
+        this._prorrateoBaseMes = mes;
+        this._prorrateoBaseTotalPorId = prorrateoBaseTotalPorId;
+
+        // Resumen de recaudación considerando mora (5% sobre valor inicial, constante si aplica)
+        let totalCuotasBase = 0, totalMorasCalc = 0, totalRecaudado = 0, totalPendienteConMora = 0, alDiaCount = 0;
+        try {
+            rows.forEach(r => {
+                const pagadoR = Calculos.round2(Number(r.pagado) || 0);
+                const baseR = Calculos.round2(Number((prorrateoBaseTotalPorId && prorrateoBaseTotalPorId[r.id] != null) ? prorrateoBaseTotalPorId[r.id] : (r.cargo || 0)) || 0);
+                let inicioMoraDateR = null;
+                try { const p=String(mes||'').split('-'); const yy=parseInt(p[0],10), mm=parseInt(p[1],10); if (yy&&mm) { inicioMoraDateR = new Date(yy, mm, 15); inicioMoraDateR.setHours(0,0,0,0); } } catch(e){}
+                const hoyR = new Date(); hoyR.setHours(0,0,0,0);
+                const inicioMoraStrR = inicioMoraDateR ? `${inicioMoraDateR.getFullYear()}-${String(inicioMoraDateR.getMonth()+1).padStart(2,'0')}-${String(inicioMoraDateR.getDate()).padStart(2,'0')}` : null;
+                const pagosDeptoR = (DB.getPagos ? DB.getPagos(mes) : []).filter(pg => pg.propietarioId == r.id);
+                let pagadoAntesMoraR = 0;
+                pagosDeptoR.forEach(pg => { const f=String(pg.fecha||''); if (inicioMoraStrR && f && f < inicioMoraStrR) pagadoAntesMoraR = Calculos.round2(pagadoAntesMoraR + (Number(pg.monto)||0)); });
+                const moraAplicaR = !!(inicioMoraDateR && baseR > 0.01 && Calculos.round2(baseR - pagadoAntesMoraR) > 0.01 && hoyR >= inicioMoraDateR);
+                const moraMontoR = moraAplicaR ? (Calculos.round2 ? Calculos.round2(baseR * 0.05) : (baseR * 0.05)) : 0;
+                const totalConMoraR = Calculos.round2(baseR + moraMontoR);
+                const saldoR = Calculos.round2(totalConMoraR - pagadoR);
+                totalCuotasBase = Calculos.round2(totalCuotasBase + baseR);
+                totalMorasCalc = Calculos.round2(totalMorasCalc + moraMontoR);
+                totalRecaudado = Calculos.round2(totalRecaudado + pagadoR);
+                if (saldoR > 0.01) totalPendienteConMora = Calculos.round2(totalPendienteConMora + saldoR);
+                if (saldoR <= 0.01) alDiaCount++;
+            });
+        } catch(e) {
+            totalRecaudado = Calculos.round2(Number(totals.pagado) || 0);
+            totalPendienteConMora = Calculos.round2(Number(totals.pendiente) || 0);
+            alDiaCount = Number(totals.alDia) || 0;
+            totalCuotasBase = Calculos.round2(Number(totals.cargo) || 0);
+            totalMorasCalc = 0;
+        }
+        const totalBaseACobrar = Calculos.round2(totalCuotasBase + totalMorasCalc);
+
         const resumenEl = document.getElementById('calculo-resumen');
         if (resumenEl) {
+            let recaudadoDetalle = `Pendiente: ${Calculos.formatMoney(totalPendienteConMora)} · ${alDiaCount} de ${totals.departamentos} al día`;
+            if (totalRecaudado > (totalBaseACobrar + 0.01) || (totalPendienteConMora <= 0.01 && totalMorasCalc > 0.01)) {
+                recaudadoDetalle = `Cuotas ${Calculos.formatMoney(totalCuotasBase)} + Moras ${Calculos.formatMoney(totalMorasCalc)} · ${alDiaCount} de ${totals.departamentos} al día`;
+            }
             resumenEl.innerHTML = `
                 <div class="summary-item"><span class="label">Gastos recurrentes + puntuales</span><span class="value">${Calculos.formatMoney(gastosRecPunt)}</span><span class="luz-status">Recurrentes y puntuales del mes (completos)</span></div>
                 <div class="summary-item"><span class="label">Servicios comunes del mes</span><span class="value">${Calculos.formatMoney(consumosComunes)}</span><span class="luz-status">${detalleConsComunes} · áreas comunes</span></div>
                 <div class="summary-item"><span class="label">Total a cobrar</span><span class="value">${Calculos.formatMoney(totalACobrar)}</span><span class="luz-status">${totals.departamentos} departamento${totals.departamentos===1?'':'s'} · recurrentes + puntuales + áreas comunes</span></div>
-                <div class="summary-item emph"><span class="label">Recaudado / Pendiente</span><span class="value">${Calculos.formatMoney(totals.pagado)}</span><span class="luz-status">Pendiente: ${Calculos.formatMoney(totals.pendiente)} · ${totals.alDia} de ${totals.departamentos} al día</span></div>
+                <div class="summary-item emph"><span class="label">Recaudado / Pendiente</span><span class="value">${Calculos.formatMoney(totalRecaudado)}</span><span class="luz-status">${recaudadoDetalle}</span></div>
             `;
         }
 
@@ -4183,7 +4249,7 @@ Recomendación: ejecutarlo desde Cálculo cuando hayas revisado el detalle. ¿Co
                     const aFavor = saldoAnterior < -0.005 ? Calculos.round2(Math.abs(saldoAnterior)) : 0;
                     const deuda = saldoAnterior > 0.005 ? Calculos.round2(saldoAnterior) : 0;
                     const netoSaldo = Calculos.round2(deuda - aFavor);
-                    const totalCobrar = Math.max(0, Calculos.round2(gastoProrrateado - aFavor + deuda));
+                    const totalCobrar = (prorrateoBaseTotalPorId[r.id] != null) ? prorrateoBaseTotalPorId[r.id] : Math.max(0, Calculos.round2(gastoProrrateado - aFavor + deuda));
 
                     sumGasto = Calculos.round2(sumGasto + gastoProrrateado);
                     sumSaldoNeto = Calculos.round2(sumSaldoNeto + netoSaldo);
@@ -4237,7 +4303,7 @@ Recomendación: ejecutarlo desde Cálculo cuando hayas revisado el detalle. ¿Co
                                     <th style="text-align:left;border-bottom:1px solid #E5E7EB;padding:12px 14px;font-size:12px;letter-spacing:.02em;color:#374151;background:#fff;">COEFICIENTE</th>
                                     <th style="text-align:left;border-bottom:1px solid #E5E7EB;padding:12px 14px;font-size:12px;letter-spacing:.02em;color:#374151;background:#fff;">GASTO PRORRATEADO</th>
                                     <th style="text-align:left;border-bottom:1px solid #E5E7EB;padding:12px 14px;font-size:12px;letter-spacing:.02em;color:#374151;background:#fff;">SALDO ANTERIOR</th>
-                                    <th style="text-align:left;border-bottom:1px solid #E5E7EB;padding:12px 14px;font-size:12px;letter-spacing:.02em;color:#374151;background:#fff;">TOTAL A COBRAR</th>
+                                    <th style="text-align:left;border-bottom:1px solid #E5E7EB;padding:12px 14px;font-size:12px;letter-spacing:.02em;color:#374151;background:#fff;">Total</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -4278,7 +4344,7 @@ Recomendación: ejecutarlo desde Cálculo cuando hayas revisado el detalle. ¿Co
                             <th>Dpto</th>
                             <th class="num-left">Mora(dias)</th>
                             <th class="num-left">Mora(S/.)</th>
-                            <th class="num-left">Total</th>
+                            <th class="num-left">Total a cobrar</th>
                             <th class="num-left">Pagado</th>
                             <th class="num-left">Saldo</th>
                             <th>Estado</th>
@@ -4287,34 +4353,91 @@ Recomendación: ejecutarlo desde Cálculo cuando hayas revisado el detalle. ¿Co
                     </thead>
                     <tbody>
                         ${rowsCobros.map(r => {
+                            // Base inicial: "Total" de la tabla de prorrateo (valor inicial/cuota del periodo)
+                            const baseInicial = Calculos.round2(Number((prorrateoBaseTotalPorId && prorrateoBaseTotalPorId[r.id] != null) ? prorrateoBaseTotalPorId[r.id] : (r.cargo || 0)) || 0);
+                            const pagado = Calculos.round2(Number(r.pagado) || 0);
+
+                            // Mora: 5% sobre valor inicial (constante si aplica); días se congelan al liquidar
+                            let inicioMoraDate = null;
+                            try {
+                                const parts = String(mes || '').split('-');
+                                const y = parseInt(parts[0], 10), m = parseInt(parts[1], 10);
+                                if (y && m) { inicioMoraDate = new Date(y, m, 15); inicioMoraDate.setHours(0,0,0,0); }
+                            } catch(e) { inicioMoraDate = null; }
+                            const hoy = new Date(); hoy.setHours(0,0,0,0);
+                            const inicioMoraStr = inicioMoraDate ? `${inicioMoraDate.getFullYear()}-${String(inicioMoraDate.getMonth()+1).padStart(2,'0')}-${String(inicioMoraDate.getDate()).padStart(2,'0')}` : null;
+
+                            const pagosDepto = (DB.getPagos ? DB.getPagos(mes) : [])
+                                .filter(pg => pg.propietarioId == r.id)
+                                .sort((a,b) => String(a.fecha||'').localeCompare(String(b.fecha||'')) || String(a.hora||'').localeCompare(String(b.hora||'')));
+                            let pagadoAntesMora = 0;
+                            pagosDepto.forEach(pg => {
+                                const f = String(pg.fecha || '');
+                                const montoPg = Calculos.round2(Number(pg.monto) || 0);
+                                if (inicioMoraStr && f && f < inicioMoraStr) pagadoAntesMora = Calculos.round2(pagadoAntesMora + montoPg);
+                            });
+                            const saldoAlInicioMora = Calculos.round2(baseInicial - pagadoAntesMora);
+                            const moraAplica = !!(inicioMoraDate && baseInicial > 0.01 && saldoAlInicioMora > 0.01 && hoy >= inicioMoraDate);
+                            const moraMonto = moraAplica ? (Calculos.round2 ? Calculos.round2(baseInicial * 0.05) : Math.round(baseInicial * 0.05 * 100) / 100) : 0;
+                            const totalConMora = Calculos.round2(baseInicial + moraMonto);
+
+                            let fechaLiquidacion = null;
+                            if (moraAplica) {
+                                let pagadoAcum = 0;
+                                for (const pg of pagosDepto) {
+                                    pagadoAcum = Calculos.round2(pagadoAcum + (Calculos.round2(Number(pg.monto) || 0)));
+                                    if (pagadoAcum >= totalConMora - 0.005) { fechaLiquidacion = String(pg.fecha || ''); break; }
+                                }
+                            }
+
+                            let diasMora = 0;
+                            if (moraAplica && inicioMoraDate) {
+                                let ref = hoy;
+                                if (fechaLiquidacion) {
+                                    const p = String(fechaLiquidacion).split('-').map(Number);
+                                    if (p.length === 3 && p[0]) { ref = new Date(p[0], p[1]-1, p[2]); ref.setHours(0,0,0,0); }
+                                }
+                                const diff = Math.floor((ref - inicioMoraDate) / 86400000);
+                                diasMora = diff > 0 ? diff : 0;
+                            }
+
+                            const saldoConMora = Calculos.round2(totalConMora - pagado);
+
+                            let estado = 'Al día';
+                            let estadoClass = 'ok';
                             let label = 'Registrar abono';
                             let action = 'pagar';
-                            if (r.cargo <= 0.01 && r.pagado <= 0.01) {
-                                label = 'Sin movimientos';
-                                action = 'none';
-                            } else if (r.saldo <= 0.01) {
-                                label = 'Ver comprobante';
-                                action = 'ver';
+                            if (baseInicial <= 0.01 && pagado <= 0.01) {
+                                estado = 'Sin cargo'; estadoClass = 'neutral'; label = 'Sin movimientos'; action = 'none';
+                            } else if (saldoConMora > 0.01) {
+                                if (pagado > 0.01) { estado = 'Parcial'; estadoClass = 'parcial'; }
+                                else { estado = 'Pendiente'; estadoClass = 'debe'; }
+                            } else if (saldoConMora < -0.01) {
+                                estado = 'A favor'; estadoClass = 'ok'; label = 'Ver comprobante'; action = 'ver';
+                            } else {
+                                estado = 'Al día'; estadoClass = 'ok'; label = 'Ver comprobante'; action = 'ver';
                             }
+
                             const disabled = action === 'none' ? 'disabled' : '';
-                            const saldoPend = Math.max(0, Number(r.saldo) || 0);
-                            const diasMora = saldoPend > 0.01 ? (typeof this._diasMoraMesLiquidado === 'function' ? this._diasMoraMesLiquidado(mes) : 0) : 0;
-                            const moraMonto = (diasMora > 0 && saldoPend > 0.01) ? (Calculos.round2 ? Calculos.round2(saldoPend * 0.05) : Math.round(saldoPend * 0.05 * 100) / 100) : 0;
-                            const diasMoraHtml = saldoPend > 0.01
-                                ? (diasMora > 0 ? `<span style="color:var(--md-sys-color-error);font-weight:600">${diasMora}</span>` : '0')
+                            const diasMoraHtml = moraAplica
+                                ? `<span style="color:var(--md-sys-color-error);font-weight:600">${diasMora}</span>`
                                 : '—';
-                            const moraMontoHtml = saldoPend > 0.01
-                                ? (moraMonto > 0.005 ? `<span style="color:var(--md-sys-color-error);font-weight:600">${Calculos.formatMoney(moraMonto)}</span>` : Calculos.formatMoney(0))
+                            const moraMontoHtml = moraAplica
+                                ? `<span style="color:var(--md-sys-color-error);font-weight:600">${Calculos.formatMoney(moraMonto)}</span>`
                                 : '—';
+                            const totalCobrarHtml = Calculos.formatMoney(totalConMora);
+                            const saldoHtml = saldoConMora > 0.01
+                                ? `<span style="color:var(--md-sys-color-error, #cf222e);font-weight:600">${Calculos.formatMoney(saldoConMora)}</span>`
+                                : (saldoConMora < -0.01 ? `<span style="color:var(--md-sys-color-success, #1a7f37);font-weight:600">+${Calculos.formatMoney(Math.abs(saldoConMora))}</span>` : Calculos.formatMoney(0));
                             return `
                                 <tr>
                                     <td><strong>${r.depto}</strong></td>
                                     <td class="num-left">${diasMoraHtml}</td>
                                     <td class="num-left">${moraMontoHtml}</td>
-                                    <td class="num-left">${Calculos.formatMoney(r.cargo)}</td>
-                                    <td class="num-left">${Calculos.formatMoney(r.pagado)}</td>
-                                    <td class="num-left">${Calculos.formatMoney(saldoPend)}</td>
-                                    <td><span class="badge-status ${r.estadoClass}">${r.estado}</span></td>
+                                    <td class="num-left">${totalCobrarHtml}</td>
+                                    <td class="num-left">${Calculos.formatMoney(pagado)}</td>
+                                    <td class="num-left">${saldoHtml}</td>
+                                    <td><span class="badge-status ${estadoClass}">${estado}</span></td>
                                     <td style="text-align:right"><button class="btn btn-sm btn-outline btn-calc-abono" data-id="${r.id}" data-action="${action}" ${disabled}>${label}</button></td>
                                 </tr>
                             `;
@@ -4605,60 +4728,86 @@ Recomendación: ejecutarlo desde Cálculo cuando hayas revisado el detalle. ¿Co
         if (tipo === 'fija') {
             try {
                 const row = Calculos.calcCargoPropietarioMes ? Calculos.calcCargoPropietarioMes(mes, propietario.id) : null;
-                let saldoAnterior = 0;
-                try {
-                    const ec = Calculos.calcEstadoCuenta ? Calculos.calcEstadoCuenta(propietario.id) : null;
-                    if (ec && Array.isArray(ec.filas) && ec.filas.length) {
-                        // filas vienen en orden descendente; buscamos acumulado del mes inmediatamente anterior al seleccionado
-                        const cron = [...ec.filas].sort((a,b) => String(a.mes).localeCompare(String(b.mes)));
-                        const idx = cron.findIndex(f => f.mes === mes);
-                        if (idx > 0) saldoAnterior = Number(cron[idx - 1].acumulado || 0);
-                        else if (idx === -1) {
-                            // mes no presente en historial: usar acumulado del último mes anterior al seleccionado
-                            const prev = cron.filter(f => f.mes < mes).pop();
-                            if (prev) saldoAnterior = Number(prev.acumulado || 0);
-                        }
-                    }
-                } catch(e2) { saldoAnterior = 0; }
+                const pagadoMes = row ? (Calculos.round2 ? Calculos.round2(Number(row.pagado) || 0) : (Number(row.pagado) || 0)) : 0;
+                const cargoMes = row ? (Calculos.round2 ? Calculos.round2(Number(row.cargo) || 0) : (Number(row.cargo) || 0)) : 0;
 
-                const pendienteMes = row ? Math.max(0, Number(row.saldo != null ? row.saldo : (row.cargo - (row.pagado || 0))) || 0) : 0;
-                const base = Number(((Calculos.round2 ? Calculos.round2(pendienteMes + saldoAnterior) : (pendienteMes + saldoAnterior))) || 0);
-                let sugerido = base;
-                let recargo = 0;
+                // Base inicial = "Total" de la tabla de prorrateo (valor inicial/cuota)
+                let baseInicial = null;
+                if (this._prorrateoBaseMes === mes && this._prorrateoBaseTotalPorId && this._prorrateoBaseTotalPorId[propietario.id] != null) {
+                    baseInicial = Calculos.round2(Number(this._prorrateoBaseTotalPorId[propietario.id]) || 0);
+                }
+                if (baseInicial == null) {
+                    let saldoAnterior = 0;
+                    try {
+                        const ec = Calculos.calcEstadoCuenta ? Calculos.calcEstadoCuenta(propietario.id) : null;
+                        if (ec && Array.isArray(ec.filas) && ec.filas.length) {
+                            const cron = [...ec.filas].sort((a,b) => String(a.mes).localeCompare(String(b.mes)));
+                            const idx = cron.findIndex(f => f.mes === mes);
+                            if (idx > 0) saldoAnterior = Number(cron[idx - 1].acumulado || 0);
+                            else if (idx === -1) {
+                                const prev = cron.filter(f => f.mes < mes).pop();
+                                if (prev) saldoAnterior = Number(prev.acumulado || 0);
+                            }
+                        }
+                    } catch(e2) { saldoAnterior = 0; }
+                    const deudaAnt = saldoAnterior > 0.01 ? saldoAnterior : 0;
+                    const aFavorAnt = saldoAnterior < -0.01 ? Math.abs(saldoAnterior) : 0;
+                    baseInicial = Calculos.round2 ? Calculos.round2(Math.max(0, cargoMes + deudaAnt - aFavorAnt)) : Math.max(0, cargoMes + deudaAnt - aFavorAnt);
+                }
+
                 const moraInfo = document.getElementById('pago-mora-info');
                 const moraGroup = document.getElementById('pago-mora-group');
                 const pctEl = document.getElementById('pago-mora-pct');
-                const diasMora = (typeof this._diasMoraMesLiquidado === 'function') ? this._diasMoraMesLiquidado(mes) : 0;
                 const pct = pctEl ? (parseFloat(String(pctEl.value).replace(',', '.')) || 0) : 5;
-                const aplicaMora = diasMora > 0 && pendienteMes > 0.01;
-                if (aplicaMora) {
-                    recargo = Number(((Calculos.round2 ? Calculos.round2(pendienteMes * (pct / 100)) : (pendienteMes * (pct / 100)))) || 0);
-                    sugerido = Number(((Calculos.round2 ? Calculos.round2(base + recargo) : (base + recargo))) || 0);
+
+                // Mora: 5% sobre valor inicial (constante si aplica); días se congelan al liquidar
+                let inicioMoraDateS = null;
+                try { const p=String(mes||'').split('-'); const yy=parseInt(p[0],10), mm=parseInt(p[1],10); if (yy&&mm) { inicioMoraDateS = new Date(yy, mm, 15); inicioMoraDateS.setHours(0,0,0,0); } } catch(e){}
+                const hoyS = new Date(); hoyS.setHours(0,0,0,0);
+                const inicioMoraStrS = inicioMoraDateS ? `${inicioMoraDateS.getFullYear()}-${String(inicioMoraDateS.getMonth()+1).padStart(2,'0')}-${String(inicioMoraDateS.getDate()).padStart(2,'0')}` : null;
+                const pagosDeptoS = (DB.getPagos ? DB.getPagos(mes) : []).filter(pg => pg.propietarioId == propietario.id).sort((a,b)=>String(a.fecha||'').localeCompare(String(b.fecha||''))||String(a.hora||'').localeCompare(String(b.hora||'')));
+                let pagadoAntesMoraS = 0;
+                pagosDeptoS.forEach(pg => { const f=String(pg.fecha||''); if (inicioMoraStrS && f && f < inicioMoraStrS) pagadoAntesMoraS = Calculos.round2 ? Calculos.round2(pagadoAntesMoraS + (Number(pg.monto)||0)) : (pagadoAntesMoraS + (Number(pg.monto)||0)); });
+                const moraAplica = !!(inicioMoraDateS && baseInicial > 0.01 && Calculos.round2(baseInicial - pagadoAntesMoraS) > 0.01 && hoyS >= inicioMoraDateS);
+                const recargo = moraAplica ? (Calculos.round2 ? Calculos.round2(baseInicial * (pct / 100)) : (baseInicial * (pct / 100))) : 0;
+                const totalConMora = Calculos.round2 ? Calculos.round2(baseInicial + recargo) : (baseInicial + recargo);
+                let fechaLiqS = null;
+                if (moraAplica) {
+                    let acumS = 0;
+                    for (const pg of pagosDeptoS) { acumS = Calculos.round2 ? Calculos.round2(acumS + (Number(pg.monto)||0)) : (acumS + (Number(pg.monto)||0)); if (acumS >= totalConMora - 0.005) { fechaLiqS = String(pg.fecha||''); break; } }
                 }
+                let diasMoraCalc = 0;
+                if (moraAplica && inicioMoraDateS) {
+                    let refS = hoyS;
+                    if (fechaLiqS) { const pp=String(fechaLiqS).split('-').map(Number); if (pp.length===3&&pp[0]) { refS=new Date(pp[0],pp[1]-1,pp[2]); refS.setHours(0,0,0,0);} }
+                    const diffS = Math.floor((refS - inicioMoraDateS)/86400000);
+                    diasMoraCalc = diffS > 0 ? diffS : 0;
+                }
+                const sugerido = Calculos.round2 ? Calculos.round2(Math.max(0, totalConMora - pagadoMes)) : Math.max(0, totalConMora - pagadoMes);
+
                 if (moraInfo) {
-                    if (aplicaMora) moraInfo.textContent = `${diasMora} día(s) de mora acumulada. El recargo (${pct}%) se aplica sobre el saldo pendiente del mes liquidado.`;
-                    else if (pendienteMes > 0.01) moraInfo.textContent = 'Sin mora acumulada por ahora. Si corresponde mora, se aplica el recargo predeterminado (5%) sobre el saldo pendiente del mes liquidado.';
-                    else moraInfo.textContent = 'Sin saldo pendiente del mes. El recargo por mora se aplica solo cuando existe saldo pendiente con mora.';
+                    if (moraAplica) {
+                        const congeladoTxt = fechaLiqS ? ` (contador detenido al liquidar: ${fechaLiqS.split('-').reverse().join('/')})` : '';
+                        moraInfo.textContent = `${diasMoraCalc} día(s) de mora${congeladoTxt}. El recargo (${pct}%) se calcula sobre el valor inicial (Total a cobrar: ${Calculos.formatMoney(baseInicial)}) y se mantiene constante.`;
+                    } else if (sugerido > 0.01) {
+                        moraInfo.textContent = 'Sin mora acumulada por ahora. Si corresponde mora, el recargo se calculará sobre el valor inicial (Total a cobrar del prorrateo).';
+                    } else {
+                        moraInfo.textContent = 'Sin saldo pendiente.';
+                    }
                 }
                 const baseEl = document.getElementById('pago-mora-base');
                 const recEl = document.getElementById('pago-mora-recargo');
                 const totEl = document.getElementById('pago-mora-total');
                 const pctLbl = document.getElementById('pago-mora-pct-label');
-                const baseMostrar = Math.max(0, base);
-                const totalMostrar = Math.max(0, sugerido);
                 if (pctLbl) pctLbl.textContent = String(Number.isFinite(pct) ? pct : 5);
-                if (baseEl) baseEl.textContent = Calculos.formatMoney(baseMostrar);
-                if (recEl) recEl.textContent = Calculos.formatMoney(recargo);
-                if (totEl) totEl.textContent = Calculos.formatMoney(totalMostrar);
+                if (baseEl) baseEl.textContent = Calculos.formatMoney(Math.max(0, baseInicial));
+                if (recEl) recEl.textContent = Calculos.formatMoney(Math.max(0, recargo));
+                if (totEl) totEl.textContent = Calculos.formatMoney(Math.max(0, totalConMora));
                 if (moraGroup) moraGroup.style.display = (!this._pagoTipoFijo) ? '' : 'none';
 
                 if (sugerido > 0.01) {
                     monto = String(Number(sugerido.toFixed(2)));
-                } else if (row && row.cargo > 0.01 && pendienteMes <= 0.01 && saldoAnterior <= 0.01) {
-                    // periodo al día y sin deuda anterior: no sugerir pago adicional por defecto
-                    monto = '';
-                } else if (sugerido < -0.01) {
-                    // saldo a favor cubre el periodo: no sugerir monto a pagar
+                } else {
                     monto = '';
                 }
             } catch(e) {}
@@ -4708,21 +4857,65 @@ Recomendación: ejecutarlo desde Cálculo cuando hayas revisado el detalle. ¿Co
             const mEl = document.getElementById('pago-monto'); if (mEl) try{mEl.focus();}catch(e){}
             return;
         }
-        // Prevención de sobrepagos (modelo unificado)
+        // Prevención de sobrepagos (considerando mora: 5% sobre valor inicial, constante si aplica)
         let pendiente = 0;
         try {
             const row = Calculos.calcCargoPropietarioMes ? Calculos.calcCargoPropietarioMes(mes, propietarioId) : null;
-            if (row) pendiente = Math.max(0, Number(row.saldo) || 0);
-            else {
-                const ec = Calculos.calcEstadoCuenta(propietarioId);
-                const filaMes = ec ? ec.filas.find(f => f.mes === mes) : null;
-                pendiente = filaMes ? Math.max(0, filaMes.saldo) : 0;
+            const pagadoMesCalc = row ? (Calculos.round2 ? Calculos.round2(Number(row.pagado) || 0) : (Number(row.pagado) || 0)) : 0;
+            const cargoMesCalc = row ? (Calculos.round2 ? Calculos.round2(Number(row.cargo) || 0) : (Number(row.cargo) || 0)) : 0;
+            let baseInicialCalc = null;
+            if (this._prorrateoBaseMes === mes && this._prorrateoBaseTotalPorId && this._prorrateoBaseTotalPorId[propietarioId] != null) {
+                baseInicialCalc = Calculos.round2(Number(this._prorrateoBaseTotalPorId[propietarioId]) || 0);
             }
-        } catch(e) {}
+            if (baseInicialCalc == null) {
+                let saldoAnteriorCalc = 0;
+                try {
+                    const ec = Calculos.calcEstadoCuenta(propietarioId);
+                    if (ec && Array.isArray(ec.filas) && ec.filas.length) {
+                        const cron = [...ec.filas].sort((a,b) => String(a.mes).localeCompare(String(b.mes)));
+                        const idx = cron.findIndex(f => f.mes === mes);
+                        if (idx > 0) saldoAnteriorCalc = Number(cron[idx - 1].acumulado || 0);
+                        else if (idx === -1) {
+                            const prev = cron.filter(f => f.mes < mes).pop();
+                            if (prev) saldoAnteriorCalc = Number(prev.acumulado || 0);
+                        }
+                    }
+                } catch(e2) { saldoAnteriorCalc = 0; }
+                const deudaAnt = saldoAnteriorCalc > 0.01 ? saldoAnteriorCalc : 0;
+                const aFavorAnt = saldoAnteriorCalc < -0.01 ? Math.abs(saldoAnteriorCalc) : 0;
+                baseInicialCalc = Calculos.round2 ? Calculos.round2(Math.max(0, cargoMesCalc + deudaAnt - aFavorAnt)) : Math.max(0, cargoMesCalc + deudaAnt - aFavorAnt);
+            }
+            let inicioMoraDateC = null;
+            try { const p=String(mes||'').split('-'); const yy=parseInt(p[0],10), mm=parseInt(p[1],10); if (yy&&mm) { inicioMoraDateC = new Date(yy, mm, 15); inicioMoraDateC.setHours(0,0,0,0); } } catch(e3){}
+            const hoyC = new Date(); hoyC.setHours(0,0,0,0);
+            const inicioMoraStrC = inicioMoraDateC ? `${inicioMoraDateC.getFullYear()}-${String(inicioMoraDateC.getMonth()+1).padStart(2,'0')}-${String(inicioMoraDateC.getDate()).padStart(2,'0')}` : null;
+            const pagosDeptoC = (DB.getPagos ? DB.getPagos(mes) : []).filter(pg => pg.propietarioId == propietarioId);
+            let pagadoAntesMoraC = 0;
+            pagosDeptoC.forEach(pg => { const f=String(pg.fecha||''); if (inicioMoraStrC && f && f < inicioMoraStrC) pagadoAntesMoraC = Calculos.round2 ? Calculos.round2(pagadoAntesMoraC + (Number(pg.monto)||0)) : (pagadoAntesMoraC + (Number(pg.monto)||0)); });
+            const moraAplicaC = !!(inicioMoraDateC && baseInicialCalc > 0.01 && Calculos.round2(baseInicialCalc - pagadoAntesMoraC) > 0.01 && hoyC >= inicioMoraDateC);
+            const recargoC = moraAplicaC ? (Calculos.round2 ? Calculos.round2(baseInicialCalc * 0.05) : (baseInicialCalc * 0.05)) : 0;
+            const totalConMoraC = Calculos.round2 ? Calculos.round2(baseInicialCalc + recargoC) : (baseInicialCalc + recargoC);
+            // Si se está editando un pago existente, no contar su monto previo en el pagado
+            let pagadoParaSaldo = pagadoMesCalc;
+            if (id) {
+                const prevP = (DB._load ? DB._load().pagos : []).find(p => p.id == id);
+                if (prevP && prevP.propietarioId == propietarioId && prevP.mes === mes) {
+                    pagadoParaSaldo = Calculos.round2 ? Calculos.round2(pagadoMesCalc - (Number(prevP.monto) || 0)) : (pagadoMesCalc - (Number(prevP.monto) || 0));
+                }
+            }
+            pendiente = Calculos.round2 ? Calculos.round2(Math.max(0, totalConMoraC - pagadoParaSaldo)) : Math.max(0, totalConMoraC - pagadoParaSaldo);
+        } catch(e) {
+            try {
+                const row = Calculos.calcCargoPropietarioMes ? Calculos.calcCargoPropietarioMes(mes, propietarioId) : null;
+                if (row) pendiente = Math.max(0, Number(row.saldo) || 0);
+            } catch(e2) {}
+        }
         if (pendiente > 0) {
-            const sobrepago = Calculator.verificarSobrepago(monto, pendiente);
+            const sobrepago = (typeof Calculator !== 'undefined' && Calculator.verificarSobrepago) ? Calculator.verificarSobrepago(monto, pendiente) : { sobrepago: (Calculos.round2 ? Calculos.round2(monto - pendiente) : (monto - pendiente)) > 0.01, excedente: Math.max(0, (Calculos.round2 ? Calculos.round2(monto - pendiente) : (monto - pendiente))) };
             if (sobrepago.sobrepago) {
-                const ok = confirm(`El monto (S/ ${monto.toFixed(2)}) supera la cuota pendiente (S/ ${pendiente.toFixed(2)}) por S/ ${sobrepago.excedente.toFixed(2)}.\n\n¿Desea registrar el pago de todas formas?`);
+                const excedente = (sobrepago.excedente != null) ? sobrepago.excedente : Math.max(0, (Calculos.round2 ? Calculos.round2(monto - pendiente) : (monto - pendiente)));
+                const fmt = (n) => `S/ ${Number(n || 0).toFixed(2)}`;
+                const ok = confirm(`El monto (${fmt(monto)}) supera el saldo pendiente (${fmt(pendiente)}) por ${fmt(excedente)}.\n\n¿Desea registrar el pago de todas formas?`);
                 if (!ok) return;
             }
         }

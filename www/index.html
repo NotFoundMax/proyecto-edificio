@@ -413,11 +413,6 @@
                     <div>
                         <div class="luz-status" style="margin-top:6px;">Prorrateo por coeficiente (m²) y consumos registrados. Revisa antes de emitir boletas.</div>
                     </div>
-                    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-                        <button class="btn btn-outline" onclick="App.navigateTo('gastos')">Ver origen en Gastos</button>
-                        <button id="btn-generar-boletas" class="btn btn-outline" onclick="App.generarBoletas()">Generar boletas</button>
-                        <button id="btn-cerrar-mes" class="btn btn-primary">Cerrar mes</button>
-                    </div>
                 </div>
 
                 <div id="calculo-resumen" class="calculo-summary" style="margin-bottom:18px;"></div>
@@ -440,7 +435,11 @@
                             <p class="luz-status" style="margin:2px 0 0;">Después de revisar el cálculo.</p>
                         </div>
                         <div style="padding:14px 16px;display:flex;flex-direction:column;gap:10px;">
-                            
+                            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+                                <button class="btn btn-outline" onclick="App.navigateTo('gastos')">Ver origen en Gastos</button>
+                                <button id="btn-generar-boletas" class="btn btn-outline" onclick="App.generarBoletas()">Generar boletas</button>
+                                <button id="btn-cerrar-mes" class="btn btn-primary">Cerrar mes</button>
+                            </div>
                             <div class="luz-status" style="background:var(--md-sys-color-surface-container-low);border:1px solid var(--md-sys-color-outline-variant);border-radius:8px;padding:10px 12px;">
                                 <strong>Nota:</strong> “Generar boletas” usa los montos calculados de este mes. Verifica gastos y consumos antes de enviarlas.
                             </div>
@@ -835,7 +834,7 @@
                     <div class="pago-mora-head">
                         <div>
                             <label for="pago-mora-pct" style="margin-bottom:2px;">Recargo por mora</label>
-                            <small class="luz-status">Porcentaje predeterminado: 5%. Se aplica sobre el saldo pendiente del mes liquidado cuando corresponde mora (desde el día 15 del mes siguiente al liquidado).</small>
+                            <small class="luz-status">Porcentaje predeterminado: 5%. Se calcula sobre el valor inicial (Total a cobrar del prorrateo) cuando corresponde mora (desde el día 15 del mes siguiente al liquidado), no sobre lo que falta pagar.</small>
                         </div>
                         <div class="pago-mora-pct-wrap">
                             <input type="number" id="pago-mora-pct" step="0.1" min="0" value="5" aria-label="Porcentaje de recargo por mora">
@@ -844,9 +843,9 @@
                     </div>
                     <div id="pago-mora-info" class="pago-mora-info luz-status"></div>
                     <div class="pago-mora-breakdown" id="pago-mora-breakdown">
-                        <div class="row"><span>Saldo base a pagar</span><strong id="pago-mora-base">S/. 0.00</strong></div>
+                        <div class="row"><span>Total a cobrar (valor inicial)</span><strong id="pago-mora-base">S/. 0.00</strong></div>
                         <div class="row"><span>Recargo por mora (<span id="pago-mora-pct-label">5</span>%)</span><strong id="pago-mora-recargo">S/. 0.00</strong></div>
-                        <div class="row total"><span>Monto final (con aumento incluido)</span><strong id="pago-mora-total">S/. 0.00</strong></div>
+                        <div class="row total"><span>Total con mora</span><strong id="pago-mora-total">S/. 0.00</strong></div>
                     </div>
                 </div>
                 <div class="form-group">
