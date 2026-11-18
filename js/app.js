@@ -4147,11 +4147,11 @@ Recomendación: ejecutarlo desde Cálculo cuando hayas revisado el detalle. ¿Co
                 distProrrateado.forEach(d => { prorrateadoPorId[d.id] = d.valor; });
                 const totalProrrateado = Calculos.round2(distProrrateado.reduce((s, d) => s + (Number(d.valor) || 0), 0));
 
-                const rowsAsc = [...rows].sort((a, b) => {
+                const rowsOrdenados = [...rows].sort((a, b) => {
                     const na = parseInt(String(a.depto || a.departamento || '').replace(/\D/g, ''), 10);
                     const nb = parseInt(String(b.depto || b.departamento || '').replace(/\D/g, ''), 10);
-                    if (!isNaN(na) && !isNaN(nb) && na !== nb) return na - nb;
-                    return String(a.depto || a.departamento || '').localeCompare(String(b.depto || b.departamento || ''), 'es', { numeric: true, sensitivity: 'base' });
+                    if (!isNaN(na) && !isNaN(nb) && na !== nb) return nb - na;
+                    return String(b.depto || b.departamento || '').localeCompare(String(a.depto || a.departamento || ''), 'es', { numeric: true, sensitivity: 'base' });
                 });
 
                 const fmtMonto = (n) => {
@@ -4160,7 +4160,7 @@ Recomendación: ejecutarlo desde Cálculo cuando hayas revisado el detalle. ¿Co
                 };
 
                 let sumGasto = 0, sumSaldoNeto = 0, sumTotalCobrar = 0;
-                const filasHtml = rowsAsc.map(r => {
+                const filasHtml = rowsOrdenados.map(r => {
                     const titular = this.formatearNombrePropio([r.nombre, r.apellido].filter(Boolean).join(' ').trim()) || r.departamento || '—';
                     const gastoProrrateado = Calculos.round2((prorrateadoPorId[r.id] != null) ? prorrateadoPorId[r.id] : 0);
 
@@ -4189,11 +4189,11 @@ Recomendación: ejecutarlo desde Cálculo cuando hayas revisado el detalle. ¿Co
                     sumSaldoNeto = Calculos.round2(sumSaldoNeto + netoSaldo);
                     sumTotalCobrar = Calculos.round2(sumTotalCobrar + totalCobrar);
 
-                    let saldoHtml = `<div style="color:#6B7280;text-align:right;">${fmtMonto(0)}</div>`;
+                    let saldoHtml = `<div style="color:#6B7280;text-align:left;">${fmtMonto(0)}</div>`;
                     if (aFavor > 0.005) {
-                        saldoHtml = `<div style="text-align:right;line-height:1.3;"><div style="color:#16A34A;font-weight:600;">+ ${fmtMonto(aFavor)}</div><span style="display:inline-block;margin-top:2px;padding:1px 8px;border-radius:999px;background:#ECFDF3;color:#16A34A;font-size:11px;font-weight:600;">A favor</span></div>`;
+                        saldoHtml = `<div style="text-align:left;line-height:1.3;"><div style="color:#16A34A;font-weight:600;">+ ${fmtMonto(aFavor)}</div><span style="display:inline-block;margin-top:2px;padding:1px 8px;border-radius:999px;background:#ECFDF3;color:#16A34A;font-size:11px;font-weight:600;">A favor</span></div>`;
                     } else if (deuda > 0.005) {
-                        saldoHtml = `<div style="text-align:right;line-height:1.3;"><div style="color:#DC2626;font-weight:600;">- ${fmtMonto(deuda)}</div><span style="display:inline-block;margin-top:2px;padding:1px 8px;border-radius:999px;background:#FEF2F2;color:#DC2626;font-size:11px;font-weight:600;">Deuda</span></div>`;
+                        saldoHtml = `<div style="text-align:left;line-height:1.3;"><div style="color:#DC2626;font-weight:600;">- ${fmtMonto(deuda)}</div><span style="display:inline-block;margin-top:2px;padding:1px 8px;border-radius:999px;background:#FEF2F2;color:#DC2626;font-size:11px;font-weight:600;">Deuda</span></div>`;
                     }
 
                     const td = 'padding:12px 14px;border-bottom:1px solid #F3F4F6;';
@@ -4201,11 +4201,11 @@ Recomendación: ejecutarlo desde Cálculo cuando hayas revisado el detalle. ¿Co
                         <tr>
                             <td style="${td}text-align:left;font-weight:700;">${this.esc ? this.esc(String(r.depto || '—')) : (r.depto || '—')}</td>
                             <td style="${td}text-align:left;">${this.esc ? this.esc(titular) : titular}</td>
-                            <td style="${td}text-align:right;">${(Number(r.m2) || 0).toFixed(2)}</td>
-                            <td style="${td}text-align:right;">${(Number(r.coef) || 0).toFixed(2)}%</td>
-                            <td style="${td}text-align:right;">${fmtMonto(gastoProrrateado)}</td>
-                            <td style="${td}text-align:right;">${saldoHtml}</td>
-                            <td style="${td}text-align:right;font-weight:700;">${fmtMonto(totalCobrar)}</td>
+                            <td style="${td}text-align:left;">${(Number(r.m2) || 0).toFixed(2)}</td>
+                            <td style="${td}text-align:left;">${(Number(r.coef) || 0).toFixed(2)}%</td>
+                            <td style="${td}text-align:left;">${fmtMonto(gastoProrrateado)}</td>
+                            <td style="${td}text-align:left;">${saldoHtml}</td>
+                            <td style="${td}text-align:left;font-weight:700;">${fmtMonto(totalCobrar)}</td>
                         </tr>
                     `;
                 }).join('');
@@ -4233,11 +4233,11 @@ Recomendación: ejecutarlo desde Cálculo cuando hayas revisado el detalle. ¿Co
                                 <tr>
                                     <th style="text-align:left;border-bottom:1px solid #E5E7EB;padding:12px 14px;font-size:12px;letter-spacing:.02em;color:#374151;background:#fff;">DPTO</th>
                                     <th style="text-align:left;border-bottom:1px solid #E5E7EB;padding:12px 14px;font-size:12px;letter-spacing:.02em;color:#374151;background:#fff;">TITULAR</th>
-                                    <th style="text-align:right;border-bottom:1px solid #E5E7EB;padding:12px 14px;font-size:12px;letter-spacing:.02em;color:#374151;background:#fff;">M²</th>
-                                    <th style="text-align:right;border-bottom:1px solid #E5E7EB;padding:12px 14px;font-size:12px;letter-spacing:.02em;color:#374151;background:#fff;">COEFICIENTE</th>
-                                    <th style="text-align:right;border-bottom:1px solid #E5E7EB;padding:12px 14px;font-size:12px;letter-spacing:.02em;color:#374151;background:#fff;">GASTO PRORRATEADO</th>
-                                    <th style="text-align:right;border-bottom:1px solid #E5E7EB;padding:12px 14px;font-size:12px;letter-spacing:.02em;color:#374151;background:#fff;">SALDO ANTERIOR</th>
-                                    <th style="text-align:right;border-bottom:1px solid #E5E7EB;padding:12px 14px;font-size:12px;letter-spacing:.02em;color:#374151;background:#fff;">TOTAL A COBRAR</th>
+                                    <th style="text-align:left;border-bottom:1px solid #E5E7EB;padding:12px 14px;font-size:12px;letter-spacing:.02em;color:#374151;background:#fff;">M²</th>
+                                    <th style="text-align:left;border-bottom:1px solid #E5E7EB;padding:12px 14px;font-size:12px;letter-spacing:.02em;color:#374151;background:#fff;">COEFICIENTE</th>
+                                    <th style="text-align:left;border-bottom:1px solid #E5E7EB;padding:12px 14px;font-size:12px;letter-spacing:.02em;color:#374151;background:#fff;">GASTO PRORRATEADO</th>
+                                    <th style="text-align:left;border-bottom:1px solid #E5E7EB;padding:12px 14px;font-size:12px;letter-spacing:.02em;color:#374151;background:#fff;">SALDO ANTERIOR</th>
+                                    <th style="text-align:left;border-bottom:1px solid #E5E7EB;padding:12px 14px;font-size:12px;letter-spacing:.02em;color:#374151;background:#fff;">TOTAL A COBRAR</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -4247,11 +4247,11 @@ Recomendación: ejecutarlo desde Cálculo cuando hayas revisado el detalle. ¿Co
                                 <tr style="background:#F9FAFB;font-weight:700;color:#111827;">
                                     <td style="text-align:left;padding:12px 14px;border-top:1px solid #E5E7EB;">Total</td>
                                     <td style="padding:12px 14px;border-top:1px solid #E5E7EB;"></td>
-                                    <td style="text-align:right;padding:12px 14px;border-top:1px solid #E5E7EB;">${(Number(totals.m2) || 0).toFixed(2)}</td>
-                                    <td style="text-align:right;padding:12px 14px;border-top:1px solid #E5E7EB;">${(Number(totals.coef) || 0).toFixed(2)}%</td>
-                                    <td style="text-align:right;padding:12px 14px;border-top:1px solid #E5E7EB;">${fmtMonto(sumGasto)}</td>
-                                    <td style="text-align:right;padding:12px 14px;border-top:1px solid #E5E7EB;">${saldoNetoTotalHtml}</td>
-                                    <td style="text-align:right;padding:12px 14px;border-top:1px solid #E5E7EB;">${fmtMonto(sumTotalCobrar)}</td>
+                                    <td style="text-align:left;padding:12px 14px;border-top:1px solid #E5E7EB;">${(Number(totals.m2) || 0).toFixed(2)}</td>
+                                    <td style="text-align:left;padding:12px 14px;border-top:1px solid #E5E7EB;">${(Number(totals.coef) || 0).toFixed(2)}%</td>
+                                    <td style="text-align:left;padding:12px 14px;border-top:1px solid #E5E7EB;">${fmtMonto(sumGasto)}</td>
+                                    <td style="text-align:left;padding:12px 14px;border-top:1px solid #E5E7EB;">${saldoNetoTotalHtml}</td>
+                                    <td style="text-align:left;padding:12px 14px;border-top:1px solid #E5E7EB;">${fmtMonto(sumTotalCobrar)}</td>
                                 </tr>
                             </tfoot>
                         </table>
@@ -4264,22 +4264,29 @@ Recomendación: ejecutarlo desde Cálculo cuando hayas revisado el detalle. ¿Co
         // Estado de cobros
         const matrizEl = document.getElementById('calculo-matriz-pagos');
         if (matrizEl) {
+            const rowsCobros = [...rows].sort((a, b) => {
+                const na = parseInt(String(a.depto || a.departamento || '').replace(/\D/g, ''), 10);
+                const nb = parseInt(String(b.depto || b.departamento || '').replace(/\D/g, ''), 10);
+                if (!isNaN(na) && !isNaN(nb) && na !== nb) return nb - na;
+                return String(b.depto || b.departamento || '').localeCompare(String(a.depto || a.departamento || ''), 'es', { numeric: true, sensitivity: 'base' });
+            });
             matrizEl.innerHTML = `
                 <div class="deptos-table-wrap" style="margin:0">
                 <table class="deptos-table matrix-table">
                     <thead>
                         <tr>
                             <th>Dpto</th>
+                            <th class="num-left">Mora(dias)</th>
+                            <th class="num-left">Mora(S/.)</th>
                             <th class="num-left">Total</th>
                             <th class="num-left">Pagado</th>
                             <th class="num-left">Saldo</th>
                             <th>Estado</th>
-                            <th>Días de mora</th>
                             <th></th>
                         </tr>
                     </thead>
                     <tbody>
-                        ${rows.map(r => {
+                        ${rowsCobros.map(r => {
                             let label = 'Registrar abono';
                             let action = 'pagar';
                             if (r.cargo <= 0.01 && r.pagado <= 0.01) {
@@ -4292,14 +4299,22 @@ Recomendación: ejecutarlo desde Cálculo cuando hayas revisado el detalle. ¿Co
                             const disabled = action === 'none' ? 'disabled' : '';
                             const saldoPend = Math.max(0, Number(r.saldo) || 0);
                             const diasMora = saldoPend > 0.01 ? (typeof this._diasMoraMesLiquidado === 'function' ? this._diasMoraMesLiquidado(mes) : 0) : 0;
+                            const moraMonto = (diasMora > 0 && saldoPend > 0.01) ? (Calculos.round2 ? Calculos.round2(saldoPend * 0.05) : Math.round(saldoPend * 0.05 * 100) / 100) : 0;
+                            const diasMoraHtml = saldoPend > 0.01
+                                ? (diasMora > 0 ? `<span style="color:var(--md-sys-color-error);font-weight:600">${diasMora}</span>` : '0')
+                                : '—';
+                            const moraMontoHtml = saldoPend > 0.01
+                                ? (moraMonto > 0.005 ? `<span style="color:var(--md-sys-color-error);font-weight:600">${Calculos.formatMoney(moraMonto)}</span>` : Calculos.formatMoney(0))
+                                : '—';
                             return `
                                 <tr>
                                     <td><strong>${r.depto}</strong></td>
+                                    <td class="num-left">${diasMoraHtml}</td>
+                                    <td class="num-left">${moraMontoHtml}</td>
                                     <td class="num-left">${Calculos.formatMoney(r.cargo)}</td>
                                     <td class="num-left">${Calculos.formatMoney(r.pagado)}</td>
                                     <td class="num-left">${Calculos.formatMoney(saldoPend)}</td>
                                     <td><span class="badge-status ${r.estadoClass}">${r.estado}</span></td>
-                                    <td>${saldoPend > 0.01 ? (diasMora > 0 ? `<span style="color:var(--md-sys-color-error);font-weight:600">${diasMora}</span>` : '0') : '—'}</td>
                                     <td style="text-align:right"><button class="btn btn-sm btn-outline btn-calc-abono" data-id="${r.id}" data-action="${action}" ${disabled}>${label}</button></td>
                                 </tr>
                             `;
