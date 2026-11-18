@@ -4157,7 +4157,7 @@ Recomendación: ejecutarlo desde Cálculo cuando hayas revisado el detalle. ¿Co
                                     <th>m²</th>
                                     <th>Coeficiente</th>
                                     <th class="num-left">Gasto prorrateado</th>
-                                    <th class="num-left">Total a pagar</th>
+                                    <th class="num-left">Total a cobrar</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -4171,7 +4171,7 @@ Recomendación: ejecutarlo desde Cálculo cuando hayas revisado el detalle. ¿Co
                                         <td>${r.m2.toFixed(2)}</td>
                                         <td>${r.coef.toFixed(2)}%</td>
                                         <td class="num-left">${Calculos.formatMoney(gastoProrrateado)}</td>
-                                        <td class="num-left"><strong>${Calculos.formatMoney(r.cargo)}</strong></td>
+                                        <td class="num-left"><strong>${Calculos.formatMoney(gastoProrrateado)}</strong></td>
                                     </tr>
                                 `;}).join('')}
                             </tbody>
@@ -4182,7 +4182,7 @@ Recomendación: ejecutarlo desde Cálculo cuando hayas revisado el detalle. ¿Co
                                     <td><strong>${(totals.m2||0).toFixed(2)}</strong></td>
                                     <td><strong>${(totals.coef||0).toFixed(2)}%</strong></td>
                                     <td class="num-left"><strong>${Calculos.formatMoney(totalProrrateado)}</strong></td>
-                                    <td class="num-left"><strong>${Calculos.formatMoney(totals.cargo)}</strong></td>
+                                    <td class="num-left"><strong>${Calculos.formatMoney(totalProrrateado)}</strong></td>
                                 </tr>
                             </tfoot>
                         </table>
