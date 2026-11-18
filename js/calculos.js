@@ -141,40 +141,56 @@ const Calculos = {
         return Math.round((Number(n) + Number.EPSILON) * 100) / 100;
     },
 
-    // Distribución exacta al centavo: (m2_dpto / 1040.98) * monto, residual al mayor m²
+    // Distribución exacta al centavo sobre el área prorrateable del mismo edificio (Σ m² de las unidades participantes).
+    // El ajuste por redondeo (solo céntimos) se reparte por mayor resto, sin concentrarlo en un mismo departamento.
     distribuirGastoExacto(monto, propietarios, opts = {}) {
         const props = this._sortDeptos(propietarios || []);
         const m = this.round2(monto);
         if (!props.length || m === 0) return props.map(p => ({ id: p.id, valor: 0 }));
         const division = opts.division || 'proporcional';
-        let filas = [];
-        if (division === 'igualitario') {
-            const n = props.length;
-            const base = this.round2(m / n);
-            filas = props.map(p => ({ id: p.id, m2: Number(p.m2) || 0, valor: base }));
-        } else {
-            // Por área (m²) sobre 1040.98 para cumplir regla de prorrateo
-            const totalM2Base = 1040.98;
-            filas = props.map(p => {
-                const m2 = Number(p.m2) || 0;
-                const bruto = (m2 / totalM2Base) * m;
-                return { id: p.id, m2, valor: this.round2(bruto) };
-            });
-        }
+        const n = props.length;
+        const totalM2 = props.reduce((s, p) => s + (Number(p.m2) || 0), 0);
+
+        let filas = props.map(p => {
+            const m2 = Number(p.m2) || 0;
+            let bruto = 0;
+            if (division === 'igualitario') {
+                bruto = n > 0 ? (m / n) : 0;
+            } else {
+                // Proporcional al área prorrateable del mismo edificio (unidades participantes)
+                bruto = totalM2 > 0 ? (m2 / totalM2) * m : (n > 0 ? (m / n) : 0);
+            }
+            const valor = this.round2(bruto);
+            return { id: p.id, m2, bruto, frac: bruto - valor, valor };
+        });
+
         const suma = this.round2(filas.reduce((acc, f) => acc + f.valor, 0));
         let residual = this.round2(m - suma);
-        if (residual !== 0) {
-            const idxMayor = filas.reduce((mi, f, i, arr) => (f.m2 > arr[mi].m2 ? i : mi), 0);
-            filas[idxMayor].valor = this.round2(filas[idxMayor].valor + residual);
+        const cents = Math.round(Math.abs(residual) * 100);
+        if (cents !== 0 && filas.length) {
+            const step = residual > 0 ? 0.01 : -0.01;
+            const orden = filas
+                .map((f, i) => ({ i, frac: f.frac }))
+                .sort((a, b) => (step > 0 ? (b.frac - a.frac) : (a.frac - b.frac)) || (filas[b.i].m2 - filas[a.i].m2) || (a.i - b.i));
+            for (let k = 0; k < cents; k++) {
+                const idx = orden[k % orden.length].i;
+                filas[idx].valor = this.round2(filas[idx].valor + step);
+            }
         }
-        // ajuste final por si quedan decimales por igualitario
+
+        // Verificación final (solo céntimos de redondeo)
         const suma2 = this.round2(filas.reduce((acc, f) => acc + f.valor, 0));
         residual = this.round2(m - suma2);
         if (residual !== 0 && filas.length) {
-            const idxMayor = filas.reduce((mi, f, i, arr) => (f.m2 > arr[mi].m2 ? i : mi), 0);
-            filas[idxMayor].valor = this.round2(filas[idxMayor].valor + residual);
+            const step = residual > 0 ? 0.01 : -0.01;
+            const cents2 = Math.round(Math.abs(residual) * 100);
+            for (let k = 0; k < cents2; k++) {
+                const idx = k % filas.length;
+                filas[idx].valor = this.round2(filas[idx].valor + step);
+            }
         }
-        return filas;
+
+        return filas.map(f => ({ id: f.id, valor: f.valor }));
     },
 
     _calcGastoParaPropietario(gasto, propietario, totalCoef, numPropietarios, _ctx) {
