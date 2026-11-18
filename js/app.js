@@ -4094,36 +4094,37 @@ Recomendación: ejecutarlo desde Cálculo cuando hayas revisado el detalle. ¿Co
         const calc = Calculos.calcMes ? Calculos.calcMes(mes) : { rows: [], totals: { comunes:0, consumosInd:0, consumosMes:0, cargo:0, pagado:0, pendiente:0, alDia:0, departamentos:0, m2:0, coef:0 } };
         const { rows, totals } = calc;
 
+        const consumosComunes = Calculos.round2((Number(totals.aguaComun) || 0) + (Number(totals.luzComun) || 0));
+        // Gastos recurrentes + puntuales (mismo criterio que el resumen de Gastos)
+        let recMes = 0, puntMes = 0;
+        try {
+            const personal = (DB.getPersonal ? DB.getPersonal(mes) : []) || [];
+            const nomina = personal.filter(p => (p.tipo || 'personal') === 'personal');
+            const servicios = personal.filter(p => p.tipo === 'fijo');
+            const jardineria = (DB.getJardineria ? DB.getJardineria(mes) : []) || [];
+            const sumNom = nomina.reduce((a, p) => a + (parseFloat(p.sueldoMensual) || 0), 0);
+            const sumServ = servicios.reduce((a, p) => a + (parseFloat(p.monto ?? p.sueldoMensual) || 0), 0);
+            const sumJard = jardineria.reduce((a, j) => a + (parseFloat(j.montoTotal != null ? j.montoTotal : j.monto) || 0), 0);
+            recMes = sumNom + sumServ + sumJard;
+            const gastosMesAplican = (DB.getGastos ? DB.getGastos(mes) : []) || [];
+            const gastosPuntuales = gastosMesAplican.filter(g => {
+                const f = g.frecuencia || 'unico';
+                return f === 'unico' || f === 'extraordinario' || f === 'puntual';
+            });
+            puntMes = gastosPuntuales.reduce((a, g) => a + (parseFloat(g.monto) || 0), 0);
+        } catch (e) { recMes = 0; puntMes = 0; }
+        const gastosRecPunt = Calculos.round2(recMes + puntMes);
+        const totalACobrar = Calculos.round2(gastosRecPunt + consumosComunes);
+        const detalleConsComunes = [
+            (Number(totals.aguaComun) || 0) > 0.005 ? `Agua ${Calculos.formatMoney(totals.aguaComun)}` : null,
+            (Number(totals.luzComun) || 0) > 0.005 ? `Luz ${Calculos.formatMoney(totals.luzComun)}` : null
+        ].filter(Boolean).join(' · ') || 'Sin consumos de áreas comunes';
+
         const resumenEl = document.getElementById('calculo-resumen');
         if (resumenEl) {
-            const consumosComunes = Calculos.round2((Number(totals.aguaComun) || 0) + (Number(totals.luzComun) || 0));
-            // Gastos recurrentes + puntuales (mismo criterio que el resumen de Gastos)
-            let recMes = 0, puntMes = 0;
-            try {
-                const personal = (DB.getPersonal ? DB.getPersonal(mes) : []) || [];
-                const nomina = personal.filter(p => (p.tipo || 'personal') === 'personal');
-                const servicios = personal.filter(p => p.tipo === 'fijo');
-                const jardineria = (DB.getJardineria ? DB.getJardineria(mes) : []) || [];
-                const sumNom = nomina.reduce((a, p) => a + (parseFloat(p.sueldoMensual) || 0), 0);
-                const sumServ = servicios.reduce((a, p) => a + (parseFloat(p.monto ?? p.sueldoMensual) || 0), 0);
-                const sumJard = jardineria.reduce((a, j) => a + (parseFloat(j.montoTotal != null ? j.montoTotal : j.monto) || 0), 0);
-                recMes = sumNom + sumServ + sumJard;
-                const gastosMesAplican = (DB.getGastos ? DB.getGastos(mes) : []) || [];
-                const gastosPuntuales = gastosMesAplican.filter(g => {
-                    const f = g.frecuencia || 'unico';
-                    return f === 'unico' || f === 'extraordinario' || f === 'puntual';
-                });
-                puntMes = gastosPuntuales.reduce((a, g) => a + (parseFloat(g.monto) || 0), 0);
-            } catch (e) { recMes = 0; puntMes = 0; }
-            const gastosRecPunt = Calculos.round2(recMes + puntMes);
-            const totalACobrar = Calculos.round2(gastosRecPunt + consumosComunes);
-            const detalleConsComunes = [
-                (Number(totals.aguaComun) || 0) > 0.005 ? `Agua ${Calculos.formatMoney(totals.aguaComun)}` : null,
-                (Number(totals.luzComun) || 0) > 0.005 ? `Luz ${Calculos.formatMoney(totals.luzComun)}` : null
-            ].filter(Boolean).join(' · ') || 'Sin consumos de áreas comunes';
             resumenEl.innerHTML = `
                 <div class="summary-item"><span class="label">Gastos recurrentes + puntuales</span><span class="value">${Calculos.formatMoney(gastosRecPunt)}</span><span class="luz-status">Recurrentes y puntuales del mes (completos)</span></div>
-                <div class="summary-item"><span class="label">Consumos del mes</span><span class="value">${Calculos.formatMoney(consumosComunes)}</span><span class="luz-status">${detalleConsComunes} · áreas comunes</span></div>
+                <div class="summary-item"><span class="label">Servicios comunes del mes</span><span class="value">${Calculos.formatMoney(consumosComunes)}</span><span class="luz-status">${detalleConsComunes} · áreas comunes</span></div>
                 <div class="summary-item"><span class="label">Total a cobrar</span><span class="value">${Calculos.formatMoney(totalACobrar)}</span><span class="luz-status">${totals.departamentos} departamento${totals.departamentos===1?'':'s'} · recurrentes + puntuales + áreas comunes</span></div>
                 <div class="summary-item emph"><span class="label">Recaudado / Pendiente</span><span class="value">${Calculos.formatMoney(totals.pagado)}</span><span class="luz-status">Pendiente: ${Calculos.formatMoney(totals.pendiente)} · ${totals.alDia} de ${totals.departamentos} al día</span></div>
             `;
@@ -4134,6 +4135,10 @@ Recomendación: ejecutarlo desde Cálculo cuando hayas revisado el detalle. ¿Co
             if (rows.length === 0) {
                 prorrateoEl.innerHTML = '<p class="empty-state" style="padding:16px;">No hay departamentos cargados. Regístralos en Dptos para generar el cálculo y prorrateo del mes.</p>';
             } else {
+                const distProrrateado = Calculos.distribuirGastoExacto(totalACobrar, rows, { division: 'proporcional' });
+                const prorrateadoPorId = {};
+                distProrrateado.forEach(d => { prorrateadoPorId[d.id] = d.valor; });
+                const totalProrrateado = Calculos.round2(distProrrateado.reduce((s, d) => s + (Number(d.valor) || 0), 0));
                 prorrateoEl.innerHTML = `
                     <div style="padding:14px 16px;border-bottom:1px solid var(--md-sys-color-outline-variant);background:var(--md-sys-color-surface-container-low);">
                         <h3 style="font-size:15px;font-weight:700;margin:0;">1. Detalle de prorrateo por departamento</h3>
@@ -4141,7 +4146,7 @@ Recomendación: ejecutarlo desde Cálculo cuando hayas revisado el detalle. ¿Co
                     </div>
                     <div style="padding:14px 16px;">
                         <div class="luz-status" style="background:var(--md-sys-color-surface-container-low);border:1px solid var(--md-sys-color-outline-variant);border-radius:8px;padding:10px 12px;margin-bottom:12px;">
-                            <strong>Cómo se calcula:</strong> Gastos del mes prorrateados por coeficiente (incluye luz como gasto común) + consumos individuales de agua y gas = total a pagar. Los coeficientes suman 100%.
+                            <strong>Cómo se calcula:</strong> Gastos recurrentes + puntuales + servicios comunes del mes, prorrateados por coeficiente (m²). Los coeficientes suman 100%.
                         </div>
                         <div class="deptos-table-wrap">
                         <table class="deptos-table calc-table">
@@ -4151,20 +4156,21 @@ Recomendación: ejecutarlo desde Cálculo cuando hayas revisado el detalle. ¿Co
                                     <th>Titular</th>
                                     <th>m²</th>
                                     <th>Coeficiente</th>
-                                    <th class="num-left">Gastos comunes</th>
+                                    <th class="num-left">Gasto prorrateado</th>
                                     <th class="num-left">Total a pagar</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 ${rows.map(r => {
                                     const titular = [r.nombre, r.apellido].filter(Boolean).join(' ').trim() || r.departamento || '—';
+                                    const gastoProrrateado = (prorrateadoPorId[r.id] != null) ? prorrateadoPorId[r.id] : 0;
                                     return `
                                     <tr>
                                         <td><strong>${r.depto}</strong></td>
                                         <td>${this.esc ? this.esc(titular) : titular}</td>
                                         <td>${r.m2.toFixed(2)}</td>
                                         <td>${r.coef.toFixed(2)}%</td>
-                                        <td class="num-left">${Calculos.formatMoney(r.comunes)}</td>
+                                        <td class="num-left">${Calculos.formatMoney(gastoProrrateado)}</td>
                                         <td class="num-left"><strong>${Calculos.formatMoney(r.cargo)}</strong></td>
                                     </tr>
                                 `;}).join('')}
@@ -4175,7 +4181,7 @@ Recomendación: ejecutarlo desde Cálculo cuando hayas revisado el detalle. ¿Co
                                     <td></td>
                                     <td><strong>${(totals.m2||0).toFixed(2)}</strong></td>
                                     <td><strong>${(totals.coef||0).toFixed(2)}%</strong></td>
-                                    <td class="num-left"><strong>${Calculos.formatMoney(totals.comunes)}</strong></td>
+                                    <td class="num-left"><strong>${Calculos.formatMoney(totalProrrateado)}</strong></td>
                                     <td class="num-left"><strong>${Calculos.formatMoney(totals.cargo)}</strong></td>
                                 </tr>
                             </tfoot>
