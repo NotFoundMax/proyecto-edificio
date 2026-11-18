@@ -3306,9 +3306,9 @@ Recomendación: ejecutarlo desde Cálculo cuando hayas revisado el detalle. ¿Co
                 ? `${comunesDetalle.join(' · ')} · se prorratean por coeficiente`
                 : 'Sin consumos comunes (áreas comunes) en este periodo';
             resumen.innerHTML = `
-                <div class="summary-item"><span class="label">Recurrentes (mes)</span><span class="value">${Calculos.formatMoney(recMes)}</span><span class="luz-status">Nómina, servicios y jardinería del periodo</span></div>
-                <div class="summary-item"><span class="label">Puntuales (mes)</span><span class="value">${Calculos.formatMoney(puntMes)}</span><span class="luz-status">Gastos del mes seleccionado</span></div>
-                <div class="summary-item"><span class="label">Consumos comunes (mes)</span><span class="value">${Calculos.formatMoney(comunesConsumo)}</span><span class="luz-status">${consComunesLabel}</span></div>
+                <div class="summary-item"><span class="label">Recurrentes (mes)</span><span class="value">${Calculos.formatMoney(recMes)}</span><span class="luz-status">Nómina y servicios contratados</span></div>
+                <div class="summary-item"><span class="label">Puntuales (mes)</span><span class="value">${Calculos.formatMoney(puntMes)}</span><span class="luz-status">Gastos puntuales del mes</span></div>
+                <div class="summary-item"><span class="label">servicios comunes (mes)</span><span class="value">${Calculos.formatMoney(comunesConsumo)}</span><span class="luz-status">${consComunesLabel}</span></div>
                 <div class="summary-item summary-diff"><span class="label">Total del mes</span><span class="value">${Calculos.formatMoney(totalMes)}</span><span class="luz-status">${Calculos.getMesLabel ? Calculos.getMesLabel(mesSel) : mesSel} · incluye consumos comunes prorrateados</span></div>
             `;
         }
